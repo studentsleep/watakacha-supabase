@@ -63,11 +63,8 @@ Route::middleware(['auth'])->group(function () {
     // (Routes สำหรับ Item Images)
 
     Route::post('/manager/items/{item}/image', [ManagerController::class, 'uploadItemImage'])->name('manager.uploadItemImage');
-
     Route::delete('/manager/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('manager.destroyItemImage');
-
     Route::patch('/manager/item-images/{image}/set-main', [ManagerController::class, 'setMainImage'])->name('manager.setMainImage');
-
 
 
     // 3. Routes สำหรับ Item Units
