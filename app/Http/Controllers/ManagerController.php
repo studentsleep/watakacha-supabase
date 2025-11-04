@@ -236,7 +236,7 @@ class ManagerController extends Controller
             'password' => Hash::make($data['password']),
         ]);
         
-        return redirect()->route('manager.index', ['table' => 'users'])->with('status', 'User created successfully.');
+        return redirect()->route('manager.index', ['table' => 'user'])->with('status', 'User created successfully.');
     }
 
     public function updateUser(Request $request, User $user)
