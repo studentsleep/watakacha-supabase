@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// --- Model ทั้งหมด ---
+// [แก้ไข] เรียกใช้ Model ทั้งหมดจาก App\Models
 use App\Models\Item;
 use App\Models\ItemUnit;
 use App\Models\ItemType;
@@ -19,13 +19,17 @@ use Illuminate\Validation\Rule;
 class ManagerController extends Controller
 {
     /**
-     * หน้า Index หลักสำหรับจัดการข้อมูลทั้งหมด (โค้ดเดิมของคุณ)
+     * หน้า Index หลักสำหรับจัดการข้อมูลทั้งหมด
      */
     public function index(Request $request)
     {
+        // รับค่าตารางที่ผู้ใช้เลือกจาก URL, หากไม่มีค่าเริ่มต้นคือ 'users'
         $table = $request->input('table', 'users');
-        $data = ['table' => $table,];
 
+        $data = [
+            'table' => $table,
+        ];
+        
         if ($table == 'users') {
              $data['users'] = User::with('userType') 
                                 ->orderBy('username')
@@ -33,32 +37,33 @@ class ManagerController extends Controller
                                 ->withQueryString();
             $data['user_types'] = UserType::orderBy('name')->get(); 
         } 
+        
         elseif ($table == 'user_types') {
             $data['user_types'] = UserType::orderBy('name')->get();
         } 
+        
         elseif ($table == 'items') {
-            // (ใช้ Eager Loading 'images' จาก Logic ใหม่)
+            // [ดึงข้อมูลแบบใหม่]
             $query = Item::with(['type', 'unit', 'images']);
-            $data['items'] = $query->paginate(20)->withQueryString();
+            $data['items'] = $query->orderBy('item_name')->paginate(20)->withQueryString();
+            
+            // (Modal ต้องใช้ Units และ Types)
             $data['units'] = ItemUnit::orderBy('name')->get();
             $data['types'] = ItemType::orderBy('name')->get();
         } 
-        elseif ($table == 'item_units') {
+        
+        elseif ($table == 'item_units') { // [แก้ไข] ใช้ item_units (จาก Sidebar)
             $data['units'] = ItemUnit::orderBy('name')->get();
         } 
-        elseif ($table == 'item_types') {
+        
+        elseif ($table == 'item_types') { // [แก้ไข] ใช้ item_types (จาก Sidebar)
             $data['types'] = ItemType::orderBy('name')->get();
         }
-        
+
         return view('manager.index', $data);
     }
 
-    // --- ▼▼▼ START: โค้ด CRUD ใหม่ (จากไฟล์ที่ 2) ที่ถูกแก้ไขแล้ว ▼▼▼ ---
-
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Validation และ Redirect)
-     */
+    // --- [CRUD ใหม่] สำหรับ Items ---
     public function storeItem(Request $request)
     {
         $data = $request->validate([
@@ -66,9 +71,8 @@ class ManagerController extends Controller
              'description' => 'nullable|string',
              'price' => 'required|numeric|min:0',
              'stock' => 'required|integer|min:0',
-             // (แก้ไข) ตรวจสอบกับ PK 'id' ของตารางเดิม
-             'item_unit_id' => 'required|exists:item_units,id', 
-             'item_type_id' => 'required|exists:item_types,id',
+             'item_unit_id' => 'required|exists:item_units,id', // [แก้ไข] DB เดิม
+             'item_type_id' => 'required|exists:item_types,id', // [แก้ไข] DB เดิม
              'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -91,15 +95,9 @@ class ManagerController extends Controller
                 ]);
             }
         }
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม เพื่อให้ Alpine UI รีเฟรชถูกต้อง
         return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item created successfully.');
     }
 
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Validation และ Redirect)
-     */
     public function updateItem(Request $request, Item $item)
     {
         $data = $request->validate([
@@ -107,9 +105,8 @@ class ManagerController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'stock' => 'required|integer|min:0',
-            // (แก้ไข) ตรวจสอบกับ PK 'id' ของตารางเดิม
-            'item_unit_id' => 'required|exists:item_units,id', 
-            'item_type_id' => 'required|exists:item_types,id',
+            'item_unit_id' => 'required|exists:item_units,id', // [แก้ไข] DB เดิม
+            'item_type_id' => 'required|exists:item_types,id', // [แก้ไข] DB เดิม
         ]);
 
         $item->update([
@@ -120,34 +117,16 @@ class ManagerController extends Controller
             'item_unit_id' => $data['item_unit_id'],
             'item_type_id' => $data['item_type_id'],
         ]);
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม
         return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item updated successfully.');
     }
-
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Redirect)
-     */
-    public function destroyItem(Item $item)
-    {
-        foreach ($item->images as $img) { Storage::disk('public')->delete($img->path); }
-        $item->images()->delete();
-        $item->delete();
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item deleted successfully.');
-    }
     
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Redirect)
-     */
-    public function uploadItemImage(Request $request, Item $item) 
+    // [CRUD ใหม่] (จัดการรูปภาพ)
+    public function uploadItemImage(Request $request, Item $item)
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
         $path = $request->file('image')->store('items', 'public');
         $isFirstImage = $item->images()->count() == 0;
 
@@ -155,52 +134,50 @@ class ManagerController extends Controller
             'path' => $path,
             'is_main' => $isFirstImage,
         ]);
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Image uploaded successfully.');
+
+        return back()->with('status', 'Image uploaded successfully.');
     }
 
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Redirect)
-     */
-    public function destroyItemImage(ItemImage $image) 
+    public function destroyItemImage(ItemImage $image)
     {
         Storage::disk('public')->delete($image->path);
+        $item = $image->item; // ดึง item ก่อนลบ
+        $isMain = $image->is_main;
         $image->delete();
-        $item = $image->item;
-        if ($image->is_main && $item->images()->count() > 0) {
+
+        if ($isMain && $item->images()->count() > 0) {
             $newMainImage = $item->images()->first();
-            $newMainImage->is_main = true;
-            $newMainImage->save();
+            if ($newMainImage) {
+                $newMainImage->is_main = true;
+                $newMainImage->save();
+            }
         }
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Image deleted successfully.');
+        return back()->with('status', 'Image deleted successfully.');
     }
 
-    /**
-     * Logic ใหม่จากไฟล์ที่ 2
-     * (แก้ไข Redirect)
-     */
-    public function setMainImage(ItemImage $image) 
+    public function setMainImage(ItemImage $image)
     {
         $item = $image->item;
         $item->images()->update(['is_main' => false]);
         $image->is_main = true;
         $image->save();
-        
-        // (แก้ไข) ใช้ Redirect แบบเดิม
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Main image has been set.');
+
+        return back()->with('status', 'Main image has been set.');
     }
-    
-    // --- ▲▲▲ END: โค้ด CRUD ใหม่ ---
 
+    public function destroyItem(Item $item)
+    {
+        foreach ($item->images as $img) { 
+            Storage::disk('public')->delete($img->path); 
+        }
+        $item->images()->delete();
+        $item->delete();
+        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item deleted successfully.');
+    }
 
-    // --- CRUD สำหรับ Item Units (โค้ดเดิมของคุณ) ---
+    // --- [CRUD ใหม่] สำหรับ Item Units ---
     public function storeUnit(Request $request)
     {
-        // (แก้ไข) เปลี่ยน 'des' เป็น 'description' ให้ตรงกับไฟล์เดิม
         $request->validate(['name' => 'required|string|max:255|unique:item_units,name', 'description' => 'nullable|string']);
         ItemUnit::create(['name' => $request->name, 'description' => $request->description]);
         return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit created successfully.');
@@ -208,8 +185,7 @@ class ManagerController extends Controller
 
     public function updateUnit(Request $request, ItemUnit $unit)
     {
-        // (แก้ไข) เปลี่ยน 'des' เป็น 'description' และ KeyName ให้ตรงกับไฟล์เดิม
-        $request->validate(['name' => 'required|string|max:255|unique:item_units,name,' . $unit->getKey() . ',' . $unit->getKeyName(), 'description' => 'nullable|string']);
+        $request->validate(['name' => 'required|string|max:255|unique:item_units,name,' . $unit->id, 'description' => 'nullable|string']); // [แก้ไข] DB เดิม
         $unit->update(['name' => $request->name, 'description' => $request->description]);
         return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit updated successfully.');
     }
@@ -220,10 +196,9 @@ class ManagerController extends Controller
         return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit deleted successfully.');
     }
 
-    // --- CRUD สำหรับ Item Types (โค้ดเดิมของคุณ) ---
+    // --- [CRUD ใหม่] สำหรับ Item Types ---
     public function storeType(Request $request)
     {
-        // (แก้ไข) เปลี่ยน 'des' เป็น 'description'
         $request->validate(['name' => 'required|string|max:255|unique:item_types,name', 'description' => 'nullable|string']);
         ItemType::create(['name' => $request->name, 'description' => $request->description]);
         return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type created successfully.');
@@ -231,8 +206,7 @@ class ManagerController extends Controller
 
     public function updateType(Request $request, ItemType $type)
     {
-        // (แก้ไข) เปลี่ยน 'des' เป็น 'description' และ KeyName ให้ตรงกับไฟล์เดิม
-        $request->validate(['name' => 'required|string|max:255|unique:item_types,name,' . $type->getKey() . ',' . $type->getKeyName(), 'description' => 'nullable|string']);
+        $request->validate(['name' => 'required|string|max:255|unique:item_types,name,' . $type->id, 'description' => 'nullable|string']); // [แก้ไข] DB เดิม
         $type->update(['name' => $request->name, 'description' => $request->description]);
         return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type updated successfully.');
     }
@@ -243,7 +217,7 @@ class ManagerController extends Controller
         return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type deleted successfully.');
     }
 
-    // --- ฟังก์ชันสำหรับจัดการ User Type (โค้ดเดิมของคุณ) ---
+    // --- [CRUD ใหม่] สำหรับ User Type ---
     public function storeUserType(Request $request)
     {
         $request->validate([
@@ -257,7 +231,7 @@ class ManagerController extends Controller
     public function updateUserType(Request $request, UserType $user_type)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:50', Rule::unique('user_types')->ignore($user_type->getKey())],
+            'name' => ['required', 'string', 'max:50', Rule::unique('user_types')->ignore($user_type->id)], // [แก้ไข] DB เดิม
             'description' => 'nullable|string'
         ]);
         $user_type->update($request->all());
@@ -273,17 +247,16 @@ class ManagerController extends Controller
         return redirect()->route('manager.index', ['table' => 'user_types'])->with('status', 'User Type deleted successfully.');
     }
 
-    // --- ฟังก์ชันสำหรับจัดการ User (โค้ดเดิมของคุณ) ---
+    // --- [CRUD ใหม่] สำหรับ User ---
     public function storeUser(Request $request)
     {
         $data = $request->validate([
-            // (แก้ไข) ใช้ user_id และ PK ที่ถูกต้อง (จากไฟล์เดิม)
-            'username' => ['required', 'string', 'max:50', Rule::unique('user_accounts')], 
-            'email' => ['required', 'email', 'max:255', Rule::unique('user_accounts')],
+            'username' => ['required', 'string', 'max:50', Rule::unique('users')], 
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')],
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'tel' => 'nullable|string|max:20',
-            'user_type_id' => 'required|exists:user_types,user_type_id', // (อันนี้ดูเหมือนจะเป็น PK ของ user_types เดิม)
+            'user_type_id' => 'required|exists:user_types,id', // [แก้ไข] DB เดิม
             'status' => 'required|string',
             'password' => 'required|string|min:8',
         ]);
@@ -299,19 +272,18 @@ class ManagerController extends Controller
             'password' => Hash::make($data['password']),
         ]);
         
-        return redirect()->route('manager.index', ['table' => 'user'])->with('status', 'User created successfully.');
+        return redirect()->route('manager.index', ['table' => 'users'])->with('status', 'User created successfully.');
     }
 
     public function updateUser(Request $request, User $user)
     {
         $data = $request->validate([
-            // (แก้ไข) ใช้ PK 'user_id' ที่ถูกต้อง (จากไฟล์เดิม)
-            'username' => ['required', 'string', 'max:50', Rule::unique('user_accounts')->ignore($user->user_id, 'user_id')], 
-            'email' => ['required', 'email', 'max:255', Rule::unique('user_accounts')->ignore($user->user_id, 'user_id')],
+            'username' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)], // [แก้ไข] DB เดิม
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)], // [แก้ไข] DB เดิม
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'tel' => 'nullable|string|max:20',
-            'user_type_id' => 'required|exists:user_types,user_type_id', // (PK เดิม)
+            'user_type_id' => 'required|exists:user_types,id', // [แก้ไข] DB เดิม
             'status' => 'required|string',
             'password' => 'nullable|string|min:8', 
         ]);
@@ -328,7 +300,7 @@ class ManagerController extends Controller
 
     public function destroyUser(User $user)
     {
-        if ($user->user_id === Auth::id()) {
+        if ($user->id === Auth::id()) {
             return back()->with('error', 'You cannot delete your own account.');
         }
         $user->delete();
