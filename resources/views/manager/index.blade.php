@@ -6,6 +6,7 @@
     - [ใหม่] ใช้ตารางแบบ Tailwind สำหรับทุกตาราง
 --}}
 @php
+    // (Logic การตั้งชื่อ Title ยังคงเดิม)
     $tableTitles = [
         'users' => 'จัดการบัญชีผู้ใช้',
         'user_types' => 'จัดการประเภทผู้ใช้',
@@ -25,6 +26,7 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Flash Message (แสดงผลการทำงาน) -->
             @if(session('status'))
                 <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative dark:bg-green-900 dark:border-green-700 dark:text-green-200" role="alert">
                     <span class="block sm:inline">{{ session('status') }}</span>
@@ -42,11 +44,15 @@
                     {{-- ▼▼▼ 1. ตาราง Items (สมบูรณ์แล้ว) ▼▼▼ --}}
                     @if($table == 'items')
                         
+                        <!-- ปุ่ม Items -->
                         <div class="flex justify-end mb-4">
                             <x-primary-button type="button" onclick="toggleModal('addItemModal', true)">
-                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มสินค้า
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                เพิ่มสินค้า
                             </x-primary-button>
                         </div>
+
+                        <!-- ตาราง Items -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -61,6 +67,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    
                                     @forelse($items as $item)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -76,12 +83,21 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $item->type->name ?? 'N/A' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $item->unit->name ?? 'N/A' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <x-secondary-button type="button" onclick="toggleModal('updateItemModal-{{ $item->id }}', true)" class="!px-2 !py-1" title="แก้ไขข้อมูลหลัก">
+                                                
+                                                <x-secondary-button type="button" 
+                                                    onclick="toggleModal('updateItemModal-{{ $item->id }}', true)"
+                                                    class="!px-2 !py-1"
+                                                    title="แก้ไขข้อมูลหลัก">
                                                     <i data-lucide="file-pen-line" class="w-5 h-5"></i>
                                                 </x-secondary-button>
-                                                <x-secondary-button type="button" onclick="toggleModal('updateImageModal-{{ $item->id }}', true)" class="!px-2 !py-1 ml-1" title="จัดการรูปภาพ">
+                                                
+                                                <x-secondary-button type="button" 
+                                                    onclick="toggleModal('updateImageModal-{{ $item->id }}', true)"
+                                                    class="!px-2 !py-1 ml-1"
+                                                    title="จัดการรูปภาพ">
                                                     <i data-lucide="image" class="w-5 h-5"></i>
                                                 </x-secondary-button>
+
                                                 <form action="{{ route('manager.items.destroy', $item->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?')">
                                                     @csrf
                                                     @method('DELETE')
@@ -98,6 +114,8 @@
                             </table>
                         </div>
                         <div class="mt-4">{{ $items->links() }}</div>
+                        
+                        {{-- เรียก Modals ของ Items --}}
                         @include('manager.modals.add-tailwind', ['types' => $types, 'units' => $units])
                         @foreach($items as $item)
                             @include('manager.modals.update-tailwind', ['item' => $item, 'types' => $types, 'units' => $units])
@@ -155,6 +173,8 @@
                             </table>
                         </div>
                         <div class="mt-4">{{ $users->links() }}</div>
+                        
+                        {{-- เรียก Modals ของ Users --}}
                         @include('manager.modals.add-user', ['user_types' => $user_types])
                         @foreach($users as $user)
                             @include('manager.modals.update-user', ['user' => $user, 'user_types' => $user_types])
@@ -201,6 +221,8 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {{-- เรียก Modals ของ User Types --}}
                         @include('manager.modals.add-user-type')
                         @foreach($user_types as $type)
                             @include('manager.modals.update-user-type', ['type' => $type])
@@ -247,6 +269,8 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {{-- เรียก Modals ของ Item Types --}}
                         @include('manager.modals.add-type')
                         @foreach($types as $type)
                             @include('manager.modals.update-type', ['type' => $type])
@@ -293,6 +317,8 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {{-- เรียก Modals ของ Item Units --}}
                         @include('manager.modals.add-unit')
                         @foreach($units as $unit)
                             @include('manager.modals.update-unit', ['unit' => $unit])
