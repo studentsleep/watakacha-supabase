@@ -9,19 +9,10 @@ class ItemType extends Model
 {
     use HasFactory;
 
-    protected $table = 'item_types';
+    /**
+     * [แก้ไข] ใช้ 'id' เป็น Primary Key (หรือลบบรรทัดนี้)
+     */
     protected $primaryKey = 'id';
 
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /**
-     * ความสัมพันธ์: 1 ประเภท "มี" สินค้าได้หลายชิ้น
-     */
-    public function items()
-    {
-        return $this->hasMany(Item::class, 'item_type_id', 'id');
-    }
+    protected $fillable = ['name', 'description'];
 }

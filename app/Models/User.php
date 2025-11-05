@@ -1,61 +1,62 @@
 <?php
-
-namespace App\Models;
-
-// ... (use ... อื่นๆ)
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // <-- ต้องใช้ Authenticatable
-use Illuminate\Notifications\Notifiable;
-
-class User extends Authenticatable
-{
-    use HasFactory, Notifiable;
-
-    /**
-     * 1. บอก Laravel ว่าตารางชื่อ user_accounts (ไม่ใช่ users)
-     */
-    protected $table = 'user_accounts';
-
-    /**
-     * 2. บอก Laravel ว่า Primary Key (PK) คือ user_id (ไม่ใช่ id)
-     */
-    protected $primaryKey = 'user_id';
-
-    /**
-     * 3. (สำคัญมาก) "อนุญาต" ให้ Controller บันทึก Field เหล่านี้
-     * (อ้างอิงจากตาราง user_accounts)
-     */
-    protected $fillable = [
-        'username',
-        'email',
-        'password',
-        'first_name',
-        'last_name',
-        'user_type_id',
-        'status',
-        'tel',
-        // 'auth_user_id', (ถ้าคุณจะใช้)
-    ];
-
-    /**
-     * 4. (สำคัญที่สุดสำหรับหน้านี้) 
-     * สร้าง "ความสัมพันธ์" (Relationship)
-     * เพื่อให้ Controller (ที่ใช้ with('userType')) ดึงชื่อประเภทผู้ใช้ได้
-     */
-    public function userType()
+    
+    namespace App\Models;
+    
+    use Illuminate\Contracts\Auth\MustVerifyEmail;
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
+    use Illuminate\Foundation\Auth\User as Authenticatable;
+    use Illuminate\Notifications\Notifiable;
+    
+    class User extends Authenticatable implements MustVerifyEmail
     {
-        // (FK 'user_type_id' ในตารางนี้, PK 'user_type_id' ในตาราง UserType)
-        return $this->belongsTo(UserType::class, 'user_type_id', 'user_type_id');
+        use HasFactory, Notifiable;
+    
+        /**
+         * [ถูกต้อง] กำหนดตารางและ Primary Key
+         */
+        protected $table = 'user_accounts';
+        protected $primaryKey = 'user_id';
+    
+        protected $fillable = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+            'user_type_id',
+            'tel',
+            'status',
+            'email_verified_at',
+        ];
+    
+        protected $hidden = [
+            'password',
+            'remember_token',
+        ];
+    
+        protected function casts(): array
+        {
+            return [
+                'email_verified_at' => 'datetime',
+                'password' => 'hashed',
+            ];
+        }
+        
+        /**
+         * [แก้ไข] ความสัมพันธ์กับ UserType
+         * Foreign Key: 'user_type_id' (ในตาราง user_accounts)
+         * Owner Key: 'user_type_id' (ในตาราง user_types)
+         */
+        public function userType()
+        {
+            return $this->belongsTo(UserType::class, 'user_type_id', 'user_type_id');
+        }
+    
+        /**
+         * [แก้ไข] ความสัมพันธ์กับ MemberAccount (ถ้ามี)
+         */
+        public function memberAccount()
+        {
+            return $this->hasOne(MemberAccount::class, 'user_id', 'user_id');
+        }
     }
-
-    // --- (ส่วนที่เหลือของ Model) ---
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-}
