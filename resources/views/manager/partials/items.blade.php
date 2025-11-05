@@ -132,21 +132,21 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <!-- Field: Item Type -->
                                 <div>
-                                    <label for="item_type_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ประเภท (Type)</label>
-                                    <select name="item_type_id" id="item_type_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <label for="id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ประเภท (Type)</label>
+                                    <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <option value="">-- เลือกประเภท --</option>
                                         <template x-for="type in types" :key="type.id">
-                                            <option :value="type.id" x-text="type.name" :selected="type.id == currentItem.item_type_id"></option>
+                                            <option :value="type.id" x-text="type.name" :selected="type.id == currentItem.id"></option>
                                         </template>
                                     </select>
                                 </div>
                                 <!-- Field: Item Unit -->
                                 <div>
-                                    <label for="item_unit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">หน่วย (Unit)</label>
-                                    <select name="item_unit_id" id="item_unit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <label for="id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">หน่วย (Unit)</label>
+                                    <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <option value="">-- เลือกหน่วย --</option>
                                         <template x-for="unit in units" :key="unit.id">
-                                            <option :value="unit.id" x-text="unit.name" :selected="unit.id == currentItem.item_unit_id"></option>
+                                            <option :value="unit.id" x-text="unit.name" :selected="unit.id == currentItem.id"></option>
                                         </template>
                                     </select>
                                 </div>
@@ -246,8 +246,8 @@
                 description: '',
                 price: 0,
                 stock: 0,
-                item_type_id: '',
-                item_unit_id: '',
+                id: '',
+                id: '',
                 images: []
             },
 
@@ -318,7 +318,7 @@
             resetCurrentItem() {
                 this.currentItem = {
                     id: null, item_name: '', description: '', price: 0,
-                    stock: 0, item_type_id: '', item_unit_id: '', images: []
+                    stock: 0, id: '', id: '', images: []
                 };
             }
         };

@@ -51,8 +51,8 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Field: Item Type -->
                             <div>
-                                <x-input-label for="item_type_id" :value="__('ประเภท (Type)')" />
-                                <select name="item_type_id" id="item_type_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="id" :value="__('ประเภท (Type)')" />
+                                <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกประเภท --</option>
                                     @foreach($types as $type)
                                         <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -61,8 +61,8 @@
                             </div>
                             <!-- Field: Item Unit -->
                             <div>
-                                <x-input-label for="item_unit_id" :value="__('หน่วย (Unit)')" />
-                                <select name="item_unit_id" id="item_unit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="id" :value="__('หน่วย (Unit)')" />
+                                <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกหน่วย --</option>
                                     @foreach($units as $unit)
                                         <option value="{{ $unit->id }}">{{ $unit->name }}</option>

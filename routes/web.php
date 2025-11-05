@@ -31,17 +31,17 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
     Route::delete('/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('items.destroyImage');
     Route::patch('/item-images/{image}/set-main', [ManagerController::class, 'setMainImage'])->name('items.setMainImage');
 
-    // Units (PK: item_unit_id)
+    // Units (PK: id)
     Route::post('/units', [ManagerController::class, 'storeUnit'])->name('units.store');
     // ระบุ Key ที่ใช้ค้นหาใน Route:
-    Route::patch('/units/{unit:item_unit_id}', [ManagerController::class, 'updateUnit'])->name('units.update');
-    Route::delete('/units/{unit:item_unit_id}', [ManagerController::class, 'destroyUnit'])->name('units.destroy');
+    Route::patch('/units/{unit:id}', [ManagerController::class, 'updateUnit'])->name('units.update');
+    Route::delete('/units/{unit:id}', [ManagerController::class, 'destroyUnit'])->name('units.destroy');
 
-    // Types (PK: item_type_id)
+    // Types (PK: id)
     Route::post('/types', [ManagerController::class, 'storeType'])->name('types.store');
     // ระบุ Key ที่ใช้ค้นหาใน Route:
-    Route::patch('/types/{type:item_type_id}', [ManagerController::class, 'updateType'])->name('types.update');
-    Route::delete('/types/{type:item_type_id}', [ManagerController::class, 'destroyType'])->name('types.destroy');
+    Route::patch('/types/{type:id}', [ManagerController::class, 'updateType'])->name('types.update');
+    Route::delete('/types/{type:id}', [ManagerController::class, 'destroyType'])->name('types.destroy');
 
     // Users (PK: user_id)
     Route::post('/users', [ManagerController::class, 'storeUser'])->name('users.store');

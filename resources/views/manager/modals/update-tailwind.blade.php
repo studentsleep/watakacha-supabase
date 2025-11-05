@@ -57,21 +57,21 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Field: Item Type -->
                             <div>
-                                <x-input-label for="item_type_id-{{ $item->id }}" :value="__('ประเภท (Type)')" />
-                                <select name="item_type_id" id="item_type_id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="id-{{ $item->id }}" :value="__('ประเภท (Type)')" />
+                                <select name="id" id="id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกประเภท --</option>
                                     @foreach($types as $type)
-                                        <option value="{{ $type->id }}" @selected($item->item_type_id == $type->id)>{{ $type->name }}</option>
+                                        <option value="{{ $type->id }}" @selected($item->id == $type->id)>{{ $type->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <!-- Field: Item Unit -->
                             <div>
-                                <x-input-label for="item_unit_id-{{ $item->id }}" :value="__('หน่วย (Unit)')" />
-                                <select name="item_unit_id" id="item_unit_id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="id-{{ $item->id }}" :value="__('หน่วย (Unit)')" />
+                                <select name="id" id="id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกหน่วย --</option>
                                     @foreach($units as $unit)
-                                        <option value="{{ $unit->id }}" @selected($item->item_unit_id == $unit->id)>{{ $unit->name }}</option>
+                                        <option value="{{ $unit->id }}" @selected($item->id == $unit->id)>{{ $unit->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

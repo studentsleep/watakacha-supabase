@@ -251,10 +251,10 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $type->name }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $type->description }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <x-secondary-button type="button" onclick="toggleModal('updateTypeModal-{{ $type->item_type_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                                <x-secondary-button type="button" onclick="toggleModal('updateTypeModal-{{ $type->id }}', true)" class="!px-2 !py-1" title="แก้ไข">
                                                     <i data-lucide="file-pen-line" class="w-5 h-5"></i>
                                                 </x-secondary-button>
-                                                <form action="{{ route('manager.types.destroy', $type->item_type_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบประเภทนี้?')">
+                                                <form action="{{ route('manager.types.destroy', $type->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบประเภทนี้?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
@@ -299,10 +299,10 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $unit->name }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $unit->description }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <x-secondary-button type="button" onclick="toggleModal('updateUnitModal-{{ $unit->item_unit_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                                <x-secondary-button type="button" onclick="toggleModal('updateUnitModal-{{ $unit->id }}', true)" class="!px-2 !py-1" title="แก้ไข">
                                                     <i data-lucide="file-pen-line" class="w-5 h-5"></i>
                                                 </x-secondary-button>
-                                                <form action="{{ route('manager.units.destroy', $unit->item_unit_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหน่วยนี้?')">
+                                                <form action="{{ route('manager.units.destroy', $unit->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหน่วยนี้?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">

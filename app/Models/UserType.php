@@ -12,15 +12,11 @@ class UserType extends Model
     /**
      * [แก้ไข] ใช้ 'id' เป็น Primary Key (หรือลบบรรทัดนี้)
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'user_type_id';
 
     protected $fillable = ['name', 'description'];
 
     /**
      * [แก้ไข] ความสัมพันธ์กับ Users ให้ตรงกับ 'id'
      */
-    public function users()
-    {
-        return $this->hasMany(User::class, 'user_type_id', 'id');
-    }
 }
