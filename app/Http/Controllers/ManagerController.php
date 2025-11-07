@@ -12,6 +12,11 @@ use App\Models\User;
 use App\Models\UserType;
 use App\Models\MemberAccount;
 use App\Models\PointTransaction;
+use App\Models\CareShop;
+use App\Models\MakeupArtist;
+use App\Models\Photographer;
+use App\Models\PhotographerPackage;
+use App\Models\Promotion;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -52,6 +57,16 @@ class ManagerController extends Controller
                 ->orderBy('transaction_date', 'desc') // เรียงจากล่าสุดไปเก่าสุด
                 ->paginate(30) // แสดงหน้าละ 30 รายการ
                 ->withQueryString();
+        } elseif ($table == 'care_shops') {
+            $data['care_shops'] = CareShop::orderBy('care_name')->paginate(20)->withQueryString();
+        } elseif ($table == 'makeup_artists') {
+            $data['makeup_artists'] = MakeupArtist::orderBy('first_name')->paginate(20)->withQueryString();
+        } elseif ($table == 'photographers') {
+            $data['photographers'] = Photographer::orderBy('first_name')->paginate(20)->withQueryString();
+        } elseif ($table == 'photographer_packages') {
+            $data['photographer_packages'] = PhotographerPackage::orderBy('package_name')->paginate(20)->withQueryString();
+        } elseif ($table == 'promotions') {
+            $data['promotions'] = Promotion::orderBy('promotion_name')->paginate(20)->withQueryString();
         }
 
         return view('manager.index', $data);
@@ -383,5 +398,174 @@ class ManagerController extends Controller
     {
         $member->delete();
         return redirect()->route('manager.index', ['table' => 'member_accounts'])->with('status', 'Member deleted successfully.');
+    }
+
+    // --- Care Shops (PK: care_shop_id) ---
+    public function storeCareShop(Request $request)
+    {
+        $data = $request->validate([
+            'care_name' => 'required|string|max:255',
+            'address' => 'nullable|string',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+        ]);
+        CareShop::create($data);
+        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop created successfully.');
+    }
+
+    public function updateCareShop(Request $request, CareShop $care_shop)
+    {
+        $data = $request->validate([
+            'care_name' => 'required|string|max:255',
+            'address' => 'nullable|string',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+        ]);
+        $care_shop->update($data);
+        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop updated successfully.');
+    }
+
+    public function destroyCareShop(CareShop $care_shop)
+    {
+        $care_shop->delete();
+        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop deleted successfully.');
+    }
+
+    // --- Makeup Artists (PK: makeup_id) ---
+    public function storeMakeupArtist(Request $request)
+    {
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+        MakeupArtist::create($data);
+        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist created successfully.');
+    }
+
+    public function updateMakeupArtist(Request $request, MakeupArtist $makeup_artist)
+    {
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+        $makeup_artist->update($data);
+        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist updated successfully.');
+    }
+
+    public function destroyMakeupArtist(MakeupArtist $makeup_artist)
+    {
+        $makeup_artist->delete();
+        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist deleted successfully.');
+    }
+
+    // --- Photographers (PK: photographer_id) ---
+    public function storePhotographer(Request $request)
+    {
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+        ]);
+        Photographer::create($data);
+        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer created successfully.');
+    }
+
+    public function updatePhotographer(Request $request, Photographer $photographer)
+    {
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'tel' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'required|string|max:50',
+        ]);
+        $photographer->update($data);
+        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer updated successfully.');
+    }
+
+    public function destroyPhotographer(Photographer $photographer)
+    {
+        $photographer->delete();
+        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer deleted successfully.');
+    }
+
+    // --- Photographer Packages (PK: package_id) ---
+    public function storePhotographerPackage(Request $request)
+    {
+        $data = $request->validate([
+            'package_name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+        PhotographerPackage::create($data);
+        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package created successfully.');
+    }
+
+    public function updatePhotographerPackage(Request $request, PhotographerPackage $photographer_package)
+    {
+        $data = $request->validate([
+            'package_name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+        ]);
+        $photographer_package->update($data);
+        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package updated successfully.');
+    }
+
+    public function destroyPhotographerPackage(PhotographerPackage $photographer_package)
+    {
+        $photographer_package->delete();
+        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package deleted successfully.');
+    }
+
+    // --- Promotions (PK: promotion_id) ---
+    public function storePromotion(Request $request)
+    {
+        $data = $request->validate([
+            'promotion_name' => 'required|string|max:255',
+            'discount_type' => 'required|string|max:50',
+            'discount_value' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'required|string|max:50',
+        ]);
+        Promotion::create($data);
+        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion created successfully.');
+    }
+
+    public function updatePromotion(Request $request, Promotion $promotion)
+    {
+        $data = $request->validate([
+            'promotion_name' => 'required|string|max:255',
+            'discount_type' => 'required|string|max:50',
+            'discount_value' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'required|string|max:50',
+        ]);
+        $promotion->update($data);
+        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion updated successfully.');
+    }
+
+    public function destroyPromotion(Promotion $promotion)
+    {
+        $promotion->delete();
+        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion deleted successfully.');
     }
 }

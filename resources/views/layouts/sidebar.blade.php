@@ -103,7 +103,6 @@
                             <li><a href="{{ route('manager.index', ['table' => 'promotions']) }}" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
 
                             <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">บริการ</span></li>
-                            <li><a href="{{ route('manager.index', ['table' => 'services']) }}" class="flyout-link"><i data-lucide="library" class="icon-size"></i> บริการ (Services)</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'care_shops']) }}" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านดูแลชุด</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'makeup_artists']) }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'photographers']) }}" class="flyout-link"><i data-lucide="camera" class="icon-size"></i> ช่างภาพ</a></li>
@@ -154,6 +153,12 @@
                             <li>
                                 <a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link">
                                     <i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('manager.index', ['table' => 'services']) }}" class="flyout-link">
+                                    <i data-lucide="library" class="icon-size"></i> ประวัติการบริการ
                                 </a>
                             </li>
 

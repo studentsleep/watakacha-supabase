@@ -60,6 +60,32 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
     // ระบุ Key ที่ใช้ค้นหาใน Route:
     Route::patch('/members/{member:member_id}', [ManagerController::class, 'updateMember'])->name('members.update');
     Route::delete('/members/{member:member_id}', [ManagerController::class, 'destroyMember'])->name('members.destroy');
+
+    // Care Shops (PK: care_shop_id)
+    Route::post('/care-shops', [ManagerController::class, 'storeCareShop'])->name('care_shops.store');
+    Route::patch('/care-shops/{care_shop:care_shop_id}', [ManagerController::class, 'updateCareShop'])->name('care_shops.update');
+    Route::delete('/care-shops/{care_shop:care_shop_id}', [ManagerController::class, 'destroyCareShop'])->name('care_shops.destroy');
+
+    // Makeup Artists (PK: makeup_id)
+    Route::post('/makeup-artists', [ManagerController::class, 'storeMakeupArtist'])->name('makeup_artists.store');
+    Route::patch('/makeup-artists/{makeup_artist:makeup_id}', [ManagerController::class, 'updateMakeupArtist'])->name('makeup_artists.update');
+    Route::delete('/makeup-artists/{makeup_artist:makeup_id}', [ManagerController::class, 'destroyMakeupArtist'])->name('makeup_artists.destroy');
+
+    // Photographers (PK: photographer_id)
+    Route::post('/photographers', [ManagerController::class, 'storePhotographer'])->name('photographers.store');
+    Route::patch('/photographers/{photographer:photographer_id}', [ManagerController::class, 'updatePhotographer'])->name('photographers.update');
+    Route::delete('/photographers/{photographer:photographer_id}', [ManagerController::class, 'destroyPhotographer'])->name('photographers.destroy');
+
+    // Photographer Packages (PK: package_id)
+    Route::post('/photographer-packages', [ManagerController::class, 'storePhotographerPackage'])->name('photographer_packages.store');
+    Route::patch('/photographer-packages/{photographer_package:package_id}', [ManagerController::class, 'updatePhotographerPackage'])->name('photographer_packages.update');
+    Route::delete('/photographer-packages/{photographer_package:package_id}', [ManagerController::class, 'destroyPhotographerPackage'])->name('photographer_packages.destroy');
+
+    // Promotions (PK: promotion_id)
+    Route::post('/promotions', [ManagerController::class, 'storePromotion'])->name('promotions.store');
+    Route::patch('/promotions/{promotion:promotion_id}', [ManagerController::class, 'updatePromotion'])->name('promotions.update');
+    Route::delete('/promotions/{promotion:promotion_id}', [ManagerController::class, 'destroyPromotion'])->name('promotions.destroy');
+
 });
 // --- ▲▲▲ จบกลุ่ม Route สำหรับ Manager ---
 

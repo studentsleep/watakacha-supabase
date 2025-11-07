@@ -15,6 +15,11 @@ $tableTitles = [
 'item_units' => 'จัดการหน่วยสินค้า',
 'member_accounts' => 'จัดการบัญชีสมาชิก',
 'point_transactions' => 'ประวัติการเปลี่ยนแปลงพอยต์',
+'care_shops' => 'จัดการร้านดูแลชุด',
+'makeup_artists' => 'จัดการช่างแต่งหน้า',
+'photographers' => 'จัดการช่างภาพ',
+'photographer_packages' => 'จัดการแพ็คเกจช่างภาพ',
+'promotions' => 'จัดการโปรโมชั่น',
 ];
 $title = $tableTitles[$table] ?? 'การจัดการข้อมูล';
 @endphp
@@ -451,6 +456,287 @@ $title = $tableTitles[$table] ?? 'การจัดการข้อมูล'
                     </div>
                     <div class="mt-4">{{ $transactions->links() }}</div>
                     {{-- --- จบส่วน Point Transactions --- --}}
+
+                    {{-- ▼▼▼ 8. ตาราง Care Shops ▼▼▼ --}}
+                    @elseif($table == 'care_shops')
+
+                    <div class="flex justify-end mb-4">
+                        <x-primary-button type="button" onclick="toggleModal('addCareShopModal', true)">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มร้านดูแลชุด
+                        </x-primary-button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อร้าน</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">เบอร์โทร</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($care_shops as $shop)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $shop->care_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $shop->email ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $shop->tel ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $shop->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $shop->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updateCareShopModal-{{ $shop->care_shop_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+                                        <form action="{{ route('manager.care_shops.destroy', $shop->care_shop_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">ไม่พบข้อมูลร้านดูแลชุด</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $care_shops->links() }}</div>
+
+                    @include('manager.modals.add-care-shop')
+                    @foreach($care_shops as $shop)
+                    @include('manager.modals.update-care-shop', ['shop' => $shop])
+                    @endforeach
+
+                    {{-- ▼▼▼ 9. ตาราง Makeup Artists ▼▼▼ --}}
+                    @elseif($table == 'makeup_artists')
+
+                    <div class="flex justify-end mb-4">
+                        <x-primary-button type="button" onclick="toggleModal('addMakeupArtistModal', true)">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มช่างแต่งหน้า
+                        </x-primary-button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อ-นามสกุล</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">เบอร์โทร</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ราคา</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($makeup_artists as $artist)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $artist->first_name }} {{ $artist->last_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $artist->tel ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ number_format($artist->price, 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $artist->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $artist->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updateMakeupArtistModal-{{ $artist->makeup_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+                                        <form action="{{ route('manager.makeup_artists.destroy', $artist->makeup_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">ไม่พบข้อมูลช่างแต่งหน้า</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $makeup_artists->links() }}</div>
+
+                    @include('manager.modals.add-makeup-artist')
+                    @foreach($makeup_artists as $artist)
+                    @include('manager.modals.update-makeup-artist', ['artist' => $artist])
+                    @endforeach
+
+                    {{-- ▼▼▼ 10. ตาราง Photographers ▼▼▼ --}}
+                    @elseif($table == 'photographers')
+
+                    <div class="flex justify-end mb-4">
+                        <x-primary-button type="button" onclick="toggleModal('addPhotographerModal', true)">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มช่างภาพ
+                        </x-primary-button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อ-นามสกุล</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">เบอร์โทร</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($photographers as $photographer)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $photographer->first_name }} {{ $photographer->last_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $photographer->email ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $photographer->tel ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $photographer->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $photographer->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updatePhotographerModal-{{ $photographer->photographer_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+                                        <form action="{{ route('manager.photographers.destroy', $photographer->photographer_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">ไม่พบข้อมูลช่างภาพ</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $photographers->links() }}</div>
+
+                    @include('manager.modals.add-photographer')
+                    @foreach($photographers as $photographer)
+                    @include('manager.modals.update-photographer', ['photographer' => $photographer])
+                    @endforeach
+
+                    {{-- ▼▼▼ 11. ตาราง Photographer Packages ▼▼▼ --}}
+                    @elseif($table == 'photographer_packages')
+
+                    <div class="flex justify-end mb-4">
+                        <x-primary-button type="button" onclick="toggleModal('addPhotographerPackageModal', true)">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มแพ็คเกจ
+                        </x-primary-button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อแพ็คเกจ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ราคา</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($photographer_packages as $package)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $package->package_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ number_format($package->price, 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updatePhotographerPackageModal-{{ $package->package_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+                                        <form action="{{ route('manager.photographer_packages.destroy', $package->package_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">ไม่พบข้อมูลแพ็คเกจ</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $photographer_packages->links() }}</div>
+
+                    @include('manager.modals.add-photographer-package')
+                    @foreach($photographer_packages as $package)
+                    @include('manager.modals.update-photographer-package', ['package' => $package])
+                    @endforeach
+
+                    {{-- ▼▼▼ 12. ตาราง Promotions ▼▼▼ --}}
+                    @elseif($table == 'promotions')
+
+                    <div class="flex justify-end mb-4">
+                        <x-primary-button type="button" onclick="toggleModal('addPromotionModal', true)">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มโปรโมชั่น
+                        </x-primary-button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อโปรโมชั่น</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ประเภท</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">มูลค่า</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">วันเริ่ม</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">วันสิ้นสุด</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($promotions as $promo)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $promo->promotion_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $promo->discount_type }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $promo->discount_value }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $promo->start_date ? $promo->start_date->format('Y-m-d') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $promo->end_date ? $promo->end_date->format('Y-m-d') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $promo->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $promo->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updatePromotionModal-{{ $promo->promotion_id }}', true)" class="!px-2 !py-1" title="แก้ไข">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+                                        <form action="{{ route('manager.promotions.destroy', $promo->promotion_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('คุณแน่ใจหรือไม่?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1" title="ลบ">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">ไม่พบข้อมูลโปรโมชั่น</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">{{ $promotions->links() }}</div>
+
+                    @include('manager.modals.add-promotion')
+                    @foreach($promotions as $promo)
+                    @include('manager.modals.update-promotion', ['promo' => $promo])
+                    @endforeach
 
                     @else
                     <p>กรุณาเลือกตารางที่ต้องการจัดการจากเมนูด้านข้าง</p>
