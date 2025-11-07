@@ -78,7 +78,6 @@
                         <i data-lucide="chevron-right" class="w-4 h-4 ml-auto" x-show="!open && sidebarOpen"></i>
                     </button>
 
-                    <!-- เมนูย่อย (Flyout Panel) -->
                     <div x-show="open"
                         @mouseenter="open = true" @mouseleave="open = false"
                         x-transition:enter="transition ease-out duration-100"
@@ -90,25 +89,73 @@
                         class="absolute left-full top-0 w-64 ml-2 p-4 bg-gray-800 rounded-lg shadow-lg"
                         style="display: none;">
 
-                        {{-- ... (เมนูย่อยทั้งหมดเหมือนเดิม) ... --}}
+                        {{-- [แก้ไข] อัปเดตลิงก์ทั้งหมด --}}
                         <ul class="space-y-2">
                             <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ผู้ใช้</span></li>
-                            <li><a href="#" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
+                            <li><a href="{{ route('manager.index', ['table' => 'member_accounts']) }}" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'users']) }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชีผู้ใช้ (Admin)</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'user_types']) }}" class="flyout-link"><i data-lucide="users-round" class="icon-size"></i> ประเภทผู้ใช้</a></li>
-                            
+
                             <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">สินค้า</span></li>
                             <li><a href="{{ route('manager.index', ['table' => 'items']) }}" class="flyout-link"><i data-lucide="package" class="icon-size"></i> สินค้า (Items)</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'item_types']) }}" class="flyout-link"><i data-lucide="list-tree" class="icon-size"></i> ประเภทสินค้า</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'item_units']) }}" class="flyout-link"><i data-lucide="box-select" class="icon-size"></i> หน่วยสินค้า</a></li>
-                            <li><a href="#" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
-                            
+                            <li><a href="{{ route('manager.index', ['table' => 'promotions']) }}" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
+
                             <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">บริการ</span></li>
-                            <li><a href="#" class="flyout-link"><i data-lucide="library" class="icon-size"></i> บริการ (Services)</a></li>
-                            <li><a href="#" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านดูแลชุด</a></li>
-                            <li><a href="{{ route('manager.index', ['table' => 'makeups']) }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
+                            <li><a href="{{ route('manager.index', ['table' => 'services']) }}" class="flyout-link"><i data-lucide="library" class="icon-size"></i> บริการ (Services)</a></li>
+                            <li><a href="{{ route('manager.index', ['table' => 'care_shops']) }}" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านดูแลชุด</a></li>
+                            <li><a href="{{ route('manager.index', ['table' => 'makeup_artists']) }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
                             <li><a href="{{ route('manager.index', ['table' => 'photographers']) }}" class="flyout-link"><i data-lucide="camera" class="icon-size"></i> ช่างภาพ</a></li>
-                            <li><a href="#" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจช่างภาพ</a></li>
+                            <li><a href="{{ route('manager.index', ['table' => 'photographer_packages']) }}" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจช่างภาพ</a></li>
+
+                        </ul>
+                    </div>
+                </li>
+
+                {{-- 3. [เพิ่ม] เมนู "ประวัติ" (แบบมีเมนูย่อย) --}}
+                <li x-data="{ open: false }" class="relative">
+                    <button @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false"
+                        class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'"
+                        :title="sidebarOpen ? '' : 'ประวัติ'">
+
+                        <i data-lucide="history" class="w-5 h-5"></i>
+
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>
+                            ประวัติ
+                        </span>
+
+                        <i data-lucide="chevron-right" class="w-4 h-4 ml-auto" x-show="!open && sidebarOpen"></i>
+                    </button>
+
+                    <div x-show="open"
+                        @mouseenter="open = true" @mouseleave="open = false"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute left-full top-0 w-64 ml-2 p-4 bg-gray-800 rounded-lg shadow-lg"
+                        style="display: none;">
+
+                        <ul class="space-y-2">
+                            <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
+
+                            {{-- ลิงก์ไปหน้าประวัติการเช่า --}}
+                            <li>
+                                <a href="{{ route('manager.index', ['table' => 'rentals']) }}" class="flyout-link">
+                                    <i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า
+                                </a>
+                            </li>
+
+                            {{-- ลิงก์ไปหน้าประวัติการใช้แต้ม --}}
+                            <li>
+                                <a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link">
+                                    <i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม
+                                </a>
+                            </li>
 
                         </ul>
                     </div>

@@ -4,10 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-// (ถ้า Member ต้อง Login ด้วย ให้ใช้ Authenticatable เหมือน User.php)
-// use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class MemberAccount extends Model // หรือ Authenticatable
+class MemberAccount extends Model
 {
     use HasFactory;
 
@@ -15,19 +13,35 @@ class MemberAccount extends Model // หรือ Authenticatable
     protected $primaryKey = 'member_id';
 
     protected $fillable = [
-        'auth_user_id',
         'username',
         'first_name',
         'last_name',
-        'points',
-        'status',
-        'tel',
         'email',
-        'transaction_id', // (FK สุดท้าย)
-        // (ระวัง: ถ้า Member Login ได้ ต้องมี 'password' ด้วย)
+        'tel',
+        'status',
+        'points',
+        'password',
     ];
 
-    // (ถ้ามี password)
-    // protected $hidden = [ 'password', 'remember_token', ];
-    // protected $casts = [ 'password' => 'hashed', ];
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password', // <-- [เพิ่ม] ซ่อนรหัสผ่าน
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'points' => 'integer',
+            'password' => 'hashed', 
+        ];
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(PointTransaction::class, 'member_id', 'member_id');
+    }
 }

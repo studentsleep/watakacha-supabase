@@ -54,6 +54,12 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
     // ระบุ Key ที่ใช้ค้นหาใน Route:
     Route::patch('/user-types/{user_type:user_type_id}', [ManagerController::class, 'updateUserType'])->name('user_types.update');
     Route::delete('/user-types/{user_type:user_type_id}', [ManagerController::class, 'destroyUserType'])->name('user_types.destroy');
+
+    // --- ▼▼▼ [เพิ่ม] Routes สำหรับ Members (PK: member_id) ▼▼▼ ---
+    Route::post('/members', [ManagerController::class, 'storeMember'])->name('members.store');
+    // ระบุ Key ที่ใช้ค้นหาใน Route:
+    Route::patch('/members/{member:member_id}', [ManagerController::class, 'updateMember'])->name('members.update');
+    Route::delete('/members/{member:member_id}', [ManagerController::class, 'destroyMember'])->name('members.destroy');
 });
 // --- ▲▲▲ จบกลุ่ม Route สำหรับ Manager ---
 
