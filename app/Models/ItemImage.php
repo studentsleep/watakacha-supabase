@@ -13,7 +13,7 @@ class ItemImage extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'item_id',
+        'id',
         'path',
         'is_main',
     ];
@@ -23,6 +23,6 @@ class ItemImage extends Model
      */
     public function item()
     {
-        return $this->belongsTo(Item::class, 'item_id', 'id');
+        return $this->belongsTo(Item::class, 'id', 'id');
     }
 }

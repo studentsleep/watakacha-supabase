@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\ReceptionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -89,4 +90,18 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
 });
 // --- ▲▲▲ จบกลุ่ม Route สำหรับ Manager ---
 
+// --- Routes สำหรับ Reception ---
+Route::middleware(['auth'])->prefix('reception')->name('reception.')->group(function () {
+    // หน้าจัดการการเช่า
+    Route::get('/rental', [ReceptionController::class, 'index'])->name('rental');
+    
+    // API: ค้นหาสมาชิก
+    Route::get('/api/check-member', [ReceptionController::class, 'checkMember'])->name('checkMember');
+    
+    // API: ค้นหาสินค้า
+    Route::get('/api/search-items', [ReceptionController::class, 'searchItems'])->name('searchItems');
+    
+    // Submit: บันทึกการเช่า
+    Route::post('/rental', [ReceptionController::class, 'storeRental'])->name('storeRental');
+});
 require __DIR__ . '/auth.php';

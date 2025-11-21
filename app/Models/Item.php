@@ -40,6 +40,6 @@ class Item extends Model
     // (อันนี้ถูกต้อง)
     public function images()
     {
-        return $this->hasMany(ItemImage::class, 'item_id', 'id');
+        return $this->hasMany(ItemImage::class, 'id', 'id');
     }
 }

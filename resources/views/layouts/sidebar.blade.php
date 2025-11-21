@@ -13,16 +13,10 @@
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="flex items-center justify-center mb-4">
             <x-application-logo class="block h-9 w-auto fill-current text-gray-200" />
-
             <span class="ml-2 text-xl font-bold text-white"
-                x-show="sidebarOpen"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-100"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0">
-                Manager
+                x-show="sidebarOpen" x-transition>
+                {{-- เปลี่ยนชื่อตามสิทธิ์ --}}
+                {{ Auth::user()->user_type_id == 1 ? 'Manager' : 'Reception' }}
             </span>
         </a>
 
@@ -62,6 +56,7 @@
                     </a>
                 </li>
 
+                @if(Auth::user()->user_type_id == 1)
                 {{-- 2. เมนู "การจัดการ" (แบบมีเมนูย่อย) --}}
                 <li x-data="{ open: false }" class="relative">
                     <button @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false"
@@ -166,6 +161,37 @@
                     </div>
                 </li>
 
+                {{-- ▼▼▼ ส่วนของ USER TYPE 2: RECEPTION (พนักงานต้อนรับ) ▼▼▼ --}}
+                @elseif(Auth::user()->user_type_id == 2)
+
+                {{-- เมนู "บริการเช่า-คืน" --}}
+                <li>
+                    <a href="{{ route('reception.rental') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-green-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>บริการเช่า-คืน</span>
+                    </a>
+                </li>
+
+                {{-- เมนู "ประวัติ" (ของ Reception - ดูได้อย่างเดียว) --}}
+                <li x-data="{ open: false }" class="relative">
+                    <button @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false"
+                        class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="history" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>ประวัติ</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 ml-auto" x-show="!open && sidebarOpen"></i>
+                    </button>
+                    <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" class="absolute left-full top-0 w-64 ml-2 p-4 bg-gray-800 rounded-lg shadow-lg" style="display: none;">
+                        <ul class="space-y-2">
+                            <li><a href="{{ route('manager.index', ['table' => 'rentals']) }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า</a></li>
+                            {{-- Reception อาจจะไม่ต้องดูประวัติการใช้แต้ม หรือดูได้แล้วแต่คุณ --}}
+                        </ul>
+                    </div>
+                </li>
+
+                @endif
             </ul>
         </nav>
     </div>
@@ -213,6 +239,7 @@
 
                     <!-- บรรทัดที่ 1 (ชื่อผู้ใช้) -->
                     <span class="text-sm font-medium">{{ Auth::user()->name }}</span>
+                    
 
                     <!-- บรรทัดที่ 2 (ชื่อจริง-นามสกุล) -->
                     <span class="ml-3" x-show="sidebarOpen" x-transition>
