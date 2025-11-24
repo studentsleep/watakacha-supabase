@@ -22,6 +22,9 @@ class Rental extends Model
         'member_id',
         'user_id',
         'promotion_id',
+        'makeup_id',       // [เพิ่ม] ช่างแต่งหน้า
+        'photographer_id', // [เพิ่ม] ช่างภาพ
+        'package_id',      // [เพิ่ม] แพ็กเกจถ่ายภาพ
         'rental_date',
         'return_date',
         'total_amount',
@@ -56,7 +59,7 @@ class Rental extends Model
         // ตรวจสอบว่า Model User ของคุณชื่อ 'User' และ PK คือ 'user_id' หรือ 'id'
         // ถ้า PK ของ User คือ 'user_id' ให้ใช้:
         return $this->belongsTo(User::class, 'user_id', 'user_id');
-        
+
         // ถ้า PK ของ User คือ 'id' (default Laravel) ให้ใช้:
         // return $this->belongsTo(User::class, 'user_id', 'id');
     }
@@ -75,5 +78,20 @@ class Rental extends Model
     public function items()
     {
         return $this->hasMany(RentalItem::class, 'rental_id', 'rental_id');
+    }
+
+    public function makeupArtist()
+    {
+        return $this->belongsTo(MakeupArtist::class, 'makeup_id', 'makeup_id');
+    }
+
+    public function photographer()
+    {
+        return $this->belongsTo(Photographer::class, 'photographer_id', 'photographer_id');
+    }
+
+    public function photographerPackage()
+    {
+        return $this->belongsTo(PhotographerPackage::class, 'package_id', 'package_id');
     }
 }
