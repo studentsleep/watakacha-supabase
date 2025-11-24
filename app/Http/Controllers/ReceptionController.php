@@ -7,6 +7,10 @@ use App\Models\MemberAccount;
 use App\Models\Item;
 use App\Models\Rental; // คุณต้องสร้าง Model นี้ หรือใช้ตาราง rentals ที่มี
 use App\Models\RentalItem; // Model สำหรับตารางลูก (ถ้ามี) หรือใช้ json
+use App\Models\Promotion;           // [เพิ่ม]
+use App\Models\MakeupArtist;        // [เพิ่ม]
+use App\Models\Photographer;        // [เพิ่ม]
+use App\Models\PhotographerPackage; // [เพิ่ม]
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -19,7 +23,18 @@ class ReceptionController extends Controller
         if (Auth::user()->user_type_id != 2 && Auth::user()->user_type_id != 1) {
             abort(403, 'ไม่มีสิทธิ์เข้าถึง');
         }
-        return view('reception.rental');
+
+        $data = [
+            'promotions' => Promotion::where('status', 'active')
+                ->where(function($q) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', now());
+                })->get(),
+            'makeup_artists' => MakeupArtist::where('status', 'active')->get(),
+            'photographers' => Photographer::where('status', 'active')->get(),
+            'photo_packages' => PhotographerPackage::all(), // แพ็คเกจมักไม่มี status
+        ];
+
+        return view('reception.rental', $data);
     }
 
     // AJAX: ตรวจสอบสมาชิก
