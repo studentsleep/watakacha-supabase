@@ -14,10 +14,18 @@ class PointTransaction extends Model
 
     protected $fillable = [
         'member_id',
-        'points',
-        'transaction_type', // 'earn' (ได้), 'redeem' (ใช้)
+        'rental_id',
+        'change_type',  // <--- ใน Controller คุณใช้ transaction_type (ผิด)
+        'point_change', // <--- ใน Controller คุณใช้ points (ผิด)
         'description',
-        'created_at'
+        'transaction_date',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'transaction_date' => 'datetime',
+        'point_change' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     public function member()

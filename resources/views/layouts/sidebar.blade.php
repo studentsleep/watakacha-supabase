@@ -138,11 +138,7 @@
                             <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
 
                             {{-- ลิงก์ไปหน้าประวัติการเช่า --}}
-                            <li>
-                                <a href="{{ route('manager.index', ['table' => 'rentals']) }}" class="flyout-link">
-                                    <i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า
-                                </a>
-                            </li>
+                            <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
 
                             {{-- ลิงก์ไปหน้าประวัติการใช้แต้ม --}}
                             <li>
@@ -152,8 +148,8 @@
                             </li>
 
                             <li>
-                                <a href="{{ route('manager.index', ['table' => 'services']) }}" class="flyout-link">
-                                    <i data-lucide="library" class="icon-size"></i> ประวัติการบริการ
+                                <a href="{{ route('reception.serviceHistory') }}" class="flyout-link">
+                                    <i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ (แต่งหน้า/ทำผม)
                                 </a>
                             </li>
 
@@ -195,8 +191,24 @@
                     </button>
                     <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" class="absolute left-full top-0 w-64 ml-2 p-4 bg-gray-800 rounded-lg shadow-lg" style="display: none;">
                         <ul class="space-y-2">
-                            {{-- ลิงก์ไปหน้าประวัติที่เราเพิ่งสร้าง --}}
+                            <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
+
+                            {{-- ลิงก์ไปหน้าประวัติการเช่า --}}
                             <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
+
+                            {{-- ลิงก์ไปหน้าประวัติการใช้แต้ม --}}
+                            <li>
+                                <a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link">
+                                    <i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('reception.serviceHistory') }}" class="flyout-link">
+                                    <i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ (แต่งหน้า/ทำผม)
+                                </a>
+                            </li>
+
                         </ul>
                     </div>
                 </li>

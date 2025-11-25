@@ -86,7 +86,6 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
     Route::post('/promotions', [ManagerController::class, 'storePromotion'])->name('promotions.store');
     Route::patch('/promotions/{promotion:promotion_id}', [ManagerController::class, 'updatePromotion'])->name('promotions.update');
     Route::delete('/promotions/{promotion:promotion_id}', [ManagerController::class, 'destroyPromotion'])->name('promotions.destroy');
-
 });
 // --- ▲▲▲ จบกลุ่ม Route สำหรับ Manager ---
 
@@ -94,13 +93,13 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
 Route::middleware(['auth'])->prefix('reception')->name('reception.')->group(function () {
     // หน้าจัดการการเช่า
     Route::get('/rental', [ReceptionController::class, 'index'])->name('rental');
-    
+
     // API: ค้นหาสมาชิก
     Route::get('/api/check-member', [ReceptionController::class, 'checkMember'])->name('checkMember');
-    
+
     // API: ค้นหาสินค้า
     Route::get('/api/search-items', [ReceptionController::class, 'searchItems'])->name('searchItems');
-    
+
     // Submit: บันทึกการเช่า
     Route::post('/rental', [ReceptionController::class, 'storeRental'])->name('storeRental');
 
@@ -110,5 +109,8 @@ Route::middleware(['auth'])->prefix('reception')->name('reception.')->group(func
 
     // --- [เพิ่มใหม่] ประวัติการเช่า (History) ---
     Route::get('/history', [ReceptionController::class, 'history'])->name('history');
+
+    // หน้าประวัติบริการ (Services History)
+    Route::get('/services-history', [ReceptionController::class, 'serviceHistory'])->name('serviceHistory');
 });
 require __DIR__ . '/auth.php';
