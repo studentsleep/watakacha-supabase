@@ -248,7 +248,7 @@
                 <div class="lg:col-span-1">
                     {{-- Summary Card (ใช้สีเทา bg-gray-50) --}}
                     <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 sticky top-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-5 border-b border-gray-200 pb-3 flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-5 border-b flex items-center gap-2">
                             <div class="bg-gray-200 p-1.5 rounded text-gray-600">
                                 <i data-lucide="receipt" class="w-5 h-5"></i>
                             </div>
@@ -311,7 +311,7 @@
                             <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-2">
                                 <div class="flex justify-between items-end">
                                     <span class="text-gray-500 font-medium pb-1">ยอดรวมสุทธิ</span>
-                                    <span class="text-3xl font-extrabold text-gray-800 tracking-tight" x-text="formatPrice(grandTotal)"></span>
+                                    <span class="text-3xl font-extrabold text-green-800 tracking-tight" x-text="formatPrice(grandTotal)"></span>
                                 </div>
                             </div>
 

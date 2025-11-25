@@ -15,7 +15,7 @@ class RentalItem extends Model
 
     protected $fillable = [
         'rental_id',
-        'id',
+        'item_id',
         'quantity',
         'price',
         'fine_amount',
@@ -43,6 +43,6 @@ class RentalItem extends Model
     public function item()
     {
         // เชื่อมกับ Model Item โดยใช้ 'id' ในตารางนี้ เชื่อมกับ 'id' ในตาราง items
-        return $this->belongsTo(Item::class, 'id', 'id');
+        return $this->belongsTo(Item::class, 'item_id', 'id');
     }
 }

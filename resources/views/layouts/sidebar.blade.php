@@ -170,7 +170,17 @@
                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-green-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span class="ml-3" x-show="sidebarOpen" x-transition>บริการเช่า-คืน</span>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>เช่าชุด (Rental)</span>
+                    </a>
+                </li>
+
+                {{-- [เพิ่ม] เมนู "คืนชุด" (Return) --}}
+                <li>
+                    <a href="{{ route('reception.return') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-blue-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="corner-down-left" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>คืนชุด (Return)</span>
                     </a>
                 </li>
 
@@ -185,12 +195,11 @@
                     </button>
                     <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" class="absolute left-full top-0 w-64 ml-2 p-4 bg-gray-800 rounded-lg shadow-lg" style="display: none;">
                         <ul class="space-y-2">
-                            <li><a href="{{ route('manager.index', ['table' => 'rentals']) }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า</a></li>
-                            {{-- Reception อาจจะไม่ต้องดูประวัติการใช้แต้ม หรือดูได้แล้วแต่คุณ --}}
+                            {{-- ลิงก์ไปหน้าประวัติที่เราเพิ่งสร้าง --}}
+                            <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
                         </ul>
                     </div>
                 </li>
-
                 @endif
             </ul>
         </nav>
@@ -239,7 +248,7 @@
 
                     <!-- บรรทัดที่ 1 (ชื่อผู้ใช้) -->
                     <span class="text-sm font-medium">{{ Auth::user()->name }}</span>
-                    
+
 
                     <!-- บรรทัดที่ 2 (ชื่อจริง-นามสกุล) -->
                     <span class="ml-3" x-show="sidebarOpen" x-transition>

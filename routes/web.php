@@ -103,5 +103,12 @@ Route::middleware(['auth'])->prefix('reception')->name('reception.')->group(func
     
     // Submit: บันทึกการเช่า
     Route::post('/rental', [ReceptionController::class, 'storeRental'])->name('storeRental');
+
+    // --- [เพิ่มใหม่] ระบบคืนชุด (Return) ---
+    Route::get('/return', [ReceptionController::class, 'returnIndex'])->name('return'); // หน้าจอรายการรอคืน
+    Route::post('/return/{rental}', [ReceptionController::class, 'processReturn'])->name('processReturn'); // ประมวลผลการคืน
+
+    // --- [เพิ่มใหม่] ประวัติการเช่า (History) ---
+    Route::get('/history', [ReceptionController::class, 'history'])->name('history');
 });
 require __DIR__ . '/auth.php';
