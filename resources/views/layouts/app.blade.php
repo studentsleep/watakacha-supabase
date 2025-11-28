@@ -10,31 +10,29 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    {{-- ▼▼▼ 2. Font Prompt จะถูกโหลดผ่านไฟล์ css นี้แทนครับ ▼▼▼ --}}
-    @vite('resources/css/app.css')
-    @vite('resources/js/app.js')
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased" x-data="{ sidebarOpen: false }">
-
-    {{-- (โค้ดส่วน <body> ที่เราแก้ครั้งก่อน ถูกต้องแล้ว) --}}
+{{-- ▼▼▼ 1. แก้ไข x-data ให้จำค่าการเปิด/ปิดเมนูได้ ▼▼▼ --}}
+<body class="font-sans antialiased"
+      x-data="{ 
+          sidebarOpen: localStorage.getItem('sidebarOpen') === 'true',
+          init() {
+              this.$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', value))
+          }
+      }">
 
     <div class="flex h-screen">
 
-        <!-- Sidebar -->
         @include('layouts.sidebar')
 
-        <!-- ส่วนเนื้อหาหลัก (Main Content) -->
-        <div class="flex-1 flex flex-col transition-all duration-300 bg-gray-100 dark:bg-gray-900"
-            :class="sidebarOpen">
+        {{-- ลบ :class="sidebarOpen" ออก เพราะไม่ได้ใช้ class นี้กับ div หลัก --}}
+        <div class="flex-1 flex flex-col transition-all duration-300 bg-gray-100 dark:bg-gray-900">
 
-            <!-- Top Navigation Bar (สำหรับมือถือ) -->
             <div class="md:hidden">
                 @include('layouts.navigation')
             </div>
 
-            <!-- Page Heading (ส่วนหัวเรื่อง) -->
             @if (isset($header))
             <header class="bg-white dark:bg-gray-800 shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -43,24 +41,19 @@
             </header>
             @endif
 
-            <!-- Page Content (เนื้อหา) -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto">
                 {{ $slot }}
             </main>
         </div>
     </div>
 
-    <!-- ▼▼▼ [แก้ไข] สั่งให้ Lucide วาดไอคอน หลังจากที่ DOM โหลดเสร็จ ▼▼▼ -->
+    {{-- ▼▼▼ 2. ลบ Script เดิมทิ้ง และใช้แค่นี้พอครับ ▼▼▼ --}}
     <script>
+        // สั่งให้ Lucide ทำงานเมื่อโหลดหน้าเสร็จ
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. สั่งให้ Alpine.js เริ่มทำงาน (หลังจากที่ users.blade.php โหลดเสร็จแล้ว)
-            window.Alpine.start();
-
-            // 2. สั่งให้ Lucide วาดไอคอน
             lucide.createIcons();
         });
     </script>
-    {{-- === จบส่วนที่แก้ไข === --}}
 </body>
 
 </html>
