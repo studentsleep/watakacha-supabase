@@ -8,48 +8,12 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- ▼▼▼ 1. ต้องมี Script ไอคอน Lucide ▼▼▼ -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    {{-- ▼▼▼ 2. [แก้ไข] แยก @vite เป็น 2 บรรทัด ▼▼▼ --}}
+    {{-- ▼▼▼ 2. Font Prompt จะถูกโหลดผ่านไฟล์ css นี้แทนครับ ▼▼▼ --}}
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    {{-- === จบส่วนที่แก้ไข === --}}
 
-    <!-- Style สำหรับเมนูย่อย (Flyout) ที่เราใช้ใน Sidebar -->
-    <style>
-        .flyout-link {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            /* py-2 px-3 */
-            color: #D1D5DB;
-            /* text-gray-300 */
-            border-radius: 0.375rem;
-            /* rounded-md */
-        }
-
-        .flyout-link:hover {
-            background-color: #374151;
-            /* hover:bg-gray-700 */
-            color: #FFFFFF;
-            /* hover:text-white */
-        }
-
-        .flyout-link .icon-size {
-            width: 1.25rem;
-            /* w-5 */
-            height: 1.25rem;
-            /* h-5 */
-            margin-right: 0.75rem;
-            /* mr-3 */
-        }
-    </style>
 </head>
 
 <body class="font-sans antialiased" x-data="{ sidebarOpen: false }">
