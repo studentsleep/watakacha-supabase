@@ -1,23 +1,15 @@
-{{-- 
-    นี่คือ Partial View สำหรับจัดการ "Items" (สินค้า)
-    - รองรับการอัปโหลดหลายรูปภาพ (enctype="multipart/form-data")
-    - แสดง/ลบ/ตั้งค่ารูปภาพหลัก
---}}
-
 <div x-data="itemManagement(
     @json($items->items()), 
     @json($types), 
     @json($units)
 )">
     
-    <!-- ปุ่มเพิ่มสินค้า -->
     <div class="flex justify-end mb-4">
         <button @click="openAddModal" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
             <i data-lucide="plus" class="w-4 h-4 mr-2"></i> เพิ่มสินค้า
         </button>
     </div>
 
-    <!-- ตารางแสดงผลสินค้า -->
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
@@ -28,6 +20,10 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Unit</th>
+                    
+                    {{-- [เพิ่มใหม่] Header คำอธิบาย --}}
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                    
                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -43,6 +39,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="item.stock"></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="item.type ? item.type.name : 'N/A'"></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" x-text="item.unit ? item.unit.name : 'N/A'"></td>
+                        
+                        {{-- [เพิ่มใหม่] Body คำอธิบาย --}}
+                        {{-- ใช้ max-w-xs และ truncate เพื่อตัดคำถ้ายาวเกินไป (เอาเมาส์ชี้เพื่อดูเต็มๆ ได้) --}}
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" 
+                            :title="item.description" 
+                            x-text="item.description || '-'">
+                        </td>
+
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button @click="openEditModal(item)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200" title="แก้ไข">
                                 <i data-lucide="file-pen-line" class="w-5 h-5"></i>
@@ -61,7 +65,8 @@
 
                 <template x-if="items.length === 0">
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        {{-- [แก้ไข] เพิ่ม colspan เป็น 8 เพราะเพิ่มมา 1 คอลัมน์ --}}
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                             ไม่พบข้อมูลสินค้า (กรุณากดปุ่ม "เพิ่มสินค้า" เพื่อสร้างข้อมูล)
                         </td>
                     </tr>
@@ -70,12 +75,11 @@
         </table>
     </div>
 
-    <!-- Pagination Links -->
     <div class="mt-4">
         {{ $items->links() }}
     </div>
 
-    {{-- ▼▼▼ Modal (ป๊อปอัพ) สำหรับเพิ่ม/แก้ไข Item ▼▼▼ --}}
+    {{-- ▼▼▼ Modal (ส่วน Modal คงเดิมตามที่คุณส่งมา) ▼▼▼ --}}
     <div x-show="isModalOpen" 
          class="fixed inset-0 z-50 overflow-y-auto" 
          aria-labelledby="modal-title" role="dialog" aria-modal="true"
@@ -93,7 +97,6 @@
             <div x-show="isModalOpen" x-transition
                  class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                 
-                {{-- [สำคัญ] ต้องมี enctype="multipart/form-data" สำหรับอัปโหลดไฟล์ --}}
                 <form :action="formActionUrl" method="POST" enctype="multipart/form-data">
                     @csrf
                     <template x-if="isEditMode">
@@ -104,25 +107,21 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title" x-text="modalTitle"></h3>
                         <div class="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                             
-                            <!-- Field: Name -->
                             <div>
                                 <label for="item_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ชื่อสินค้า (Name)</label>
                                 <input type="text" name="name" :value="currentItem.item_name" id="item_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
 
-                            <!-- Field: Description -->
                             <div>
                                 <label for="item_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">คำอธิบาย (Description)</label>
                                 <textarea name="description" id="item_description" x-text="currentItem.description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                             </div>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <!-- Field: Price -->
                                 <div>
                                     <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ราคา (Price)</label>
                                     <input type="number" name="price" :value="currentItem.price" id="price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
-                                <!-- Field: Stock -->
                                 <div>
                                     <label for="stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">จำนวน (Stock)</label>
                                     <input type="number" name="stock" :value="currentItem.stock" id="stock" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
@@ -130,44 +129,40 @@
                             </div>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <!-- Field: Item Type -->
                                 <div>
-                                    <label for="id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ประเภท (Type)</label>
-                                    <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <label for="item_type_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ประเภท (Type)</label>
+                                    <select name="item_type_id" id="item_type_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <option value="">-- เลือกประเภท --</option>
                                         <template x-for="type in types" :key="type.id">
-                                            <option :value="type.id" x-text="type.name" :selected="type.id == currentItem.id"></option>
+                                            {{-- [แก้ไข] เช็ค type.id กับ currentItem.item_type_id หรือ currentItem.type.id ให้ตรงกับโครงสร้างข้อมูล --}}
+                                            <option :value="type.id" x-text="type.name" :selected="type.id == currentItem.item_type_id"></option>
                                         </template>
                                     </select>
                                 </div>
-                                <!-- Field: Item Unit -->
                                 <div>
-                                    <label for="id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">หน่วย (Unit)</label>
-                                    <select name="id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <label for="item_unit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">หน่วย (Unit)</label>
+                                    <select name="item_unit_id" id="item_unit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <option value="">-- เลือกหน่วย --</option>
                                         <template x-for="unit in units" :key="unit.id">
-                                            <option :value="unit.id" x-text="unit.name" :selected="unit.id == currentItem.id"></option>
+                                             {{-- [แก้ไข] เช็ค unit.id กับ currentItem.item_unit_id --}}
+                                            <option :value="unit.id" x-text="unit.name" :selected="unit.id == currentItem.item_unit_id"></option>
                                         </template>
                                     </select>
                                 </div>
                             </div>
 
-                            <!-- Field: Image Upload (สำหรับ Add) -->
                             <div x-show="!isEditMode">
                                 <label for="images" class="block text-sm font-medium text-gray-700 dark:text-gray-300">อัปโหลดรูปภาพ (เพิ่มได้หลายรูป)</label>
                                 <input type="file" name="images[]" id="images" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-200 hover:file:bg-blue-100">
                             </div>
 
-                            <!-- Image Management (สำหรับ Edit) -->
                             <div x-show="isEditMode" class="space-y-4">
                                 <div>
                                     <h4 class="text-md font-medium text-gray-900 dark:text-gray-100">จัดการรูปภาพ</h4>
                                 </div>
                                 
-                                <!-- Upload new image (for Edit) -->
                                 <div>
                                     <label for="new_image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">เพิ่มรูปภาพใหม่</label>
-                                    {{-- เราจะใช้ Form แยกสำหรับอัปโหลดรูปในโหมด Edit --}}
                                     <form :action="getImageUploadUrl(currentItem.id)" method="POST" enctype="multipart/form-data" class="flex items-center gap-2 mt-1">
                                         @csrf
                                         <input type="file" name="image" id="new_image" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-100">
@@ -177,7 +172,6 @@
                                     </form>
                                 </div>
                                 
-                                <!-- Existing Images -->
                                 <div class="grid grid-cols-3 gap-4">
                                     <template x-for="image in currentItem.images" :key="image.id">
                                         <div class="relative group">
@@ -185,7 +179,6 @@
                                                  :class="image.is_main ? 'border-green-500' : 'border-gray-300 dark:border-gray-600'">
                                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-150 rounded flex items-center justify-center gap-2">
                                                 
-                                                <!-- Delete Image Form -->
                                                 <form :action="getImageDeleteUrl(image.id)" method="POST" @submit.prevent="deleteImage($event, image.id)">
                                                     @csrf
                                                     @method('DELETE')
@@ -194,7 +187,6 @@
                                                     </button>
                                                 </form>
 
-                                                <!-- Set Main Image Form -->
                                                 <form :action="getImageSetMainUrl(image.id)" method="POST" @submit.prevent="setMainImage($event, image.id)">
                                                     @csrf
                                                     @method('PATCH')
@@ -246,14 +238,13 @@
                 description: '',
                 price: 0,
                 stock: 0,
-                id: '',
-                id: '',
+                item_type_id: '', // แก้ไขชื่อตัวแปรให้ตรงกับในฐานข้อมูล (ถ้าใน DB เป็น item_type_id)
+                item_unit_id: '', // แก้ไขชื่อตัวแปรให้ตรงกับในฐานข้อมูล
                 images: []
             },
 
             // URL Helpers
             getImageUrl(path) {
-                // (ต้องมั่นใจว่ารัน php artisan storage:link แล้ว)
                 return `{{ asset('storage') }}/${path}`;
             },
             getMainImageUrl(item) {
@@ -293,6 +284,12 @@
                 this.modalTitle = 'แก้ไขสินค้า: ' + item.item_name;
                 this.isEditMode = true;
                 this.currentItem = JSON.parse(JSON.stringify(item));
+                
+                // [TIPS] ตรวจสอบว่า currentItem.item_type_id หรือ currentItem.type.id มีค่าหรือไม่ เพื่อให้ Select เลือกถูก
+                // บางครั้งข้อมูลที่ส่งมาอาจจะเป็น object (item.type) ต้อง map ให้เป็น ID
+                if(item.type) this.currentItem.item_type_id = item.type.id;
+                if(item.unit) this.currentItem.item_unit_id = item.unit.id;
+
                 this.formActionUrl = `{{ url("manager/items") }}/${item.id}`;
                 this.isModalOpen = true;
                 this.$nextTick(() => lucide.createIcons());
@@ -318,7 +315,7 @@
             resetCurrentItem() {
                 this.currentItem = {
                     id: null, item_name: '', description: '', price: 0,
-                    stock: 0, id: '', id: '', images: []
+                    stock: 0, item_type_id: '', item_unit_id: '', images: []
                 };
             }
         };

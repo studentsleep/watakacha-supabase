@@ -28,19 +28,24 @@
                                 <x-text-input type="email" name="email" id="email_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->email }}" class="mt-1 block w-full" />
                             </div>
                         </div>
-                        <div>
-                            <x-input-label for="status_pg-{{ $photographer->photographer_id }}" :value="__('สถานะ')" />
-                            <select name="status" id="status_pg-{{ $photographer->photographer_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active" @selected($photographer->status == 'active')>Active</option>
-                                <option value="inactive" @selected($photographer->status == 'inactive')>Inactive</option>
-                            </select>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="lineid_pg-{{ $photographer->photographer_id }}" :value="__('Line ID')" />
+                                <x-text-input type="text" name="lineid" id="lineid_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->lineid }}" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="status_pg-{{ $photographer->photographer_id }}" :value="__('สถานะ')" />
+                                <select name="status" id="status_pg-{{ $photographer->photographer_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    <option value="active" @selected($photographer->status == 'active')>Active</option>
+                                    <option value="inactive" @selected($photographer->status == 'inactive')>Inactive</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
-                    <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('updatePhotographerModal-{{ $photographer->photographer_id }}', false)">ยกเลิก</x-secondary-button>
-                </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
+                        <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('updatePhotographerModal-{{ $photographer->photographer_id }}', false)">ยกเลิก</x-secondary-button>
+                    </div>
             </form>
         </div>
     </div>

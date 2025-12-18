@@ -17,6 +17,7 @@ class MakeupArtist extends Model
         'last_name',
         'tel',
         'email',
+        'lineid',
         'status',
         'price',
         'description',

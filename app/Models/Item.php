@@ -7,39 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
-    use HasFactory;
-
-    protected $primaryKey = 'id'; // (อันนี้ถูกต้อง)
-
+    // อนุญาตให้แก้ไขคอลัมน์ปลายทาง
     protected $fillable = [
         'item_name',
         'description',
         'price',
         'stock',
-        'id',
-        'id',
+        'item_type_id', // เพิ่มบรรทัดนี้
+        'item_unit_id', // เพิ่มบรรทัดนี้
         'status',
     ];
 
-    /**
-     * [แก้ไข] Foreign Key 'id' เชื่อมกับ 'id' ของตาราง ItemType
-     */
+    // บอก Laravel ว่าคอลัมน์ item_type_id ของเรา เชื่อมกับ id ของอีกตารางนะ
     public function type()
     {
-        return $this->belongsTo(ItemType::class, 'id', 'id');
+        // belongsTo(Model, 'คอลัมน์ในตารางนี้ (FK)', 'คอลัมน์ในตารางนู้น (PK)')
+        return $this->belongsTo(ItemType::class, 'item_type_id', 'id');
     }
 
-    /**
-     * [แก้ไข] Foreign Key 'id' เชื่อมกับ 'id' ของตาราง ItemUnit
-     */
     public function unit()
     {
-        return $this->belongsTo(ItemUnit::class, 'id', 'id');
+        return $this->belongsTo(ItemUnit::class, 'item_unit_id', 'id');
     }
 
     // (อันนี้ถูกต้อง)
     public function images()
     {
-        return $this->hasMany(ItemImage::class, 'id', 'id');
+        // แก้เป็น 'item_id' (ชื่อคอลัมน์ในตาราง item_images ที่เก็บรหัสสินค้า)
+        return $this->hasMany(ItemImage::class, 'item_id', 'id');
     }
 }

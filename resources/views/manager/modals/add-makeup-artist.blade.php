@@ -28,29 +28,36 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             <div>
+                            <div>
+                                <x-input-label for="lineid" :value="__('Line ID')" />
+                                <x-text-input type="text" name="lineid" id="lineid" class="mt-1 block w-full" />
+                            </div>
+                            <div>
                                 <x-input-label for="price" :value="__('ราคา')" />
                                 <x-text-input type="number" name="price" id="price" step="0.01" min="0" required class="mt-1 block w-full" />
                             </div>
-                            <div>
-                                <x-input-label for="status" :value="__('สถานะ')" />
-                                <select name="status" id="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                    <option value="active">กำลังใช้งาน</option>
-                                    <option value="inactive">ระงับการใช้งาน</option>
-                                </select>
-                            </div>
                         </div>
-                         <div>
-                            <x-input-label for="description" :value="__('รายละเอียด')" />
-                            <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"></textarea>
+
+                        {{-- Status แยกออกมา หรือจะวางคู่กับอย่างอื่นก็ได้ --}}
+                        <div>
+                            <x-input-label for="status" :value="__('สถานะ')" />
+                            <select name="status" id="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                <option value="active">กำลังใช้งาน</option>
+                                <option value="inactive">ระงับการใช้งาน</option>
+                            </select>
                         </div>
                     </div>
+                    <div>
+                        <x-input-label for="description" :value="__('รายละเอียด')" />
+                        <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"></textarea>
+                    </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
-                    <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('addMakeupArtistModal', false)">ยกเลิก</x-secondary-button>
-                </div>
-            </form>
         </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
+            <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('addMakeupArtistModal', false)">ยกเลิก</x-secondary-button>
+        </div>
+        </form>
     </div>
+</div>
 </div>

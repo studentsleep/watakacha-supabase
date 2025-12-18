@@ -29,29 +29,35 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             <div>
+                            <div>
+                                <x-input-label for="lineid-{{ $artist->makeup_id }}" :value="__('Line ID')" />
+                                <x-text-input type="text" name="lineid" id="lineid-{{ $artist->makeup_id }}" value="{{ $artist->lineid }}" class="mt-1 block w-full" />
+                            </div>
+                            <div>
                                 <x-input-label for="price-{{ $artist->makeup_id }}" :value="__('ราคา')" />
                                 <x-text-input type="number" name="price" id="price-{{ $artist->makeup_id }}" value="{{ $artist->price }}" step="0.01" min="0" required class="mt-1 block w-full" />
                             </div>
-                            <div>
-                                <x-input-label for="status-{{ $artist->makeup_id }}" :value="__('สถานะ')" />
-                                <select name="status" id="status-{{ $artist->makeup_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                    <option value="active" @selected($artist->status == 'active')>Active</option>
-                                    <option value="inactive" @selected($artist->status == 'inactive')>Inactive</option>
-                                </select>
-                            </div>
                         </div>
-                         <div>
-                            <x-input-label for="description-{{ $artist->makeup_id }}" :value="__('รายละเอียด')" />
-                            <textarea name="description" id="description-{{ $artist->makeup_id }}" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">{{ $artist->description }}</textarea>
+
+                        <div>
+                            <x-input-label for="status-{{ $artist->makeup_id }}" :value="__('สถานะ')" />
+                            <select name="status" id="status-{{ $artist->makeup_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                <option value="active" @selected($artist->status == 'active')>Active</option>
+                                <option value="inactive" @selected($artist->status == 'inactive')>Inactive</option>
+                            </select>
                         </div>
                     </div>
+                    <div>
+                        <x-input-label for="description-{{ $artist->makeup_id }}" :value="__('รายละเอียด')" />
+                        <textarea name="description" id="description-{{ $artist->makeup_id }}" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">{{ $artist->description }}</textarea>
+                    </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
-                    <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('updateMakeupArtistModal-{{ $artist->makeup_id }}', false)">ยกเลิก</x-secondary-button>
-                </div>
-            </form>
         </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
+            <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('updateMakeupArtistModal-{{ $artist->makeup_id }}', false)">ยกเลิก</x-secondary-button>
+        </div>
+        </form>
     </div>
+</div>
 </div>

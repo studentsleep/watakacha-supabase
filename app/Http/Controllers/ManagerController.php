@@ -99,7 +99,16 @@ class ManagerController extends Controller
             }
             $data['units'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
         } elseif ($table == 'item_types') {
-            $data['types'] = ItemType::orderBy('name')->get();
+            $query = ItemType::query();
+
+            // 1. เพิ่ม Logic ค้นหา
+            if ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            }
+
+            // 2. เปลี่ยนเป็น Paginate
+            $data['types'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
         } elseif ($table == 'point_transactions') {
             $query = PointTransaction::with('member');
             if ($search) {
@@ -109,7 +118,18 @@ class ManagerController extends Controller
             }
             $data['transactions'] = $query->orderBy('transaction_date', 'desc')->paginate(30)->withQueryString();
         } elseif ($table == 'user_types') {
-            $data['user_types'] = UserType::orderBy('name')->get();
+            $query = UserType::query();
+
+            // เพิ่ม Logic ค้นหา
+            if ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            }
+
+            // เปลี่ยนเป็น Paginate (แบ่งหน้า)
+            $data['user_types'] = $query->orderBy('user_type_id', 'desc')
+                ->paginate(20)
+                ->withQueryString();
         } elseif ($table == 'photographer_packages') {
             $query = PhotographerPackage::query();
             if ($search) $query->where('package_name', 'like', "%{$search}%");
@@ -168,7 +188,7 @@ class ManagerController extends Controller
             // 'id' => 'required|exists:item_units,id',
             // // [แก้ไข] ต้องตรวจสอบกับ 'id'
             // 'id' => 'required|exists:item_types,id',
-            'item_type_id' => 'required', 
+            'item_type_id' => 'required',
             'item_unit_id' => 'required',
         ]);
         $item->update([
@@ -186,21 +206,30 @@ class ManagerController extends Controller
 
     public function uploadItemImage(Request $request, Item $item)
     {
+        // 1. Validate แบบ Array
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'images' => 'required',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // ตรวจสอบทีละไฟล์
         ]);
 
-        $path = $request->file('image')->store('items', 'public');
+        // 2. วนลูปบันทึกไฟล์
+        if ($request->hasFile('images')) {
+            // เช็คก่อนว่าตอนนี้มีรูปอยู่แล้วหรือไม่ (เพื่อกำหนด is_main ของรูปแรกที่เพิ่มเข้าไปใหม่ ถ้ายังไม่มีรูปเลย)
+            $hasExistingImages = $item->images()->exists();
 
-        // ตรวจสอบว่านี่เป็นรูปแรกหรือไม่
-        $isFirstImage = $item->images()->count() == 0;
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('items', 'public');
 
-        $item->images()->create([
-            'path' => $path,
-            'is_main' => $isFirstImage, // ตั้งเป็นรูปหลักถ้านี่คือรูปแรก
-        ]);
+                $item->images()->create([
+                    'path' => $path,
+                    // ถ้ายังไม่มีรูปเลย -> รูปแรกสุดที่อัป (index 0) จะเป็น main
+                    // ถ้ามีรูปอยู่แล้ว -> รูปใหม่ทั้งหมดจะไม่ใช่ main
+                    'is_main' => (!$hasExistingImages && $index === 0),
+                ]);
+            }
+        }
 
-        return back()->with('status', 'Image uploaded successfully.');
+        return back()->with('status', 'อัปโหลดรูปภาพเรียบร้อยแล้ว');
     }
 
     /**

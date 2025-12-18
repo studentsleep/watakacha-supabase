@@ -27,19 +27,25 @@
                                 <x-text-input type="email" name="email" id="email_pg" class="mt-1 block w-full" />
                             </div>
                         </div>
-                        <div>
-                            <x-input-label for="status_pg" :value="__('สถานะ')" />
-                            <select name="status" id="status_pg" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active">กำลังใช้งาน</option>
-                                <option value="inactive">ระงับการใช้งาน</option>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="lineid_pg" :value="__('Line ID')" />
+                                <x-text-input type="text" name="lineid" id="lineid_pg" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="status_pg" :value="__('สถานะ')" />
+                                <select name="status" id="status_pg" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    <option value="active">กำลังใช้งาน</option>
+                                    <option value="inactive">ระงับการใช้งาน</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
-                    <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('addPhotographerModal', false)">ยกเลิก</x-secondary-button>
-                </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <x-primary-button type="submit" class="sm:ml-3">บันทึก</x-primary-button>
+                        <x-secondary-button type="button" class="mt-3 sm:mt-0" onclick="toggleModal('addPhotographerModal', false)">ยกเลิก</x-secondary-button>
+                    </div>
             </form>
         </div>
     </div>

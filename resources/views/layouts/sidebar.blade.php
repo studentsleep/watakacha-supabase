@@ -31,7 +31,7 @@
             <x-application-logo class="block h-9 w-auto fill-current text-gray-200" />
             <span class="ml-2 text-lg font-bold text-white"
                 x-show="sidebarOpen" x-transition>
-                {{ Auth::user()->user_type_id == 1 ? 'Manager' : 'Reception' }}
+                {{ Auth::user()->user_type_id == 1 ? 'ผู้จัดการ' : 'พนักงานต้อนรับ' }}
             </span>
         </a>
 

@@ -1,19 +1,19 @@
-{{-- 
+{{--
     นี่คือ Modal (หน้าต่าง Insert) "แบบใหม่"
     - สร้างด้วย Tailwind CSS (ธีมเดิม)
     - ถูกควบคุมโดย "JS ธรรมดา" (toggleModal)
     - ส่งข้อมูลไปยัง Route "แบบใหม่" (manager.items.store)
 --}}
-<div id="addItemModal" 
-     class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75 hidden" 
-     aria-labelledby="modal-title" role="dialog" aria-modal="true"
-     onclick="toggleModal('addItemModal', false, event)">
-    
+<div id="addItemModal"
+    class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75 hidden"
+    aria-labelledby="modal-title" role="dialog" aria-modal="true"
+    onclick="toggleModal('addItemModal', false, event)">
+
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        
+
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
-             role="document">
-            
+            role="document">
+
             {{-- [CRUD ใหม่] ส่ง Form ไปยัง Route ใหม่ --}}
             <form action="{{ route('manager.items.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -22,7 +22,7 @@
                         เพิ่มสินค้าใหม่
                     </h3>
                     <div class="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                        
+
                         <!-- Field: Name -->
                         <div>
                             <x-input-label for="item_name" :value="__('ชื่อสินค้า (Name)')" />
@@ -34,7 +34,7 @@
                             <x-input-label for="item_description" :value="__('คำอธิบาย (Description)')" />
                             <textarea name="description" id="item_description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Field: Price -->
                             <div>
@@ -47,25 +47,30 @@
                                 <x-text-input type="number" name="stock" id="stock" required class="mt-1 block w-full" />
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Field: Item Type -->
                             <div>
-                                <x-input-label for="id" :value="__('ประเภท (Type)')" />
-                                <select name="item_type_id" id="id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="add_item_type_id" :value="__('ประเภท (Type)')" />
+
+                                <select name="item_type_id" id="add_item_type_id" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    
                                     <option value="">-- เลือกประเภท --</option>
                                     @foreach($types as $type)
-                                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <!-- Field: Item Unit -->
+
                             <div>
-                                <x-input-label for="id" :value="__('หน่วย (Unit)')" />
-                                <select name="id" id="item_unit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="add_item_unit_id" :value="__('หน่วย (Unit)')" />
+
+                                <select name="item_unit_id" id="add_item_unit_id" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    
                                     <option value="">-- เลือกหน่วย --</option>
                                     @foreach($units as $unit)
-                                        <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -79,7 +84,7 @@
 
                     </div>
                 </div>
-                
+
                 <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <x-primary-button type="submit" class="sm:ml-3">
                         บันทึกข้อมูล

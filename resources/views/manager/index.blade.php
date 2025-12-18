@@ -25,7 +25,7 @@
 
                     {{-- ส่วนหัว: ปุ่มเพิ่ม + ช่องค้นหา + ตัวกรอง --}}
                     {{-- [แก้ไขจุดที่ 2] เพิ่ม 'item_units' ใน array เพื่อให้แสดงช่องค้นหา --}}
-                    @if(in_array($table, ['items', 'users', 'member_accounts', 'care_shops', 'makeup_artists', 'photographers', 'photographer_packages', 'promotions', 'point_transactions', 'item_units']))
+                    @if(in_array($table, ['items', 'users', 'member_accounts', 'care_shops', 'makeup_artists', 'photographers', 'photographer_packages', 'promotions', 'point_transactions', 'item_units', 'user_types', 'item_types']))
                     <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
 
                         <form method="GET" action="{{ route('manager.index') }}" class="w-full xl:w-auto flex flex-col sm:flex-row gap-2">
@@ -477,7 +477,7 @@
                     @endforeach
 
                     @elseif($table == 'makeup_artists')
-                    {{-- ... (ตาราง Makeup Artists คงเดิม) ... --}}
+                    {{-- ... (ตาราง Makeup Artists) ... --}}
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
@@ -485,7 +485,8 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-16">ลำดับ</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อ - นามสกุล</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">รายละเอียด/ที่อยู่</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">เบอร์โทร</th>
+                                    {{-- [แก้ไข] เปลี่ยนหัวข้อเป็น ช่องทางการติดต่อ --}}
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ช่องทางการติดต่อ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ราคาจ้าง</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">จัดการ</th>
@@ -497,7 +498,18 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $makeup_artists->firstItem() + $loop->index }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $artist->first_name }} {{ $artist->last_name }}</td>
                                     <td class="px-6 py-4 whitespace-normal text-sm">{{ $artist->description ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $artist->tel ?? '-' }}</td>
+
+                                    {{-- [แก้ไข] ส่วนแสดงผลข้อมูลติดต่อ --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div>{{ $artist->email ?? '-' }}</div>
+                                        <div class="text-xs text-gray-500">{{ $artist->tel ?? '-' }}</div>
+                                        @if($artist->lineid)
+                                        <div class="text-xs text-green-600 mt-0.5">
+                                            <span class="font-bold">Line:</span> {{ $artist->lineid }}
+                                        </div>
+                                        @endif
+                                    </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ number_format($artist->price, 2) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $artist->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -527,14 +539,15 @@
                     @endforeach
 
                     @elseif($table == 'photographers')
-                    {{-- ... (ตาราง Photographers คงเดิม) ... --}}
+                    {{-- ... (ตาราง Photographers) ... --}}
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-16">ลำดับ</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อ - นามสกุล</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">อีเมล / เบอร์โทร</th>
+                                    {{-- [แก้ไข] เปลี่ยนหัวข้อเป็น ช่องทางการติดต่อ --}}
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ช่องทางการติดต่อ</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">จัดการ</th>
                                 </tr>
@@ -544,10 +557,18 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $photographers->firstItem() + $loop->index }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $photographer->first_name }} {{ $photographer->last_name }}</td>
+
+                                    {{-- [แก้ไข] ส่วนแสดงผลข้อมูลติดต่อ --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <div>{{ $photographer->email ?? '-' }}</div>
                                         <div class="text-xs text-gray-500">{{ $photographer->tel ?? '-' }}</div>
+                                        @if($photographer->lineid)
+                                        <div class="text-xs text-green-600 mt-0.5">
+                                            <span class="font-bold">Line:</span> {{ $photographer->lineid }}
+                                        </div>
+                                        @endif
                                     </td>
+
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $photographer->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ $photographer->status == 'active' ? 'กำลังใช้งาน' : 'ระงับการใช้งาน' }}

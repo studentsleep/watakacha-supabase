@@ -69,11 +69,11 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" x-text="modalTitle"></h3>
                         <div class="mt-4 space-y-4">
                             <div>
-                                <label for="item_unit_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                <label for="item_unit_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">หน่วยสินค้า</label>
                                 <input type="text" name="name" :value="currentItem.name" id="item_unit_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                             </div>
                             <div>
-                                <label for="item_unit_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                <label for="item_unit_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">คำอธิบาย</label>
                                 <textarea name="description" x-text="currentItem.description" id="item_unit_description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
                             </div>
                         </div>

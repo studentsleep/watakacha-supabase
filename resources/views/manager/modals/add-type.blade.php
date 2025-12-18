@@ -13,11 +13,11 @@
                     </h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="name_type" :value="__('Name')" />
+                            <x-input-label for="name_type" :value="__('ชื่อประเภทสินค้า')" />
                             <x-text-input type="text" name="name" id="name_type" required class="mt-1 block w-full" />
                         </div>
                         <div>
-                            <x-input-label for="description_type" :value="__('Description')" />
+                            <x-input-label for="description_type" :value="__('คำอธิบาย')" />
                             <textarea name="description" id="description_type" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
                     </div>

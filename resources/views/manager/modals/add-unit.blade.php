@@ -13,11 +13,11 @@
                     </h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="name_unit" :value="__('Name')" />
+                            <x-input-label for="name_unit" :value="__('ชื่อหน่วยนับสินค้า')" />
                             <x-text-input type="text" name="name" id="name_unit" required class="mt-1 block w-full" />
                         </div>
                         <div>
-                            <x-input-label for="description_unit" :value="__('Description')" />
+                            <x-input-label for="description_unit" :value="__('คำอธิบาย')" />
                             <textarea name="description" id="description_unit" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
                     </div>

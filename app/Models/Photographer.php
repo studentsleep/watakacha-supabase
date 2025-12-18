@@ -17,6 +17,7 @@ class Photographer extends Model
         'last_name',
         'tel',
         'email',
+        'lineid',
         'status',
     ];
 }
