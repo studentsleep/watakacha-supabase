@@ -78,7 +78,7 @@
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ระบบสมาชิก</span></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'member_accounts']) }}" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">ระบบพนักงาน</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'users']) }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชี Admin/Staff</a></li>
+                                <li><a href="{{ route('manager.index', ['table' => 'users']) }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชีผู้ใช้</a></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'user_types']) }}" class="flyout-link"><i data-lucide="contact" class="icon-size"></i> ประเภทผู้ใช้</a></li>
                             </ul>
                         </div>

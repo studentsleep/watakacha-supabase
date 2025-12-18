@@ -23,15 +23,15 @@
                                 <x-text-input type="text" name="tel" id="tel_pg" class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="email_pg" :value="__('Email')" />
+                                <x-input-label for="email_pg" :value="__('อีเมล')" />
                                 <x-text-input type="email" name="email" id="email_pg" class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div>
                             <x-input-label for="status_pg" :value="__('สถานะ')" />
                             <select name="status" id="status_pg" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">กำลังใช้งาน</option>
+                                <option value="inactive">ระงับการใช้งาน</option>
                             </select>
                         </div>
                     </div>

@@ -15,8 +15,8 @@
                             <div>
                                 <x-input-label for="discount_type" :value="__('ประเภทส่วนลด')" />
                                 <select name="discount_type" id="discount_type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                    <option value="percentage">Percentage (%)</option>
-                                    <option value="fixed">Fixed Amount (THB)</option>
+                                    <option value="percentage">เปอร์เซ็นต์ (%)</option>
+                                    <option value="fixed">บาท (THB)</option>
                                 </select>
                             </div>
                             <div>

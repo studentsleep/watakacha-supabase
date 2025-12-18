@@ -16,37 +16,37 @@
                         {{-- ( ... username, email, first_name, last_name, tel ... ) --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="username_add_member" :value="__('Username')" />
+                                <x-input-label for="username_add_member" :value="__('ชื่อผู้ใช้')" />
                                 <x-text-input type="text" name="username" id="username_add_member" required class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="email_add_member" :value="__('Email')" />
+                                <x-input-label for="email_add_member" :value="__('อีเมล')" />
                                 <x-text-input type="email" name="email" id="email_add_member" required class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name_add_member" :value="__('First Name')" />
+                                <x-input-label for="first_name_add_member" :value="__('ชื่อ')" />
                                 <x-text-input type="text" name="first_name" id="first_name_add_member" required class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="last_name_add_member" :value="__('Last Name')" />
+                                <x-input-label for="last_name_add_member" :value="__('นามสกุล')" />
                                 <x-text-input type="text" name="last_name" id="last_name_add_member" required class="mt-1 block w-full" />
                             </div>
                         </div>
                          <div>
-                            <x-input-label for="tel_add_member" :value="__('Telephone')" />
+                            <x-input-label for="tel_add_member" :value="__('เบอร์มือถือ')" />
                             <x-text-input type="text" name="tel" id="tel_add_member" class="mt-1 block w-full" />
                         </div>
 
                         {{-- ▼▼▼ [แก้ไข] ช่อง Password และ Confirmation ▼▼▼ --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="password_add_member" :value="__('Password (min 8 chars)')" />
+                                <x-input-label for="password_add_member" :value="__('รหัสผ่าน (ขั้นต่ำ 8 ตัวอักษร)')" />
                                 <x-text-input type="password" name="password" id="password_add_member" required class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="password_confirmation_add_member" :value="__('Confirm Password')" />
+                                <x-input-label for="password_confirmation_add_member" :value="__('ยืนยันรหัสผ่าน')" />
                                 <x-text-input type="password" name="password_confirmation" id="password_confirmation_add_member" required class="mt-1 block w-full" />
                             </div>
                         </div>
@@ -55,14 +55,14 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {{-- ( ... points, status ... ) --}}
                             <div>
-                                <x-input-label for="points_add_member" :value="__('Points')" />
+                                <x-input-label for="points_add_member" :value="__('แต้มสะสม')" />
                                 <x-text-input type="number" name="points" id="points_add_member" value="0" required class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="status_add_member" :value="__('Status')" />
+                                <x-input-label for="status_add_member" :value="__('สถานะ')" />
                                 <select name="status" id="status_add_member" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="active">กำลังใช้งาน</option>
+                                    <option value="inactive">ระงับการใช้งาน</option>
                                 </select>
                             </div>
                         </div>

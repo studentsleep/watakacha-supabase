@@ -25,48 +25,95 @@ use Illuminate\Validation\Rule;
 
 class ManagerController extends Controller
 {
-    // (index function ถูกต้อง ไม่ต้องแก้ไข)
     public function index(Request $request)
     {
         $table = $request->input('table', 'users');
+        $search = $request->input('search');
+
+        $status = $request->input('status');
+        $typeId = $request->input('type_id');
+
         $data = ['table' => $table];
 
         if ($table == 'users') {
-            $data['users'] = User::with('userType')
-                ->orderBy('username')
-                ->paginate(20)
-                ->withQueryString();
+            $query = User::with('userType');
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('username', 'like', "%{$search}%")
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+            if ($status) $query->where('status', $status);
+            if ($typeId) $query->where('user_type_id', $typeId);
+
+            $data['users'] = $query->orderBy('user_id', 'desc')->paginate(20)->withQueryString();
             $data['user_types'] = UserType::orderBy('name')->get();
-        } elseif ($table == 'user_types') {
-            $data['user_types'] = UserType::orderBy('name')->get();
+        } elseif ($table == 'member_accounts') {
+            $query = MemberAccount::query();
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('username', 'like', "%{$search}%")
+                        ->orWhere('first_name', 'like', "%{$search}%");
+                });
+            }
+            if ($status) $query->where('status', $status);
+            $data['members'] = $query->orderBy('member_id', 'desc')->paginate(20)->withQueryString();
+        } elseif (in_array($table, ['care_shops', 'makeup_artists', 'photographers', 'promotions'])) {
+            $modelMap = [
+                'care_shops' => CareShop::class,
+                'makeup_artists' => MakeupArtist::class,
+                'photographers' => Photographer::class,
+                'promotions' => Promotion::class,
+            ];
+            $pkMap = [
+                'care_shops' => 'care_shop_id',
+                'makeup_artists' => 'makeup_id',
+                'photographers' => 'photographer_id',
+                'promotions' => 'promotion_id',
+            ];
+
+            $model = $modelMap[$table];
+            $pk = $pkMap[$table];
+            $query = $model::query();
+
+            if ($search) {
+                if ($table == 'care_shops') $query->where('care_name', 'like', "%{$search}%");
+                elseif ($table == 'promotions') $query->where('promotion_name', 'like', "%{$search}%");
+                else $query->where('first_name', 'like', "%{$search}%");
+            }
+            if ($status) $query->where('status', $status);
+
+            $data[$table] = $query->orderBy($pk, 'desc')->paginate(20)->withQueryString();
         } elseif ($table == 'items') {
             $query = Item::with(['type', 'unit', 'images']);
-            $data['items'] = $query->orderBy('item_name')->paginate(20)->withQueryString();
+            if ($search) $query->where('item_name', 'like', "%{$search}%");
+            $data['items'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
             $data['units'] = ItemUnit::orderBy('name')->get();
             $data['types'] = ItemType::orderBy('name')->get();
         } elseif ($table == 'item_units') {
-            $data['units'] = ItemUnit::orderBy('name')->get();
+            // [จุดที่แก้ไข] เปลี่ยนเป็น paginate() เพื่อแก้ Error firstItem()
+            $query = ItemUnit::query();
+            if ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            }
+            $data['units'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
         } elseif ($table == 'item_types') {
             $data['types'] = ItemType::orderBy('name')->get();
-        } elseif ($table == 'member_accounts') {
-            $data['members'] = MemberAccount::orderBy('username')
-                ->paginate(20)
-                ->withQueryString();
         } elseif ($table == 'point_transactions') {
-            $data['transactions'] = PointTransaction::with('member') // ดึงข้อมูล Member มาด้วย
-                ->orderBy('transaction_date', 'desc') // เรียงจากล่าสุดไปเก่าสุด
-                ->paginate(30) // แสดงหน้าละ 30 รายการ
-                ->withQueryString();
-        } elseif ($table == 'care_shops') {
-            $data['care_shops'] = CareShop::orderBy('care_name')->paginate(20)->withQueryString();
-        } elseif ($table == 'makeup_artists') {
-            $data['makeup_artists'] = MakeupArtist::orderBy('first_name')->paginate(20)->withQueryString();
-        } elseif ($table == 'photographers') {
-            $data['photographers'] = Photographer::orderBy('first_name')->paginate(20)->withQueryString();
+            $query = PointTransaction::with('member');
+            if ($search) {
+                $query->whereHas('member', function ($q) use ($search) {
+                    $q->where('username', 'like', "%{$search}%");
+                })->orWhere('description', 'like', "%{$search}%");
+            }
+            $data['transactions'] = $query->orderBy('transaction_date', 'desc')->paginate(30)->withQueryString();
+        } elseif ($table == 'user_types') {
+            $data['user_types'] = UserType::orderBy('name')->get();
         } elseif ($table == 'photographer_packages') {
-            $data['photographer_packages'] = PhotographerPackage::orderBy('package_name')->paginate(20)->withQueryString();
-        } elseif ($table == 'promotions') {
-            $data['promotions'] = Promotion::orderBy('promotion_name')->paginate(20)->withQueryString();
+            $query = PhotographerPackage::query();
+            if ($search) $query->where('package_name', 'like', "%{$search}%");
+            $data['photographer_packages'] = $query->orderBy('package_id', 'desc')->paginate(20)->withQueryString();
         }
 
         return view('manager.index', $data);
@@ -82,9 +129,11 @@ class ManagerController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             // [แก้ไข] ต้องตรวจสอบกับ 'id' (PK ของตาราง item_units)
-            'id' => 'required|exists:item_units,id',
+            // 'id' => 'required|exists:item_units,id',
             // [แก้ไข] ต้องตรวจสอบกับ 'id' (PK ของตาราง item_types)
-            'id' => 'required|exists:item_types,id',
+            // 'id' => 'required|exists:item_types,id',
+            'item_type_id' => 'required',
+            'item_unit_id' => 'required',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -93,8 +142,10 @@ class ManagerController extends Controller
             'description' => $data['description'],
             'price' => $data['price'],
             'stock' => $data['stock'],
-            'id' => $data['id'],
-            'id' => $data['id'],
+            // 'id' => $data['id'],
+            // 'id' => $data['id'],
+            'item_type_id' => $data['item_type_id'],
+            'item_unit_id' => $data['item_unit_id'],
             'status' => 'active',
         ]);
         if ($request->hasFile('images')) {
@@ -114,17 +165,21 @@ class ManagerController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer|min:0',
             // [แก้ไข] ต้องตรวจสอบกับ 'id'
-            'id' => 'required|exists:item_units,id',
-            // [แก้ไข] ต้องตรวจสอบกับ 'id'
-            'id' => 'required|exists:item_types,id',
+            // 'id' => 'required|exists:item_units,id',
+            // // [แก้ไข] ต้องตรวจสอบกับ 'id'
+            // 'id' => 'required|exists:item_types,id',
+            'item_type_id' => 'required', 
+            'item_unit_id' => 'required',
         ]);
         $item->update([
             'item_name' => $data['name'],
             'description' => $data['description'],
             'price' => $data['price'],
             'stock' => $data['stock'],
-            'id' => $data['id'],
-            'id' => $data['id'],
+            // 'id' => $data['id'],
+            // 'id' => $data['id'],
+            'item_type_id' => $data['item_type_id'],
+            'item_unit_id' => $data['item_unit_id'],
         ]);
         return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item updated successfully.');
     }
