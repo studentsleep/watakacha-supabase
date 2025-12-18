@@ -484,11 +484,11 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-16">ลำดับ</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่อ - นามสกุล</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">รายละเอียด/ที่อยู่</th>
                                     {{-- [แก้ไข] เปลี่ยนหัวข้อเป็น ช่องทางการติดต่อ --}}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ช่องทางการติดต่อ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ราคาจ้าง</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สถานะ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">รายละเอียด</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">จัดการ</th>
                                 </tr>
                             </thead>
@@ -497,7 +497,6 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $makeup_artists->firstItem() + $loop->index }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $artist->first_name }} {{ $artist->last_name }}</td>
-                                    <td class="px-6 py-4 whitespace-normal text-sm">{{ $artist->description ?? '-' }}</td>
 
                                     {{-- [แก้ไข] ส่วนแสดงผลข้อมูลติดต่อ --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -516,6 +515,7 @@
                                             {{ $artist->status == 'active' ? 'กำลังใช้งาน' : 'ระงับการใช้งาน' }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-normal text-sm">{{ $artist->description ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <x-secondary-button type="button" onclick="toggleModal('updateMakeupArtistModal-{{ $artist->makeup_id }}', true)" class="!px-2 !py-1"><i data-lucide="file-pen-line" class="w-5 h-5"></i></x-secondary-button>
                                         <form action="{{ route('manager.makeup_artists.destroy', $artist->makeup_id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('ยืนยันการลบ?')">
