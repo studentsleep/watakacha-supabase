@@ -14,11 +14,11 @@
                     </h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="name-{{ $type->id }}" :value="__('Name')" />
+                            <x-input-label for="name-{{ $type->id }}" :value="__('ชื่อประเภทสินค้า')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                             <x-text-input type="text" name="name" id="name-{{ $type->id }}" value="{{ $type->name }}" required class="mt-1 block w-full" />
                         </div>
                         <div>
-                            <x-input-label for="description-{{ $type->id }}" :value="__('Description')" />
+                            <x-input-label for="description-{{ $type->id }}" :value="__('คำอธิบาย')" />
                             <textarea name="description" id="description-{{ $type->id }}" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ $type->description }}</textarea>
                         </div>
                     </div>

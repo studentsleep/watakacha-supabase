@@ -8,12 +8,12 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">เพิ่มแพ็คเกจช่างภาพ</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="package_name" :value="__('ชื่อแพ็คเกจ')" />
-                            <x-text-input type="text" name="package_name" id="package_name" required class="mt-1 block w-full" />
+                            <x-input-label for="package_name" :value="__('ชื่อแพ็คเกจ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="package_name" id="package_name" required class="mt-1 block w-full" require/>
                         </div>
                         <div>
-                            <x-input-label for="price_pkg" :value="__('ราคา')" />
-                            <x-text-input type="number" name="price" id="price_pkg" step="0.01" min="0" required class="mt-1 block w-full" />
+                            <x-input-label for="price_pkg" :value="__('ราคา')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="number" name="price" id="price_pkg" step="0.01" min="0" required class="mt-1 block w-full" require/>
                         </div>
                         <div>
                             <x-input-label for="description_pkg" :value="__('รายละเอียด')" />

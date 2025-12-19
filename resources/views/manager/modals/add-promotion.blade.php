@@ -8,8 +8,8 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">เพิ่มโปรโมชั่น</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="promotion_name" :value="__('ชื่อโปรโมชั่น')" />
-                            <x-text-input type="text" name="promotion_name" id="promotion_name" required class="mt-1 block w-full" />
+                            <x-input-label for="promotion_name" :value="__('ชื่อโปรโมชั่น')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="promotion_name" id="promotion_name" required class="mt-1 block w-full" require/>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -20,18 +20,18 @@
                                 </select>
                             </div>
                             <div>
-                                <x-input-label for="discount_value" :value="__('มูลค่าส่วนลด')" />
-                                <x-text-input type="number" name="discount_value" id="discount_value" step="0.01" min="0" required class="mt-1 block w-full" />
+                                <x-input-label for="discount_value" :value="__('มูลค่าส่วนลด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="number" name="discount_value" id="discount_value" step="0.01" min="0" required class="mt-1 block w-full" require/>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="start_date" :value="__('วันเริ่มต้น (ว่างได้)')" />
-                                <x-text-input type="date" name="start_date" id="start_date" class="mt-1 block w-full" />
+                                <x-input-label for="start_date" :value="__('วันเริ่มต้น')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="date" name="start_date" id="start_date" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="end_date" :value="__('วันสิ้นสุด (ว่างได้)')" />
-                                <x-text-input type="date" name="end_date" id="end_date" class="mt-1 block w-full" />
+                                <x-input-label for="end_date" :value="__('วันสิ้นสุด')" />
+                                <x-text-input type="date" name="end_date" id="end_date" class="mt-1 block w-full" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                             </div>
                         </div>
                         <div>

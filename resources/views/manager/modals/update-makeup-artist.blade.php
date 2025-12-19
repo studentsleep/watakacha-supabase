@@ -10,31 +10,31 @@
                     <div class="mt-4 space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name-{{ $artist->makeup_id }}" :value="__('ชื่อจริง')" />
+                                <x-input-label for="first_name-{{ $artist->makeup_id }}" :value="__('ชื่อจริง')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                                 <x-text-input type="text" name="first_name" id="first_name-{{ $artist->makeup_id }}" value="{{ $artist->first_name }}" required class="mt-1 block w-full" />
                             </div>
                             <div>
                                 <x-input-label for="last_name-{{ $artist->makeup_id }}" :value="__('นามสกุล')" />
-                                <x-text-input type="text" name="last_name" id="last_name-{{ $artist->makeup_id }}" value="{{ $artist->last_name }}" required class="mt-1 block w-full" />
+                                <x-text-input type="text" name="last_name" id="last_name-{{ $artist->makeup_id }}" value="{{ $artist->last_name }}"  class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel-{{ $artist->makeup_id }}" :value="__('เบอร์โทร')" />
+                                <x-input-label for="tel-{{ $artist->makeup_id }}" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                                 <x-text-input type="text" name="tel" id="tel-{{ $artist->makeup_id }}" value="{{ $artist->tel }}" class="mt-1 block w-full" />
                             </div>
                             <div>
-                                <x-input-label for="email-{{ $artist->makeup_id }}" :value="__('Email')" />
+                                <x-input-label for="email-{{ $artist->makeup_id }}" :value="__('อีเมล')" />
                                 <x-text-input type="email" name="email" id="email-{{ $artist->makeup_id }}" value="{{ $artist->email }}" class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="lineid-{{ $artist->makeup_id }}" :value="__('Line ID')" />
-                                <x-text-input type="text" name="lineid" id="lineid-{{ $artist->makeup_id }}" value="{{ $artist->lineid }}" class="mt-1 block w-full" />
+                                <x-input-label for="lineid-{{ $artist->makeup_id }}" :value="__('Line ID')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="lineid" id="lineid-{{ $artist->makeup_id }}" value="{{ $artist->lineid }}" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="price-{{ $artist->makeup_id }}" :value="__('ราคา')" />
+                                <x-input-label for="price-{{ $artist->makeup_id }}" :value="__('ราคา')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                                 <x-text-input type="number" name="price" id="price-{{ $artist->makeup_id }}" value="{{ $artist->price }}" step="0.01" min="0" required class="mt-1 block w-full" />
                             </div>
                         </div>

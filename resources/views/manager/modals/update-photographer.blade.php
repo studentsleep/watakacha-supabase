@@ -10,28 +10,28 @@
                     <div class="mt-4 space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name_pg-{{ $photographer->photographer_id }}" :value="__('ชื่อจริง')" />
+                                <x-input-label for="first_name_pg-{{ $photographer->photographer_id }}" :value="__('ชื่อจริง')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                                 <x-text-input type="text" name="first_name" id="first_name_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->first_name }}" required class="mt-1 block w-full" />
                             </div>
                             <div>
                                 <x-input-label for="last_name_pg-{{ $photographer->photographer_id }}" :value="__('นามสกุล')" />
-                                <x-text-input type="text" name="last_name" id="last_name_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->last_name }}" required class="mt-1 block w-full" />
+                                <x-text-input type="text" name="last_name" id="last_name_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->last_name }}"  class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel_pg-{{ $photographer->photographer_id }}" :value="__('เบอร์โทร')" />
-                                <x-text-input type="text" name="tel" id="tel_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->tel }}" class="mt-1 block w-full" />
+                                <x-input-label for="tel_pg-{{ $photographer->photographer_id }}" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="tel" id="tel_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->tel }}" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="email_pg-{{ $photographer->photographer_id }}" :value="__('Email')" />
+                                <x-input-label for="email_pg-{{ $photographer->photographer_id }}" :value="__('อีเมล')" />
                                 <x-text-input type="email" name="email" id="email_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->email }}" class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="lineid_pg-{{ $photographer->photographer_id }}" :value="__('Line ID')" />
-                                <x-text-input type="text" name="lineid" id="lineid_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->lineid }}" class="mt-1 block w-full" />
+                                <x-input-label for="lineid_pg-{{ $photographer->photographer_id }}" :value="__('Line ID')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="lineid" id="lineid_pg-{{ $photographer->photographer_id }}" value="{{ $photographer->lineid }}" class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="status_pg-{{ $photographer->photographer_id }}" :value="__('สถานะ')" />

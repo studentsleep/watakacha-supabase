@@ -9,11 +9,11 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">แก้ไข: {{ $package->package_name }}</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="package_name-{{ $package->package_id }}" :value="__('ชื่อแพ็คเกจ')" />
+                            <x-input-label for="package_name-{{ $package->package_id }}" :value="__('ชื่อแพ็คเกจ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                             <x-text-input type="text" name="package_name" id="package_name-{{ $package->package_id }}" value="{{ $package->package_name }}" required class="mt-1 block w-full" />
                         </div>
                         <div>
-                            <x-input-label for="price_pkg-{{ $package->package_id }}" :value="__('ราคา')" />
+                            <x-input-label for="price_pkg-{{ $package->package_id }}" :value="__('ราคา')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                             <x-text-input type="number" name="price" id="price_pkg-{{ $package->package_id }}" value="{{ $package->price }}" step="0.01" min="0" required class="mt-1 block w-full" />
                         </div>
                         <div>

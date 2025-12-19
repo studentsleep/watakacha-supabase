@@ -9,30 +9,30 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">แก้ไข: {{ $promo->promotion_name }}</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="promotion_name-{{ $promo->promotion_id }}" :value="__('ชื่อโปรโมชั่น')" />
-                            <x-text-input type="text" name="promotion_name" id="promotion_name-{{ $promo->promotion_id }}" value="{{ $promo->promotion_name }}" required class="mt-1 block w-full" />
+                            <x-input-label for="promotion_name-{{ $promo->promotion_id }}" :value="__('ชื่อโปรโมชั่น')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="promotion_name" id="promotion_name-{{ $promo->promotion_id }}" value="{{ $promo->promotion_name }}" required class="mt-1 block w-full" require/>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="discount_type-{{ $promo->promotion_id }}" :value="__('ประเภทส่วนลด')" />
-                                <select name="discount_type" id="discount_type-{{ $promo->promotion_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                <x-input-label for="discount_type-{{ $promo->promotion_id }}" :value="__('ประเภทส่วนลด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <select name="discount_type" id="discount_type-{{ $promo->promotion_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300" require>
                                     <option value="percentage" @selected($promo->discount_type == 'percentage')>Percentage (%)</option>
                                     <option value="fixed" @selected($promo->discount_type == 'fixed')>Fixed Amount (THB)</option>
                                 </select>
                             </div>
                             <div>
-                                <x-input-label for="discount_value-{{ $promo->promotion_id }}" :value="__('มูลค่าส่วนลด')" />
-                                <x-text-input type="number" name="discount_value" id="discount_value-{{ $promo->promotion_id }}" value="{{ $promo->discount_value }}" step="0.01" min="0" required class="mt-1 block w-full" />
+                                <x-input-label for="discount_value-{{ $promo->promotion_id }}" :value="__('มูลค่าส่วนลด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="number" name="discount_value" id="discount_value-{{ $promo->promotion_id }}" require value="{{ $promo->discount_value }}" step="0.01" min="0" required class="mt-1 block w-full" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="start_date-{{ $promo->promotion_id }}" :value="__('วันเริ่มต้น (ว่างได้)')" />
-                                <x-text-input type="date" name="start_date" id="start_date-{{ $promo->promotion_id }}" value="{{ $promo->start_date?->format('Y-m-d') }}" class="mt-1 block w-full" />
+                                <x-input-label for="start_date-{{ $promo->promotion_id }}" :value="__('วันเริ่มต้น')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="date" name="start_date" id="start_date-{{ $promo->promotion_id }}" value="{{ $promo->start_date?->format('Y-m-d') }}" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="end_date-{{ $promo->promotion_id }}" :value="__('วันสิ้นสุด (ว่างได้)')" />
-                                <x-text-input type="date" name="end_date" id="end_date-{{ $promo->promotion_id }}" value="{{ $promo->end_date?->format('Y-m-d') }}" class="mt-1 block w-full" />
+                                <x-input-label for="end_date-{{ $promo->promotion_id }}" :value="__('วันสิ้นสุด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="date" name="end_date" id="end_date-{{ $promo->promotion_id }}" value="{{ $promo->end_date?->format('Y-m-d') }}" class="mt-1 block w-full" require/>
                             </div>
                         </div>
                         <div>

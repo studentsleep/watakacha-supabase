@@ -13,8 +13,8 @@
                     </h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="name_unit" :value="__('ชื่อหน่วยนับสินค้า')" />
-                            <x-text-input type="text" name="name" id="name_unit" required class="mt-1 block w-full" />
+                            <x-input-label for="name_unit" :value="__('ชื่อหน่วยนับสินค้า')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="name" id="name_unit" required class="mt-1 block w-full" require/>
                         </div>
                         <div>
                             <x-input-label for="description_unit" :value="__('คำอธิบาย')" />

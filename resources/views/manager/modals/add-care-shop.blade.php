@@ -8,17 +8,17 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">เพิ่มร้านดูแลชุด</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="care_name" :value="__('ชื่อร้าน')" />
-                            <x-text-input type="text" name="care_name" id="care_name" required class="mt-1 block w-full" />
+                            <x-input-label for="care_name" :value="__('ชื่อร้าน')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="care_name" id="care_name" required class="mt-1 block w-full" require/>
                         </div>
                         <div>
-                            <x-input-label for="address" :value="__('ที่อยู่')" />
-                            <textarea name="address" id="address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                            <x-input-label for="address" :value="__('ที่อยู่')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <textarea name="address" id="address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" require></textarea>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel" :value="__('เบอร์โทร')" />
-                                <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" />
+                                <x-input-label for="tel" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="email" :value="__('อีเมล')" />
@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div>
-                            <x-input-label for="status" :value="__('สถานะ')" />
+                            <x-input-label for="status" :value="__('สถานะ')"/>
                             <select name="status" id="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
                                 <option value="active">กำลังใช้งาน</option>
                                 <option value="inactive">ระงับการใช้งาน</option>

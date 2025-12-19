@@ -9,7 +9,7 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">แก้ไขร้าน: {{ $shop->care_name }}</h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="care_name-{{ $shop->care_shop_id }}" :value="__('ชื่อร้าน')" />
+                            <x-input-label for="care_name-{{ $shop->care_shop_id }}" :value="__('ชื่อร้าน')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                             <x-text-input type="text" name="care_name" id="care_name-{{ $shop->care_shop_id }}" value="{{ $shop->care_name }}" required class="mt-1 block w-full" />
                         </div>
                         <div>
@@ -18,11 +18,11 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel-{{ $shop->care_shop_id }}" :value="__('เบอร์โทร')" />
-                                <x-text-input type="text" name="tel" id="tel-{{ $shop->care_shop_id }}" value="{{ $shop->tel }}" class="mt-1 block w-full" />
+                                <x-input-label for="tel-{{ $shop->care_shop_id }}" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="tel" id="tel-{{ $shop->care_shop_id }}" value="{{ $shop->tel }}" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="email-{{ $shop->care_shop_id }}" :value="__('Email')" />
+                                <x-input-label for="email-{{ $shop->care_shop_id }}" :value="__('อีเมล')" />
                                 <x-text-input type="email" name="email" id="email-{{ $shop->care_shop_id }}" value="{{ $shop->email }}" class="mt-1 block w-full" />
                             </div>
                         </div>

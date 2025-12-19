@@ -13,11 +13,11 @@
                     </h3>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <x-input-label for="name_ut" :value="__('Name')" />
-                            <x-text-input type="text" name="name" id="name_ut" required class="mt-1 block w-full" />
+                            <x-input-label for="name_ut" :value="__('ชื่อประเภทผู้ใช้')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="name" id="name_ut" required class="mt-1 block w-full" require/>
                         </div>
                         <div>
-                            <x-input-label for="description_ut" :value="__('Description')" />
+                            <x-input-label for="description_ut" :value="__('คำอธิบาย')" />
                             <textarea name="description" id="description_ut" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
                     </div>

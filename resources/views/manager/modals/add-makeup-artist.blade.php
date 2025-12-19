@@ -9,8 +9,8 @@
                     <div class="mt-4 space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name" :value="__('ชื่อจริง')" />
-                                <x-text-input type="text" name="first_name" id="first_name" required class="mt-1 block w-full" />
+                                <x-input-label for="first_name" :value="__('ชื่อจริง')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="first_name" id="first_name" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="last_name" :value="__('นามสกุล')" />
@@ -19,8 +19,8 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel" :value="__('เบอร์โทร')" />
-                                <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" />
+                                <x-input-label for="tel" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="email" :value="__('อีเมล')" />
@@ -29,12 +29,12 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="lineid" :value="__('Line ID')" />
-                                <x-text-input type="text" name="lineid" id="lineid" class="mt-1 block w-full" />
+                                <x-input-label for="lineid" :value="__('Line ID')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="lineid" id="lineid" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="price" :value="__('ราคา')" />
-                                <x-text-input type="number" name="price" id="price" step="0.01" min="0" required class="mt-1 block w-full" />
+                                <x-input-label for="price" :value="__('ราคา')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="number" name="price" id="price" step="0.01" min="0" required class="mt-1 block w-full" require/>
                             </div>
                         </div>
 

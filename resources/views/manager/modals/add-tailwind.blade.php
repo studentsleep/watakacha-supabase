@@ -25,8 +25,8 @@
 
                         <!-- Field: Name -->
                         <div>
-                            <x-input-label for="item_name" :value="__('ชื่อสินค้า (Name)')" />
-                            <x-text-input type="text" name="name" id="item_name" required class="mt-1 block w-full" />
+                            <x-input-label for="item_name" :value="__('ชื่อสินค้า (Name)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="name" id="item_name" required class="mt-1 block w-full" require/>
                         </div>
 
                         <!-- Field: Description -->
@@ -38,22 +38,22 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Field: Price -->
                             <div>
-                                <x-input-label for="price" :value="__('ราคา (Price)')" />
-                                <x-text-input type="number" name="price" id="price" step="0.01" required class="mt-1 block w-full" />
+                                <x-input-label for="price" :value="__('ราคา (Price)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="number" name="price" id="price" step="0.01" required class="mt-1 block w-full" require/>
                             </div>
                             <!-- Field: Stock -->
                             <div>
-                                <x-input-label for="stock" :value="__('จำนวน (Stock)')" />
-                                <x-text-input type="number" name="stock" id="stock" required class="mt-1 block w-full" />
+                                <x-input-label for="stock" :value="__('จำนวน (Stock)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="number" name="stock" id="stock" required class="mt-1 block w-full" require/>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="add_item_type_id" :value="__('ประเภท (Type)')" />
+                                <x-input-label for="add_item_type_id" :value="__('ประเภท (Type)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
 
                                 <select name="item_type_id" id="add_item_type_id" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300" require>
                                     
                                     <option value="">-- เลือกประเภท --</option>
                                     @foreach($types as $type)
@@ -63,10 +63,10 @@
                             </div>
 
                             <div>
-                                <x-input-label for="add_item_unit_id" :value="__('หน่วย (Unit)')" />
+                                <x-input-label for="add_item_unit_id" :value="__('หน่วย (Unit)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
 
                                 <select name="item_unit_id" id="add_item_unit_id" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300" require>
                                     
                                     <option value="">-- เลือกหน่วย --</option>
                                     @foreach($units as $unit)

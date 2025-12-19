@@ -16,8 +16,8 @@
                         {{-- ( ... username, email, first_name, last_name, tel ... ) --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="username_add_member" :value="__('ชื่อผู้ใช้')" />
-                                <x-text-input type="text" name="username" id="username_add_member" required class="mt-1 block w-full" />
+                                <x-input-label for="username_add_member" :value="__('ชื่อผู้ใช้')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="username" id="username_add_member" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="email_add_member" :value="__('อีเมล')" />
@@ -26,8 +26,8 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name_add_member" :value="__('ชื่อ')" />
-                                <x-text-input type="text" name="first_name" id="first_name_add_member" required class="mt-1 block w-full" />
+                                <x-input-label for="first_name_add_member" :value="__('ชื่อ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="first_name" id="first_name_add_member" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="last_name_add_member" :value="__('นามสกุล')" />
@@ -35,19 +35,19 @@
                             </div>
                         </div>
                          <div>
-                            <x-input-label for="tel_add_member" :value="__('เบอร์มือถือ')" />
-                            <x-text-input type="text" name="tel" id="tel_add_member" class="mt-1 block w-full" />
+                            <x-input-label for="tel_add_member" :value="__('เบอร์มือถือ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="tel" id="tel_add_member" class="mt-1 block w-full" require/>
                         </div>
 
                         {{-- ▼▼▼ [แก้ไข] ช่อง Password และ Confirmation ▼▼▼ --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="password_add_member" :value="__('รหัสผ่าน (ขั้นต่ำ 8 ตัวอักษร)')" />
-                                <x-text-input type="password" name="password" id="password_add_member" required class="mt-1 block w-full" />
+                                <x-input-label for="password_add_member" :value="__('รหัสผ่าน (ขั้นต่ำ 8 ตัวอักษร)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="password" name="password" id="password_add_member" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="password_confirmation_add_member" :value="__('ยืนยันรหัสผ่าน')" />
-                                <x-text-input type="password" name="password_confirmation" id="password_confirmation_add_member" required class="mt-1 block w-full" />
+                                <x-input-label for="password_confirmation_add_member" :value="__('ยืนยันรหัสผ่าน')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="password" name="password_confirmation" id="password_confirmation_add_member" required class="mt-1 block w-full" require/>
                             </div>
                         </div>
                         {{-- ▲▲▲ จบส่วนที่แก้ไข ▲▲▲ --}}

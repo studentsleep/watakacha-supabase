@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    {{-- Data Injection: ส่งข้อมูลจาก PHP เข้าสู่ Alpine.js --}}
+    {{-- Data Injection --}}
     <div class="py-6" x-data="rentalSystem({
         promotions: {{ Js::from($promotions) }},
         makeupArtists: {{ Js::from($makeup_artists) }},
@@ -13,39 +13,36 @@
         photographers: {{ Js::from($photographers) }}
     })">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {{-- LEFT COLUMN: Forms --}}
                 <div class="lg:col-span-2 space-y-6">
-                    
-                    {{-- 1. ส่วนข้อมูลสมาชิก --}}
-                    {{-- ปรับพื้นหลังเป็นสีเทาอ่อน bg-gray-50 --}}
+
+                    {{-- 1. ส่วนข้อมูลสมาชิก (เหมือนเดิม) --}}
                     <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
                             <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                                 <span class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner">1</span>
                                 ข้อมูลสมาชิก
                             </h3>
-                            
                             <label class="flex items-center space-x-2 text-sm cursor-pointer select-none group bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm hover:bg-gray-100 transition">
                                 <input type="checkbox" x-model="isGuest" @change="toggleGuest" class="rounded border-gray-300 text-gray-600 shadow-sm focus:ring-gray-500">
                                 <span class="text-gray-600 font-semibold group-hover:text-gray-800 transition">ลูกค้าทั่วไป (Guest)</span>
                             </label>
                         </div>
-                        
+
                         {{-- ช่องค้นหา --}}
                         <div x-show="!isGuest && !member" class="flex gap-2 transition-all duration-300">
                             <div class="relative w-full">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                                 </div>
-                                {{-- Input พื้นขาวเพื่อให้ตัดกับพื้นเทา --}}
-                                <input type="text" 
-                                       x-model="memberQuery" 
-                                       @keydown.enter.prevent="checkMember" 
-                                       class="w-full pl-10 rounded-lg border-gray-300 bg-white shadow-sm focus:border-gray-500 focus:ring-gray-500 text-gray-800 placeholder-gray-400" 
-                                       placeholder="เบอร์โทร, รหัสสมาชิก หรือชื่อ...">
+                                <input type="text"
+                                    x-model="memberQuery"
+                                    @keydown.enter.prevent="checkMember"
+                                    class="w-full pl-10 rounded-lg border-gray-300 bg-white shadow-sm focus:border-gray-500 focus:ring-gray-500 text-gray-800 placeholder-gray-400"
+                                    placeholder="เบอร์โทร, รหัสสมาชิก หรือชื่อ...">
                             </div>
                             <button @click="checkMember" class="px-5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 shadow transition font-medium">
                                 ค้นหา
@@ -55,7 +52,7 @@
                             <i data-lucide="alert-circle" class="w-4 h-4"></i> <span x-text="memberErrorMsg"></span>
                         </p>
 
-                        {{-- Member Card: กรณีเจอสมาชิก --}}
+                        {{-- Member Card --}}
                         <div x-show="member && !isGuest" x-transition class="mt-4 p-4 rounded-xl border flex items-start gap-4 shadow-sm bg-white border-green-200">
                             <div class="p-3 rounded-full shrink-0 bg-green-100 text-green-700">
                                 <i data-lucide="user-check" class="w-6 h-6"></i>
@@ -74,7 +71,7 @@
                             </button>
                         </div>
 
-                        {{-- Guest Card: เพิ่มรายละเอียดตามที่ขอ --}}
+                        {{-- Guest Card --}}
                         <div x-show="isGuest" x-transition class="mt-4 p-4 rounded-xl border flex items-start gap-4 shadow-sm bg-white border-gray-300">
                             <div class="p-3 rounded-full shrink-0 bg-gray-200 text-gray-600">
                                 <i data-lucide="user" class="w-6 h-6"></i>
@@ -82,18 +79,9 @@
                             <div class="flex-grow">
                                 <h4 class="font-bold text-lg text-gray-800">ลูกค้าทั่วไป (Guest Customer)</h4>
                                 <ul class="mt-2 space-y-1 text-sm text-gray-600">
-                                    <li class="flex items-center gap-2">
-                                        <span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-                                        <span>ไม่ได้เป็นสมาชิกของทางร้าน</span>
-                                    </li>
-                                    <li class="flex items-center gap-2 text-red-600 font-medium">
-                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                        <span>ไม่มีการสะสมแต้ม (No Points)</span>
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-                                        <span>ชำระเงินตามราคาปกติ</span>
-                                    </li>
+                                    <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span><span>ไม่ได้เป็นสมาชิกของทางร้าน</span></li>
+                                    <li class="flex items-center gap-2 text-red-600 font-medium"><i data-lucide="x-circle" class="w-4 h-4"></i><span>ไม่มีการสะสมแต้ม (No Points)</span></li>
+                                    <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span><span>ชำระเงินตามราคาปกติ</span></li>
                                 </ul>
                             </div>
                             <button @click="resetMember" class="text-gray-400 hover:text-red-500 transition p-2 hover:bg-gray-100 rounded-full">
@@ -104,8 +92,8 @@
 
                     {{-- 2. เลือกสินค้า --}}
                     <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-opacity duration-200"
-                         :class="(member || isGuest) ? 'opacity-100' : 'opacity-50 pointer-events-none'">
-                         
+                        :class="(member || isGuest) ? 'opacity-100' : 'opacity-50 pointer-events-none'">
+
                         <div class="border-b border-gray-200 pb-4 mb-4">
                             <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                                 <span class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner">2</span>
@@ -116,18 +104,18 @@
                         <div class="relative">
                             <label class="block text-sm font-medium text-gray-600 mb-1">ค้นหาสินค้า</label>
                             <div class="relative">
-                                <input type="text" 
-                                       x-model="itemQuery" 
-                                       @input.debounce.300ms="searchItems" 
-                                       @focus="if(!itemQuery) searchItems()"
-                                       class="w-full pl-4 pr-10 py-2.5 rounded-lg border-gray-300 bg-white shadow-sm focus:border-gray-500 focus:ring-gray-500 placeholder-gray-400 text-gray-800" 
-                                       placeholder="พิมพ์ชื่อชุด... (คลิกเพื่อดูรายการแนะนำ)">
+                                <input type="text"
+                                    x-model="itemQuery"
+                                    @input.debounce.300ms="searchItems"
+                                    @focus="if(!itemQuery) searchItems()"
+                                    class="w-full pl-4 pr-10 py-2.5 rounded-lg border-gray-300 bg-white shadow-sm focus:border-gray-500 focus:ring-gray-500 placeholder-gray-400 text-gray-800"
+                                    placeholder="พิมพ์ชื่อชุด... (คลิกเพื่อดูรายการแนะนำ)">
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                                     <i data-lucide="search" class="w-5 h-5"></i>
                                 </div>
                             </div>
-                            
-                            {{-- Dropdown --}}
+
+                            {{-- Dropdown Search Results --}}
                             <div x-show="items.length > 0" @click.away="items = []" class="absolute z-20 w-full bg-white dark:bg-gray-700 border border-gray-200 mt-2 rounded-lg shadow-xl max-h-60 overflow-y-auto" style="display: none;">
                                 <ul>
                                     <template x-for="item in items" :key="item.id">
@@ -143,32 +131,47 @@
                             </div>
                         </div>
 
-                        {{-- Table --}}
+                        {{-- Table: ปรับปรุงให้มีจำนวนและราคารวม --}}
                         <div class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                             <table class="w-full text-sm text-left text-gray-600">
                                 <thead class="text-xs text-gray-500 uppercase bg-gray-100 border-b border-gray-200">
                                     <tr>
                                         <th class="px-4 py-3 font-semibold">รายการสินค้า</th>
-                                        <th class="px-4 py-3 text-right font-semibold">ราคา</th>
-                                        <th class="px-4 py-3 text-center w-24">จัดการ</th> {{-- เพิ่มความกว้าง --}}
+                                        <th class="px-4 py-3 text-right font-semibold">ราคา/หน่วย</th>
+                                        <th class="px-4 py-3 text-center font-semibold">จำนวน</th> {{-- เพิ่มคอลัมน์จำนวน --}}
+                                        <th class="px-4 py-3 text-right font-semibold">รวม</th>
+                                        <th class="px-4 py-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    <template x-for="(item, index) in cart" :key="index">
+                                    <template x-for="(item, index) in cart" :key="item.id">
                                         <tr class="hover:bg-gray-50 transition">
-                                            <td class="px-4 py-3 font-medium text-gray-800" x-text="item.item_name"></td>
+                                            <td class="px-4 py-3 font-medium text-gray-800">
+                                                <div x-text="item.item_name"></div>
+                                                <div class="text-xs text-gray-400" x-text="'Stock: ' + item.stock"></div>
+                                            </td>
                                             <td class="px-4 py-3 text-right font-mono text-gray-600" x-text="formatPrice(item.price)"></td>
+
+                                            {{-- ส่วนจัดการจำนวน --}}
+                                            <td class="px-4 py-3">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <button @click="decreaseQty(index)" class="w-7 h-7 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold transition">-</button>
+                                                    <span class="w-8 text-center font-bold text-gray-800" x-text="item.quantity"></span>
+                                                    <button @click="increaseQty(index)" class="w-7 h-7 rounded bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white font-bold transition shadow-sm" :disabled="item.quantity >= item.stock" :class="{'opacity-50 cursor-not-allowed': item.quantity >= item.stock}">+</button>
+                                                </div>
+                                            </td>
+
+                                            <td class="px-4 py-3 text-right font-mono text-gray-800 font-bold" x-text="formatPrice(item.price * item.quantity)"></td>
+
                                             <td class="px-4 py-3 text-center">
-                                                {{-- ปุ่มลบแบบชัดเจน --}}
-                                                <button @click="removeFromCart(index)" class="inline-flex items-center px-2 py-1 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition border border-red-200">
-                                                    <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>
-                                                    <span class="text-xs font-bold">ลบ</span>
+                                                <button @click="removeFromCart(index)" class="text-red-400 hover:text-red-600 transition p-1 hover:bg-red-50 rounded">
+                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                                 </button>
                                             </td>
                                         </tr>
                                     </template>
                                     <tr x-show="cart.length === 0">
-                                        <td colspan="3" class="px-4 py-10 text-center text-gray-400 flex flex-col items-center justify-center bg-white">
+                                        <td colspan="5" class="px-4 py-10 text-center text-gray-400 flex flex-col items-center justify-center bg-white">
                                             <div class="bg-gray-50 p-4 rounded-full mb-2">
                                                 <i data-lucide="shopping-bag" class="w-8 h-8 opacity-30"></i>
                                             </div>
@@ -180,10 +183,10 @@
                         </div>
                     </div>
 
-                    {{-- 3. บริการเสริม --}}
+                    {{-- 3. บริการเสริม (เหมือนเดิม) --}}
                     <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-opacity duration-200"
-                         :class="(cart.length > 0) ? 'opacity-100' : 'opacity-50 pointer-events-none'">
-                        
+                        :class="(cart.length > 0) ? 'opacity-100' : 'opacity-50 pointer-events-none'">
+
                         <div class="border-b border-gray-200 pb-4 mb-4">
                             <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                                 <span class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-inner">3</span>
@@ -192,8 +195,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
-                            {{-- โปรโมชั่น (ใช้สีเหลืองอ่อนๆ เพื่อให้เด่น แต่คุมโทน) --}}
+                            {{-- โปรโมชั่น --}}
                             <div class="col-span-1 md:col-span-2 bg-yellow-50 p-5 rounded-xl border border-yellow-200">
                                 <x-input-label value="เลือกโปรโมชั่น (Promotion)" class="mb-2 text-yellow-800 font-bold" />
                                 <div class="relative">
@@ -208,7 +210,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             {{-- ช่างแต่งหน้า --}}
                             <div>
                                 <x-input-label value="บริการช่างแต่งหน้า" class="text-gray-600 font-medium" />
@@ -219,7 +220,6 @@
                                     </template>
                                 </select>
                             </div>
-
                             {{-- แพ็กเกจถ่ายภาพ --}}
                             <div>
                                 <x-input-label value="แพ็กเกจถ่ายภาพ" class="text-gray-600 font-medium" />
@@ -229,7 +229,6 @@
                                         <option :value="pkg.package_id" x-text="pkg.package_name + ' (' + formatPrice(pkg.price) + ')'"></option>
                                     </template>
                                 </select>
-
                                 <div x-show="selectedPackageId" x-transition class="mt-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
                                     <x-input-label value="ระบุช่างภาพ" class="text-xs text-gray-500 mb-1" />
                                     <select x-model="selectedPhotographerId" class="w-full text-sm rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-gray-700">
@@ -246,7 +245,6 @@
 
                 {{-- RIGHT COLUMN: Summary --}}
                 <div class="lg:col-span-1">
-                    {{-- Summary Card (ใช้สีเทา bg-gray-50) --}}
                     <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 sticky top-6">
                         <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-5 border-b flex items-center gap-2">
                             <div class="bg-gray-200 p-1.5 rounded text-gray-600">
@@ -254,7 +252,7 @@
                             </div>
                             สรุปรายการเช่า
                         </h3>
-                        
+
                         <div class="space-y-5">
                             {{-- Date --}}
                             <div class="bg-white p-4 rounded-lg border border-gray-200 space-y-3 shadow-sm">
@@ -271,7 +269,7 @@
                             {{-- Price Detail --}}
                             <div class="text-sm space-y-3 text-gray-600 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                                 <div class="flex justify-between items-center py-1">
-                                    <span>ค่าชุดและอุปกรณ์ <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200" x-text="cart.length"></span></span>
+                                    <span>ค่าชุดและอุปกรณ์ <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200" x-text="cartItemCount"></span></span>
                                     <span class="font-bold text-gray-800" x-text="formatPrice(cartTotal)"></span>
                                 </div>
 
@@ -308,20 +306,39 @@
                                 </template>
                             </div>
 
-                            <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-2">
+                            {{-- Grand Total & Deposit Section (ปรับปรุงส่วนสรุปยอด) --}}
+                            <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-2 space-y-3">
                                 <div class="flex justify-between items-end">
-                                    <span class="text-gray-500 font-medium pb-1">ยอดรวมสุทธิ</span>
-                                    <span class="text-3xl font-extrabold text-green-800 tracking-tight" x-text="formatPrice(grandTotal)"></span>
+                                    <span class="text-gray-500 font-medium pb-1">ยอดรวมทั้งสิ้น</span>
+                                    <span class="text-xl font-bold text-gray-800" x-text="formatPrice(grandTotal)"></span>
+                                </div>
+
+                                {{-- ส่วนแสดงมัดจำ 50% --}}
+                                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-blue-800 font-bold flex items-center gap-2">
+                                            <i data-lucide="coins" class="w-4 h-4"></i>
+                                            มัดจำ (50%)
+                                        </span>
+                                        <span class="text-2xl font-extrabold text-blue-700" x-text="formatPrice(depositAmount)"></span>
+                                    </div>
+                                    <div class="text-xs text-blue-600 text-right">ยอดที่ต้องชำระวันนี้</div>
+                                </div>
+
+                                <div class="flex justify-between items-center text-sm text-gray-500 pt-1">
+                                    <span>คงเหลือชำระวันคืนของ</span>
+                                    <span class="font-bold text-gray-600" x-text="formatPrice(remainingAmount)"></span>
                                 </div>
                             </div>
 
                             {{-- Buttons --}}
                             <div class="pt-2">
-                                <button @click="submitRental" 
-                                        class="w-full py-3.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl shadow-lg transform transition hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2"
-                                        :disabled="(!member && !isGuest) || cart.length === 0 || isSubmitting">
+                                <button @click="submitRental"
+                                    class="w-full py-3.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl shadow-lg transform transition hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2"
+                                    :disabled="(!member && !isGuest) || cart.length === 0 || isSubmitting">
                                     <i data-lucide="check-circle" class="w-5 h-5" x-show="!isSubmitting"></i>
-                                    <span x-text="isSubmitting ? 'กำลังบันทึก...' : 'ยืนยันการเช่า'"></span>
+                                    {{-- เปลี่ยนข้อความเป็นชำระมัดจำ --}}
+                                    <span x-text="isSubmitting ? 'กำลังบันทึก...' : 'ชำระมัดจำ & ยืนยันการเช่า'"></span>
                                 </button>
                             </div>
                         </div>
@@ -361,13 +378,13 @@
                 isSubmitting: false,
 
                 toggleGuest() {
-                    if(this.isGuest) {
+                    if (this.isGuest) {
                         this.member = null;
                         this.memberQuery = '';
                         this.memberError = false;
                     }
                 },
-                
+
                 resetMember() {
                     this.member = null;
                     this.isGuest = false;
@@ -379,12 +396,12 @@
                 },
 
                 async checkMember() {
-                    if(!this.memberQuery) return;
+                    if (!this.memberQuery) return;
                     this.memberError = false;
                     try {
                         const res = await fetch(`{{ route('reception.checkMember') }}?q=${this.memberQuery}`);
                         const data = await res.json();
-                        if(data.success) {
+                        if (data.success) {
                             this.member = data.member;
                             this.memberQuery = '';
                         } else {
@@ -392,20 +409,61 @@
                             this.memberError = true;
                             this.memberErrorMsg = 'ไม่พบข้อมูลสมาชิกในระบบ';
                         }
-                    } catch (e) { alert('Connection Error'); }
+                    } catch (e) {
+                        alert('Connection Error');
+                    }
                 },
 
                 async searchItems() {
                     try {
                         const res = await fetch(`{{ route('reception.searchItems') }}?q=${this.itemQuery}`);
                         this.items = await res.json();
-                    } catch (e) { console.error(e); }
+                    } catch (e) {
+                        console.error(e);
+                    }
                 },
 
                 addToCart(item) {
-                    this.cart.push(item);
+                    let existingItem = this.cart.find(i => i.id === item.id);
+                    if (existingItem) {
+                        if (existingItem.quantity < item.stock) {
+                            existingItem.quantity++;
+                        } else {
+                            alert('สินค้าหมดสต็อก (Max Stock Reached)');
+                        }
+                    } else {
+                        if (item.stock > 0) {
+                            let newItem = {
+                                ...item,
+                                quantity: 1
+                            };
+                            this.cart.push(newItem);
+                        } else {
+                            alert('สินค้าหมดสต็อก');
+                        }
+                    }
                     this.items = [];
                     this.itemQuery = '';
+                },
+
+                increaseQty(index) {
+                    let item = this.cart[index];
+                    if (item.quantity < item.stock) {
+                        item.quantity++;
+                    } else {
+                        alert('ไม่สามารถเพิ่มจำนวนได้เกินสต็อกที่มี');
+                    }
+                },
+
+                decreaseQty(index) {
+                    let item = this.cart[index];
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                    } else {
+                        if (confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
+                            this.removeFromCart(index);
+                        }
+                    }
                 },
 
                 removeFromCart(index) {
@@ -431,13 +489,17 @@
 
                 getPromotionName() {
                     const promo = this.promotions.find(p => p.promotion_id == this.selectedPromotionId);
-                    if(!promo) return '';
+                    if (!promo) return '';
                     return promo.promotion_name + (promo.discount_type == 'percentage' ? ` (${promo.discount_value}%)` : ` (${promo.discount_value} บาท)`);
                 },
 
                 // --- Calculations ---
+                get cartItemCount() {
+                    return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                },
+
                 get cartTotal() {
-                    return this.cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+                    return this.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
                 },
 
                 get makeupPrice() {
@@ -451,32 +513,53 @@
                     return pkg ? parseFloat(pkg.price) : 0;
                 },
 
+                // *** แก้ไขส่วนลดตรงนี้ ***
                 get discountAmount() {
                     if (!this.selectedPromotionId) return 0;
                     const promo = this.promotions.find(p => p.promotion_id == this.selectedPromotionId);
                     if (!promo) return 0;
 
-                    const subtotal = this.cartTotal + this.makeupPrice + this.packagePrice;
+                    // ใช้เฉพาะ cartTotal (ค่าชุด) เป็นฐานคำนวณ
+                    const itemTotal = this.cartTotal;
 
+                    if (itemTotal === 0) return 0;
+
+                    let discount = 0;
                     if (promo.discount_type === 'percentage') {
-                        return (subtotal * parseFloat(promo.discount_value)) / 100;
+                        discount = (itemTotal * parseFloat(promo.discount_value)) / 100;
                     } else {
-                        return parseFloat(promo.discount_value);
+                        discount = parseFloat(promo.discount_value);
                     }
+
+                    // ป้องกันส่วนลดเกินค่าชุด
+                    return discount > itemTotal ? itemTotal : discount;
                 },
 
                 get grandTotal() {
-                    let total = this.cartTotal + this.makeupPrice + this.packagePrice - this.discountAmount;
+                    // Logic เดิมถูกต้องแล้ว: (ค่าชุด - ส่วนลดเฉพาะค่าชุด) + ค่าบริการต่างๆ
+                    // เนื่องจาก discountAmount เรา Cap ไม่ให้เกิน cartTotal แล้ว ผลลัพธ์จึงไม่มีทางติดลบ
+                    let total = this.cartTotal - this.discountAmount + this.makeupPrice + this.packagePrice;
                     return total < 0 ? 0 : total;
                 },
 
+                get depositAmount() {
+                    return this.grandTotal * 0.5;
+                },
+
+                get remainingAmount() {
+                    return this.grandTotal - this.depositAmount;
+                },
+
                 formatPrice(price) {
-                    return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(price);
+                    return new Intl.NumberFormat('th-TH', {
+                        style: 'currency',
+                        currency: 'THB'
+                    }).format(price);
                 },
 
                 async submitRental() {
-                    if(!confirm(`ยืนยันการเช่า ยอดรวมสุทธิ ${this.formatPrice(this.grandTotal)}?`)) return;
-                    
+                    if (!confirm(`ยืนยันการเช่า?\n\nยอดรวม: ${this.formatPrice(this.grandTotal)}\nต้องชำระมัดจำตอนนี้ (50%): ${this.formatPrice(this.depositAmount)}`)) return;
+
                     this.isSubmitting = true;
                     try {
                         const res = await fetch(`{{ route('reception.storeRental') }}`, {
@@ -494,13 +577,16 @@
                                 makeup_id: this.selectedMakeupId,
                                 package_id: this.selectedPackageId,
                                 photographer_id: this.selectedPhotographerId,
-                                total_amount: this.grandTotal
+                                total_amount: this.grandTotal,
+                                deposit_amount: this.depositAmount,
+                                remaining_amount: this.remainingAmount,
+                                is_deposit_paid: true
                             })
                         });
 
                         const result = await res.json();
-                        if(result.success) {
-                            alert('บันทึกสำเร็จ!');
+                        if (result.success) {
+                            alert('บันทึกการเช่าและรับชำระมัดจำเรียบร้อยแล้ว!');
                             window.location.reload();
                         } else {
                             alert('เกิดข้อผิดพลาด: ' + JSON.stringify(result.errors || result.message));

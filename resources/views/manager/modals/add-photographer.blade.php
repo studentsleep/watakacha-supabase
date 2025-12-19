@@ -9,8 +9,8 @@
                     <div class="mt-4 space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name_pg" :value="__('ชื่อจริง')" />
-                                <x-text-input type="text" name="first_name" id="first_name_pg" required class="mt-1 block w-full" />
+                                <x-input-label for="first_name_pg" :value="__('ชื่อจริง')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="first_name" id="first_name_pg" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="last_name_pg" :value="__('นามสกุล')" />
@@ -19,8 +19,8 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="tel_pg" :value="__('เบอร์โทร')" />
-                                <x-text-input type="text" name="tel" id="tel_pg" class="mt-1 block w-full" />
+                                <x-input-label for="tel_pg" :value="__('เบอร์โทร')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="tel" id="tel_pg" class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="email_pg" :value="__('อีเมล')" />
@@ -30,8 +30,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="lineid_pg" :value="__('Line ID')" />
-                                <x-text-input type="text" name="lineid" id="lineid_pg" class="mt-1 block w-full" />
+                                <x-input-label for="lineid_pg" :value="__('Line ID')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="lineid" id="lineid_pg" class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="status_pg" :value="__('สถานะ')" />

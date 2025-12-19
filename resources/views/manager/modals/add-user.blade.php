@@ -15,8 +15,8 @@
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="username" :value="__('ชื่อผู้ใช้')" />
-                                <x-text-input type="text" name="username" id="username" required class="mt-1 block w-full" />
+                                <x-input-label for="username" :value="__('ชื่อผู้ใช้')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="username" id="username" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="email" :value="__('อีเมล')" />
@@ -26,8 +26,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="first_name" :value="__('ชื่อ')" />
-                                <x-text-input type="text" name="first_name" id="first_name" required class="mt-1 block w-full" />
+                                <x-input-label for="first_name" :value="__('ชื่อ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="text" name="first_name" id="first_name" required class="mt-1 block w-full" require/>
                             </div>
                             <div>
                                 <x-input-label for="last_name" :value="__('นามสกุล')" />
@@ -36,19 +36,19 @@
                         </div>
 
                          <div>
-                            <x-input-label for="tel" :value="__('เบอร์มือถือ')" />
-                            <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" />
+                            <x-input-label for="tel" :value="__('เบอร์มือถือ')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="text" name="tel" id="tel" class="mt-1 block w-full" require/>
                         </div>
 
                         <div>
-                            <x-input-label for="password" :value="__('รหัสผ่าน (ขั้นต่ำ 8 ตัว)')" />
-                            <x-text-input type="password" name="password" id="password" required class="mt-1 block w-full" />
+                            <x-input-label for="password" :value="__('รหัสผ่าน (ขั้นต่ำ 8 ตัว)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-text-input type="password" name="password" id="password" required class="mt-1 block w-full" require/>
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="user_type_id" :value="__('ประเภทผู้ใช้')" />
-                                <select name="user_type_id" id="user_type_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <x-input-label for="user_type_id" :value="__('ประเภทผู้ใช้')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <select name="user_type_id" id="user_type_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" require>
                                     <option value="">-- เลือกประเภท --</option>
                                     @foreach($user_types as $type)
                                         <option value="{{ $type->user_type_id }}">{{ $type->name }}</option>
