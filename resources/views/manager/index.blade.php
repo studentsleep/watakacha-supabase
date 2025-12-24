@@ -25,7 +25,7 @@
 
                     {{-- ส่วนหัว: ปุ่มเพิ่ม + ช่องค้นหา + ตัวกรอง --}}
                     {{-- [แก้ไขจุดที่ 2] เพิ่ม 'item_units' ใน array เพื่อให้แสดงช่องค้นหา --}}
-                    @if(in_array($table, ['items', 'users', 'member_accounts', 'care_shops', 'makeup_artists', 'photographers', 'photographer_packages', 'promotions', 'point_transactions', 'item_units', 'user_types', 'item_types']))
+                    @if(in_array($table, ['items', 'accessories', 'users', 'member_accounts', 'care_shops', 'makeup_artists', 'photographers', 'photographer_packages', 'promotions', 'point_transactions', 'item_units', 'user_types', 'item_types']))
                     <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
 
                         <form method="GET" action="{{ route('manager.index') }}" class="w-full xl:w-auto flex flex-col sm:flex-row gap-2">
@@ -70,6 +70,7 @@
                             @php
                             $modalMap = [
                             'items' => 'addItemModal',
+                            'accessories' => 'addAccessoryModal',
                             'users' => 'addUserModal',
                             'user_types' => 'addUserTypeModal',
                             'item_types' => 'addTypeModal',
@@ -152,6 +153,65 @@
                     @include('manager.modals.add-tailwind', ['types' => $types, 'units' => $units])
                     @foreach($items as $item)
                     @include('manager.modals.update-tailwind', ['item' => $item, 'types' => $types, 'units' => $units])
+                    @endforeach
+
+                    @elseif($table == 'accessories')
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-16">ลำดับ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ชื่ออุปกรณ์ (ประเภท)</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ราคา</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">คงเหลือ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @forelse($accessories as $acc)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $accessories->firstItem() + $loop->index }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        {{ $acc->name }}
+                                        <span class="text-xs text-gray-500 font-normal">({{ $acc->type->name ?? '-' }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        {{ number_format($acc->price, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        {{ number_format($acc->stock) }} {{ $acc->unit->name ?? 'ชิ้น' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <x-secondary-button type="button" onclick="toggleModal('updateAccessoryModal-{{ $acc->id }}', true)" class="!px-2 !py-1">
+                                            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+                                        </x-secondary-button>
+
+                                        <form action="{{ route('manager.accessories.destroy', $acc->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('ยืนยันการลบ?')">
+                                            @csrf @method('DELETE')
+                                            <x-danger-button type="submit" class="!px-2 !py-1">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </x-danger-button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">ไม่พบข้อมูล</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">{{ $accessories->links() }}</div>
+
+                    {{-- Include Modals --}}
+                    @include('manager.modals.add-accessory', ['types' => $types, 'units' => $units])
+
+                    @foreach($accessories as $acc)
+                    @include('manager.modals.update-accessory', ['accessory' => $acc, 'types' => $types, 'units' => $units])
                     @endforeach
 
                     @elseif($table == 'users')

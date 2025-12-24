@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -86,6 +87,15 @@ Route::middleware(['auth'])->prefix('manager')->name('manager.')->group(function
     Route::post('/promotions', [ManagerController::class, 'storePromotion'])->name('promotions.store');
     Route::patch('/promotions/{promotion:promotion_id}', [ManagerController::class, 'updatePromotion'])->name('promotions.update');
     Route::delete('/promotions/{promotion:promotion_id}', [ManagerController::class, 'destroyPromotion'])->name('promotions.destroy');
+
+    //อุปกรณ์เสริม
+    Route::put('/accessories/{accessory}', [ManagerController::class, 'updateAccessory'])->name('accessories.update');
+    Route::delete('/accessories/{accessory}', [ManagerController::class, 'destroyAccessory'])->name('accessories.destroy');
+    Route::post('/accessories', [ManagerController::class, 'storeAccessory'])->name('accessories.store');
+
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 });
 // --- ▲▲▲ จบกลุ่ม Route สำหรับ Manager ---
 
@@ -112,5 +122,11 @@ Route::middleware(['auth'])->prefix('reception')->name('reception.')->group(func
 
     // หน้าประวัติบริการ (Services History)
     Route::get('/services-history', [ReceptionController::class, 'serviceHistory'])->name('serviceHistory');
+
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+
+    Route::get('/payment-history', [ReceptionController::class, 'paymentHistory'])->name('paymentHistory');
 });
 require __DIR__ . '/auth.php';

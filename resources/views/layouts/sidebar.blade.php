@@ -58,7 +58,7 @@
                 </li>
 
                 @if(Auth::user()->user_type_id == 1)
-                
+
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
                     <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
@@ -103,6 +103,7 @@
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">คลังสินค้า</span></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'items']) }}" class="flyout-link"><i data-lucide="shopping-bag" class="icon-size"></i> รายการสินค้า</a></li>
+                                <li><a href="{{ route('manager.index', ['table' => 'accessories']) }}" class="flyout-link"><i data-lucide="headphones" class="icon-size"></i> อุปกรณ์เสริม</a></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'item_types']) }}" class="flyout-link"><i data-lucide="list-tree" class="icon-size"></i> ประเภทสินค้า</a></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'item_units']) }}" class="flyout-link"><i data-lucide="box-select" class="icon-size"></i> หน่วยนับ</a></li>
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">การตลาด</span></li>
@@ -159,13 +160,14 @@
                                 <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
+                                <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                             </ul>
                         </div>
                     </div>
                 </li>
 
                 @elseif(Auth::user()->user_type_id == 2)
-                
+
                 <li>
                     <a href="{{ route('reception.rental') }}"
                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-green-700 hover:text-white rounded-md"
@@ -192,17 +194,18 @@
                         <i data-lucide="chevron-right" class="w-4 h-4 ml-auto" x-show="!open && sidebarOpen"></i>
                     </button>
                     <div x-show="open"
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0 scale-95"
-                         x-transition:enter-end="transform opacity-100 scale-100"
-                         class="absolute left-full top-0 w-64 pl-2"
-                         style="display: none;">
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        class="absolute left-full top-0 w-64 pl-2"
+                        style="display: none;">
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
                                 <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
                                 <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
+                                <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                             </ul>
                         </div>
                     </div>

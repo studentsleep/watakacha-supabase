@@ -94,4 +94,22 @@ class Rental extends Model
     {
         return $this->belongsTo(PhotographerPackage::class, 'package_id', 'package_id');
     }
+
+    public function accessories()
+    {
+        // ใช้ belongsToMany เชื่อมไปหา Model Accessory โดยตรง ผ่านตารางกลาง rental_accessories
+        return $this->belongsToMany(Accessory::class, 'rental_accessories', 'rental_id', 'accessory_id')
+            ->withPivot('quantity', 'price'); // ดึงข้อมูล จำนวน และ ราคา จากตารางกลางมาด้วย
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'rental_id', 'rental_id');
+    }
+
+    // ฟังก์ชันช่วยคำนวณยอดที่จ่ายไปแล้ว
+    public function getTotalPaidAttribute()
+    {
+        return $this->payments->where('status', 'paid')->sum('amount');
+    }
 }

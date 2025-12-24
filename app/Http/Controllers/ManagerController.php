@@ -17,6 +17,7 @@ use App\Models\MakeupArtist;
 use App\Models\Photographer;
 use App\Models\PhotographerPackage;
 use App\Models\Promotion;
+use App\Models\Accessory;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -91,6 +92,20 @@ class ManagerController extends Controller
             $data['items'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
             $data['units'] = ItemUnit::orderBy('name')->get();
             $data['types'] = ItemType::orderBy('name')->get();
+        } elseif ($table == 'accessories') {
+            $query = Accessory::with(['type', 'unit']);
+
+            if ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            }
+
+            $data['accessories'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+
+            // ดึงข้อมูล Type และ Unit มาสำหรับใส่ใน Dropdown ของ Modal เพิ่ม/แก้ไข
+            $data['units'] = ItemUnit::orderBy('name')->get();
+            $data['types'] = ItemType::orderBy('name')->get();
+            // ▲▲▲ [จบส่วนแทรก] ▲▲▲
+
         } elseif ($table == 'item_units') {
             // [จุดที่แก้ไข] เปลี่ยนเป็น paginate() เพื่อแก้ Error firstItem()
             $query = ItemUnit::query();
@@ -291,7 +306,45 @@ class ManagerController extends Controller
         return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item and all associated images deleted successfully.');
     }
 
+    // --- Accessories Management ---
+    public function storeAccessory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required|exists:item_types,id',
+            'item_unit_id' => 'required|exists:item_units,id',
+        ]);
 
+        Accessory::create($data);
+
+        return redirect()->route('manager.index', ['table' => 'accessories'])
+            ->with('status', 'เพิ่มอุปกรณ์เสริมเรียบร้อยแล้ว');
+    }
+
+    public function updateAccessory(Request $request, Accessory $accessory)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required|exists:item_types,id',
+            'item_unit_id' => 'required|exists:item_units,id',
+        ]);
+
+        $accessory->update($data);
+
+        return redirect()->route('manager.index', ['table' => 'accessories'])
+            ->with('status', 'แก้ไขอุปกรณ์เสริมเรียบร้อยแล้ว');
+    }
+
+    public function destroyAccessory(Accessory $accessory)
+    {
+        $accessory->delete();
+        return redirect()->route('manager.index', ['table' => 'accessories'])
+            ->with('status', 'ลบอุปกรณ์เสริมเรียบร้อยแล้ว');
+    }
     // --- Item Units (PK: id) ---
     public function storeUnit(Request $request)
     {
