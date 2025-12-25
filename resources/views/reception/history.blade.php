@@ -2,23 +2,36 @@
     {{-- CSS สำหรับการพิมพ์ใบเสร็จ --}}
     <style>
         @media print {
+
             /* ซ่อนทุกอย่างในหน้าเว็บ */
-            body * { visibility: hidden; }
-            
+            body * {
+                visibility: hidden;
+            }
+
             /* โชว์เฉพาะ Modal ใบเสร็จ และลูกๆ ของมัน */
-            #receipt-modal, #receipt-modal * { visibility: visible; }
-            
+            #receipt-modal,
+            #receipt-modal * {
+                visibility: visible;
+            }
+
             /* จัดตำแหน่งให้ใบเสร็จอยู่ตรงกลางกระดาษ */
             #receipt-modal {
                 position: absolute;
-                left: 0; top: 0; width: 100%;
-                margin: 0; padding: 0;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
                 background: white;
-                box-shadow: none !important; /* ลบเงา */
+                box-shadow: none !important;
+                /* ลบเงา */
             }
-            
+
             /* ซ่อนปุ่มกดและ Element ที่ไม่ต้องการ */
-            button, .no-print { display: none !important; }
+            button,
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 
@@ -80,18 +93,22 @@
                                     <td class="px-6 py-4 text-right">{{ number_format($rental->total_amount, 2) }}</td>
                                     <td class="px-6 py-4 text-center">
                                         @if($rental->status == 'rented')
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">กำลังเช่า</span>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">กำลังเช่า</span>
                                         @elseif($rental->status == 'returned')
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">คืนแล้ว</span>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">คืนแล้ว</span>
                                         @else
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ $rental->status }}</span>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ $rental->status }}</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         {{-- ปุ่มดูรายละเอียด --}}
-                                        <button @click="showModal = true; selectedRental = {{ Js::from($rental) }}" 
+                                        <button @click="showModal = true; selectedRental = {{ Js::from($rental) }}"
                                             class="text-blue-600 hover:text-blue-900 text-sm font-medium flex items-center justify-center gap-1 mx-auto">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+                                                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                                                <path d="M12 17V7" />
+                                            </svg>
                                             ดูใบเสร็จ
                                         </button>
                                     </td>
@@ -114,7 +131,7 @@
 
                 {{-- กล่องใบเสร็จ (ต้องมี id="receipt-modal") --}}
                 <div id="receipt-modal" class="inline-block w-full max-w-sm overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-sm relative z-[60] my-8 font-mono text-sm">
-                    
+
                     {{-- Header --}}
                     <div class="bg-gray-800 text-white p-6 text-center relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
@@ -146,14 +163,32 @@
                                 <span class="text-gray-500">กำหนดคืน:</span>
                                 <span class="text-gray-800" x-text="selectedRental ? new Date(selectedRental.return_date).toLocaleDateString('th-TH') : ''"></span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">ลูกค้า:</span>
-                                <span class="font-bold text-gray-800" x-text="selectedRental?.member ? (selectedRental.member.first_name + ' ' + selectedRental.member.last_name) : 'Guest'"></span>
+                            {{-- ส่วนแสดงข้อมูลลูกค้า (แก้ไขใหม่) --}}
+                            <div class="flex justify-between items-start">
+                                <span class="text-gray-500 shrink-0">ลูกค้า:</span>
+                                <div class="text-right">
+                                    {{-- กรณี 1: สมาชิก --}}
+                                    <template x-if="selectedRental?.member">
+                                        <div>
+                                            <span class="font-bold text-gray-800 block" x-text="selectedRental.member.first_name + ' ' + selectedRental.member.last_name"></span>
+                                            <span class="text-gray-500 text-[10px] block" x-text="'Tel: ' + selectedRental.member.tel"></span>
+                                        </div>
+                                    </template>
+
+                                    {{-- กรณี 2: Guest (ดึงจาก Description ที่บันทึกไว้) --}}
+                                    <template x-if="!selectedRental?.member">
+                                        <div>
+                                            <span class="font-bold text-gray-800 block">ลูกค้าทั่วไป (Guest)</span>
+                                            {{-- โชว์ข้อความ "คุณ... โทร..." ที่บันทึกไว้ใน description --}}
+                                            <span class="text-gray-600 text-[10px] block" x-text="selectedRental?.description || '-'"></span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-500">พนักงานขาย:</span>
                                 {{-- ชื่อพนักงาน --}}
-                                <span class="text-gray-800" x-text="selectedRental?.user?.name || '-'"></span>
+                                <span class="text-gray-800" x-text="selectedRental?.user?.first_name || selectedRental?.user?.last_name || '-'"></span>
                             </div>
                         </div>
 
@@ -245,10 +280,12 @@
                             <p class="font-bold text-gray-800 text-xs">OFFICIAL RECEIPT</p>
                         </div>
                     </div>
-                    
+
                     <div class="bg-gray-100 p-4 border-t border-gray-200 no-print">
-                         <button @click="window.print()" class="w-full py-2 bg-white hover:bg-gray-50 text-gray-800 font-bold rounded border border-gray-300 shadow-sm transition text-xs uppercase flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                        <button @click="window.print()" class="w-full py-2 bg-white hover:bg-gray-50 text-gray-800 font-bold rounded border border-gray-300 shadow-sm transition text-xs uppercase flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
                             พิมพ์หน้านี้
                         </button>
                     </div>

@@ -86,6 +86,14 @@ class ReceptionController extends Controller
 
         DB::beginTransaction();
         try {
+             $description = null;
+            if (!$request->member_id) {
+                // ถ้าเป็น Guest ให้สร้าง string ตามฟอร์แมตที่คุณต้องการ
+                // ตัวอย่าง: "คุณสมชาย โทร 0812345678"
+                $guestName = $request->guest_name ?? '-';
+                $guestPhone = $request->guest_phone ?? '-';
+                $description = "คุณ" . $guestName . " โทร " . $guestPhone;
+            }
             // 4. สร้าง Rental Header
             $rental = new Rental();
             $rental->member_id = $request->member_id;
@@ -98,8 +106,9 @@ class ReceptionController extends Controller
             $rental->package_id = $request->package_id;
             $rental->status = 'rented';
             $rental->total_amount = $request->total_amount;
+            $rental->description = $description;
             $rental->save();
-
+    
             // 5. บันทึก Rental Items 
             // (หมายเหตุ: ไม่ตัด Stock จริง เพราะใช้ Logic ตรวจสอบวันว่างแทน)
             foreach ($request->items as $itemData) {
@@ -347,7 +356,7 @@ class ReceptionController extends Controller
     {
         $query = Rental::with([
             'member',       // ข้อมูลลูกค้า
-            'user',         // ข้อมูลพนักงานขาย (แก้เรื่องชื่อหาย)
+            'user',         // ข้อมูลพนักงานขาย
             'payments',     // ประวัติการจ่ายเงิน
             'items.item',   // รายการสินค้าหลัก + รายละเอียดสินค้า
             'accessories'   // รายการอุปกรณ์เสริม
