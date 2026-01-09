@@ -3,32 +3,32 @@
         @csrf
 
         <div>
-            <x-input-label for="first_name" :value="__('First Name')" />
+            <x-input-label for="first_name" :value="__('ชื่อ')" />
             <x-text-input id="first_name" class="block mt-1 w-full" type="text" name="first_name" :value="old('first_name')" required autofocus autocomplete="given-name" />
             <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
         </div>
 
         <div class="mt-4">
-            <x-input-label for="last_name" :value="__('Last Name')" />
+            <x-input-label for="last_name" :value="__('นามสกุล')" />
             <x-text-input id="last_name" class="block mt-1 w-full" type="text" name="last_name" :value="old('last_name')" required autocomplete="family-name" />
             <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
         </div>
 
         <div class="mt-4">
-            <x-input-label for="username" :value="__('Username')" />
+            <x-input-label for="username" :value="__('ชื่อผู้ใช้')" />
             <x-text-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('username')" class="mt-2" />
         </div>
 
         <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" :value="__('อีเมล')" />
             <x-text-input id="email" class="block mt-1 w-full" type="text" name="email" :value="old('email')" required autocomplete="email" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="password" :value="__('รหัสผ่าน')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
                 type="password"
@@ -40,7 +40,7 @@
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <x-input-label for="password_confirmation" :value="__('ยืนยันรหัสผ่าน')" />
 
             <x-text-input id="password_confirmation" class="block mt-1 w-full"
                 type="password"
@@ -51,11 +51,11 @@
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+                {{ __('มีชื่อผู้ใช้แล้วใช่ไหม?') }}
             </a>
 
             <x-primary-button class="ms-4">
-                {{ __('Register') }}
+                {{ __('สมัครสมาชิก') }}
             </x-primary-button>
         </div>
     </form>
