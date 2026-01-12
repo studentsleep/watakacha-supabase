@@ -161,6 +161,7 @@
                                 <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
+                                <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>
                             </ul>
                         </div>
                     </div>
@@ -206,6 +207,7 @@
                                 <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
+                                <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>
                             </ul>
                         </div>
                     </div>

@@ -18,6 +18,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //Route สำหรับหน้าปฏิทิน
+    Route::get('/calendar', [App\Http\Controllers\ReceptionController::class, 'calendar'])->name('reception.calendar');
+    Route::get('/calendar/events', [App\Http\Controllers\ReceptionController::class, 'getCalendarEvents'])->name('reception.calendar.events');
 });
 
 // --- ▼▼▼ [แก้ไข] กลุ่ม Route สำหรับ Manager (ใช้ PK ที่ถูกต้อง) ▼▼▼ ---
