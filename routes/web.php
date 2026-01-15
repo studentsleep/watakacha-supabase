@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function () {
     //Route สำหรับหน้าปฏิทิน
     Route::get('/calendar', [App\Http\Controllers\ReceptionController::class, 'calendar'])->name('reception.calendar');
     Route::get('/calendar/events', [App\Http\Controllers\ReceptionController::class, 'getCalendarEvents'])->name('reception.calendar.events');
+    
+    Route::get('/reception/points', [App\Http\Controllers\ReceptionController::class, 'pointHistory'])->name('reception.pointHistory');
 });
 
 // --- ▼▼▼ [แก้ไข] กลุ่ม Route สำหรับ Manager (ใช้ PK ที่ถูกต้อง) ▼▼▼ ---

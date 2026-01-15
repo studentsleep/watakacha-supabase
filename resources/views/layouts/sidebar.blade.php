@@ -158,7 +158,7 @@
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
                                 <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
+                                <li><a href="{{ route('reception.pointHistory') }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                                 <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>
@@ -174,7 +174,7 @@
                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-green-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span class="ml-3" x-show="sidebarOpen" x-transition>เช่าชุด (Rental)</span>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>เช่าชุด</span>
                     </a>
                 </li>
 
@@ -183,7 +183,7 @@
                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-blue-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="corner-down-left" class="w-5 h-5"></i>
-                        <span class="ml-3" x-show="sidebarOpen" x-transition>คืนชุด (Return)</span>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>คืนชุด</span>
                     </a>
                 </li>
 
@@ -204,7 +204,7 @@
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
                                 <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'point_transactions']) }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
+                                <li><a href="{{ route('reception.pointHistory') }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
                                 <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                                 <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>

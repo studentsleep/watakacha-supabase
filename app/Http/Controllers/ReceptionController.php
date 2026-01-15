@@ -21,7 +21,6 @@ use Carbon\Carbon;
 
 class ReceptionController extends Controller
 {
-    // ... (ฟังก์ชัน index และ storeRental เหมือนเดิม ไม่ต้องแก้) ...
     public function index()
     {
         if (Auth::user()->user_type_id != 2 && Auth::user()->user_type_id != 1) {
@@ -42,8 +41,27 @@ class ReceptionController extends Controller
         return view('reception.rental', $data);
     }
 
+    // ฟังก์ชันแสดงประวัติแต้ม (ย้ายมาจาก Manager)
+    public function pointHistory(Request $request)
+    {
+        $query = PointTransaction::with('member');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('member', function ($q) use ($search) {
+                $q->where('first_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('last_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('member_id', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        $transactions = $query->orderBy('created_at', 'desc')->paginate(15);
+        return view('reception.point_history', compact('transactions'));
+    }
+
     public function storeRental(Request $request)
     {
+        // 1. Validate ข้อมูล
         $request->validate([
             'deposit_amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
@@ -51,12 +69,14 @@ class ReceptionController extends Controller
             'items' => 'required|array|min:1',
             'items.*.id' => 'required|exists:items,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'points_used' => 'nullable|integer|min:0', // รับค่าแต้มที่ใช้
         ]);
 
+        // คำนวณวันคืน (เช่า 7 วัน)
         $rentalDate = Carbon::parse($request->rental_date);
         $returnDate = $rentalDate->copy()->addDays(6);
 
-        // เช็คสต็อก (ใช้ฟังก์ชันที่แก้ให้รองรับ Postgres แล้ว)
+        // 2. เช็คสต็อก Item (แบบ 10 วัน)
         foreach ($request->items as $itemData) {
             if (!$this->isItemAvailable($itemData['id'], $rentalDate->toDateString(), $itemData['quantity'])) {
                 $itemName = Item::find($itemData['id'])->item_name;
@@ -64,6 +84,7 @@ class ReceptionController extends Controller
             }
         }
 
+        // 3. เช็คสต็อก Accessories
         if ($request->has('accessories')) {
             foreach ($request->accessories as $accData) {
                 if (!$this->isAccessoryAvailable($accData['id'], $rentalDate->toDateString(), $accData['quantity'])) {
@@ -82,6 +103,7 @@ class ReceptionController extends Controller
                 $description = "คุณ" . $guestName . " โทร " . $guestPhone;
             }
 
+            // 4. สร้าง Rental Header
             $rental = new Rental();
             $rental->member_id = $request->member_id;
             $rental->user_id = Auth::id();
@@ -92,10 +114,49 @@ class ReceptionController extends Controller
             $rental->photographer_id = $request->photographer_id;
             $rental->package_id = $request->package_id;
             $rental->status = 'rented';
-            $rental->total_amount = $request->total_amount;
             $rental->description = $description;
-            $rental->save();
 
+            // 5. จัดการส่วนลดจากแต้ม (Point Redemption)
+            $pointsUsed = $request->points_used ?? 0;
+
+            if ($request->member_id && $pointsUsed > 0) {
+                $member = MemberAccount::find($request->member_id);
+                // เช็คว่ามีแต้มพอไหม
+                if ($member && $member->points >= $pointsUsed) {
+                    // ตัดแต้มสมาชิก
+                    $member->decrement('points', $pointsUsed);
+
+                    // บันทึก Transaction การใช้แต้ม
+                    // หมายเหตุ: rental_id จะถูกอัปเดตทีหลังหลัง save() หรือใส่ null ไว้ก่อน
+                    PointTransaction::create([
+                        'member_id' => $member->member_id,
+                        'rental_id' => null,
+                        'point_change' => -$pointsUsed,
+                        'change_type' => 'redeem',
+                        'description' => 'ใช้แต้มแลกส่วนลดค่าเช่า',
+                        'transaction_date' => now(),
+                    ]);
+                } else {
+                    // ถ้าแต้มไม่พอ ให้แจ้ง error หรือข้ามไป (ในที่นี้ข้ามไป ไม่ตัดแต้ม)
+                    $pointsUsed = 0;
+                }
+            }
+
+            // บันทึกยอดเงินสุทธิ (Grand Total ที่หักส่วนลดทุกอย่างแล้วจากหน้าบ้าน)
+            $rental->total_amount = $request->total_amount;
+            $rental->save(); // ได้ rental_id แล้ว
+
+            // อัปเดต rental_id กลับไปที่ transaction การใช้แต้ม (ถ้ามีการใช้)
+            if ($pointsUsed > 0) {
+                PointTransaction::where('member_id', $request->member_id)
+                    ->where('change_type', 'redeem')
+                    ->whereNull('rental_id') // หาอันที่เพิ่งสร้างและยังไม่มี rental_id
+                    ->latest()
+                    ->first()
+                    ?->update(['rental_id' => $rental->rental_id]);
+            }
+
+            // 6. บันทึก Rental Items
             foreach ($request->items as $itemData) {
                 RentalItem::create([
                     'rental_id' => $rental->rental_id,
@@ -105,6 +166,7 @@ class ReceptionController extends Controller
                 ]);
             }
 
+            // 7. บันทึก Accessories
             if ($request->has('accessories')) {
                 foreach ($request->accessories as $accData) {
                     $dbAccessory = Accessory::find($accData['id']);
@@ -121,6 +183,7 @@ class ReceptionController extends Controller
                 }
             }
 
+            // 8. บันทึก Payment (มัดจำ)
             if ($request->deposit_amount > 0) {
                 Payment::create([
                     'rental_id' => $rental->rental_id,
@@ -255,7 +318,7 @@ class ReceptionController extends Controller
 
     public function getCalendarEvents()
     {
-        // ดึงข้อมูลการเช่าทั้งหมด (ที่ไม่ยกเลิก)
+        // 1. ดึงข้อมูลการเช่าทั้งหมด (สถานะต้องไม่ใช่ยกเลิก)
         $rentals = Rental::with(['member', 'items.item'])
             ->where('status', '!=', 'cancelled')
             ->get();
@@ -264,12 +327,12 @@ class ReceptionController extends Controller
         $today = Carbon::now()->startOfDay();
 
         foreach ($rentals as $rental) {
-            // 1. ชื่อลูกค้า
+            // 2. จัดการชื่อลูกค้า (ถ้าไม่มี Member ให้ใช้ Guest Description)
             $customerName = $rental->member
                 ? ($rental->member->first_name . ' ' . $rental->member->last_name)
                 : ($rental->description ?? 'Guest');
 
-            // 2. ชื่อชุด (เอาแค่ชุดแรกพอ ให้สั้นกระชับ)
+            // 3. จัดการชื่อชุด (แสดงแค่ชุดแรก + จำนวนที่เหลือ)
             $itemText = 'No Item';
             if ($rental->items->isNotEmpty() && $rental->items->first()->item) {
                 $itemText = $rental->items->first()->item->item_name;
@@ -278,63 +341,64 @@ class ReceptionController extends Controller
                 $itemText .= " +" . ($rental->items->count() - 1);
             }
 
+            // ข้ามถ้าระบุวันที่ไม่ครบ
             if (!$rental->rental_date || !$rental->return_date) continue;
 
             $rentalStart = Carbon::parse($rental->rental_date);
             $returnDate  = Carbon::parse($rental->return_date);
-            // FullCalendar จบวันต้อง +1 เพื่อให้คลุมถึงสิ้นวันนั้น
+
+            // FullCalendar ใช้ end date แบบ exclusive (ต้องบวกเพิ่ม 1 วันเพื่อให้คลุมถึงวันคืน)
             $rentalEnd   = $returnDate->copy()->addDay();
 
             // -------------------------------------------------------
-            // 🎨 ตั้งค่าสีแบบ Google Calendar Style
+            // 🎨 กำหนดสีของ Event ตามสถานะ
             // -------------------------------------------------------
-            $color = '#4285F4'; // 🔵 Blue (Google) - ปกติ
-            $textColor = '#FFFFFF';
-            $icon = '';
+            $color = '#4285F4'; // 🔵 Blue (สถานะปกติ: กำลังเช่า)
 
             if ($rental->status === 'returned') {
-                $color = '#9AA0A6'; // ⚪ Gray (Google) - คืนแล้ว
-                $icon = '✅';
+                $color = '#9CA3AF'; // ⚪ Gray (คืนแล้ว)
             } elseif ($returnDate->lt($today)) {
-                $color = '#EA4335'; // 🔴 Red (Google) - เกินกำหนด
-                $icon = '⚠️';
+                $color = '#EF4444'; // 🔴 Red (เกินกำหนดคืน)
             }
 
-            // ข้อความที่จะโชว์ในแท่งบาร์ (สั้นๆ ได้ใจความ)
-            $title = "{$icon} #{$rental->rental_id} {$customerName} ({$itemText})";
+            // ชื่อ Event ที่จะแสดงในปฏิทิน
+            $title = "#{$rental->rental_id} {$customerName} ({$itemText})";
 
-            // Event หลัก (ช่วงเช่า)
+            // -------------------------------------------------------
+            // 1️⃣ สร้าง Event หลัก (ช่วงเวลาเช่า)
+            // -------------------------------------------------------
             $events[] = [
                 'title' => $title,
                 'start' => $rentalStart->toDateString(),
                 'end'   => $rentalEnd->toDateString(),
                 'color' => $color,
-                'textColor' => $textColor,
-                'allDay' => true, // ✅ บังคับเป็นแถบเต็มวัน
+                'textColor' => '#FFFFFF', // ตัวหนังสือสีขาว
+                'allDay' => true,
                 'url'   => route('reception.history', ['search' => $rental->rental_id]),
-                // ใส่ข้อมูลเพิ่มเติมสำหรับ Tooltip (ถ้าจะทำ)
                 'extendedProps' => [
-                    'status' => $rental->status,
-                    'customer' => $customerName,
-                    'items' => $itemText
+                    'type' => 'rental',
+                    'tel' => $rental->member ? $rental->member->tel : ($rental->guest_phone ?? '-') // ✅ เพิ่มบรรทัดนี้
                 ]
             ];
 
-            // Event รอง (ช่วงดูแลชุด) - แสดงเป็นพื้นหลัง (Background Event)
-            // จะไม่แย่งซีน Event หลัก แต่จะถมสีลงในช่องวัน
+            // -------------------------------------------------------
+            // 2️⃣ สร้าง Event รอง (ช่วงดูแลชุด/ซักรีด) - ต่อท้ายวันคืน
+            // -------------------------------------------------------
+            // เริ่มต้นหลังจากวันคืน 1 วัน (ต่อเนื่องกัน)
             $maintStart = $returnDate->copy()->addDay();
+            // ระยะเวลาดูแล 3 วัน
             $maintEnd   = $maintStart->copy()->addDays(3);
 
-            // ถ้าคืนแล้ว ไม่ต้องโชว์ Maintenance ให้รกตา (หรือโชว์จางๆ)
-            if ($rental->status !== 'returned') {
-                $events[] = [
-                    'start' => $maintStart->toDateString(),
-                    'end'   => $maintEnd->toDateString(),
-                    'display' => 'background', // ✅ แสดงเป็นพื้นหลัง
-                    'color' => '#FEF3C7', // 🟡 สีเหลืองอ่อนๆ (Tailwind amber-100)
-                    'allDay' => true,
-                ];
-            }
+            $events[] = [
+                // ระบุชื่อชุดใน Title เพื่อให้รู้ว่ากำลังดูแลชุดไหน
+                'title' => "🔧 ดูแล: #{$rental->rental_id} ({$itemText})",
+                'start' => $maintStart->toDateString(),
+                'end'   => $maintEnd->toDateString(),
+                'color' => '#FEF3C7', // 🟡 สีพื้นหลังเหลืองอ่อน (Amber-100)
+                'textColor' => '#92400e', // สีตัวหนังสือเข้ม (Amber-800) ให้อ่านง่าย
+                'allDay' => true,
+                'extendedProps' => ['type' => 'maintenance'] // ระบุประเภทว่าเป็น 'maintenance'
+            ];
         }
 
         return response()->json($events);
@@ -389,8 +453,6 @@ class ReceptionController extends Controller
 
     public function processReturn(Request $request, $rentalId)
     {
-        // ... (Logic เดิม ไม่ต้องแก้) ...
-        // เพียงแค่ copy ส่วนเดิมมาวางได้เลยครับ
         DB::beginTransaction();
         try {
             $rental = Rental::with(['items', 'payments'])->findOrFail($rentalId);

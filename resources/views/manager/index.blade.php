@@ -449,42 +449,6 @@
                     @include('manager.modals.update-member', ['member' => $member])
                     @endforeach
 
-                    @elseif($table == 'point_transactions')
-                    {{-- ... (ตาราง Point Transactions คงเดิม) ... --}}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">วันที่ทำรายการ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">สมาชิก</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ประเภท</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">จำนวนพอยต์</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">รายละเอียด</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">รหัสการเช่า</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($transactions as $tx)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $tx->transaction_date ? $tx->transaction_date->format('d/m/Y H:i') : '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $tx->member->username ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $tx->change_type }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold {{ $tx->point_change >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $tx->point_change > 0 ? '+' : '' }}{{ number_format($tx->point_change) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-normal text-sm">{{ $tx->description }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $tx->rental_id ?? '-' }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">ไม่พบข้อมูล</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">{{ $transactions->links() }}</div>
-
                     @elseif($table == 'care_shops')
                     {{-- ... (ตาราง Care Shops คงเดิม) ... --}}
                     <div class="overflow-x-auto">
