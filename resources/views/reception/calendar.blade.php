@@ -5,7 +5,7 @@
                 📅 ปฏิทินงานเช่า (Rental Calendar)
             </h2>
             {{-- Legend บอกสี --}}
-            <div class="flex gap-3 text-xs">
+            <div class="flex gap-3 text-xs text-slate-400">
                 <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#4285F4]"></span> กำลังเช่า</div>
                 <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#EA4335]"></span> เกินกำหนด</div>
                 <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#9AA0A6]"></span> คืนแล้ว</div>

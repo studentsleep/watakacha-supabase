@@ -15,6 +15,7 @@ use App\Models\PointTransaction;
 use App\Models\Accessory;
 use App\Models\RentalAccessory;
 use App\Models\Payment;
+use App\Models\ItemMaintenance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -431,9 +432,6 @@ class ReceptionController extends Controller
         return view('reception.history', compact('rentals'));
     }
 
-    // ... (ส่วนอื่นๆ เช่น checkMember, returnIndex, processReturn, serviceHistory, paymentHistory เหมือนเดิม) ...
-    // แนะนำให้เปลี่ยน LIKE เป็น ILIKE ในฟังก์ชันอื่นๆ ด้วยถ้าต้องการค้นหาแบบไม่สนตัวพิมพ์
-
     public function returnIndex(Request $request)
     {
         $query = Rental::with(['member', 'items.item'])->where('status', 'rented');
@@ -456,29 +454,72 @@ class ReceptionController extends Controller
         DB::beginTransaction();
         try {
             $rental = Rental::with(['items', 'payments'])->findOrFail($rentalId);
+
             if ($rental->status !== 'rented') {
                 return response()->json(['success' => false, 'message' => 'รายการนี้สถานะไม่ถูกต้อง หรือถูกคืนไปแล้ว'], 400);
             }
+
             $itemsDamage = $request->input('items_damage', []);
             $overdueFine = $request->input('overdue_fine', 0);
             $paymentMethod = $request->input('payment_method', 'cash');
+
+            // คำนวณยอดเงิน
             $totalRentalPrice = $rental->total_amount;
             $totalPaid = $rental->payments->where('status', 'paid')->sum('amount');
             $remainingAmount = max(0, $totalRentalPrice - $totalPaid);
+
             $totalDamageFine = 0;
+            $damageNotes = []; // เก็บ Note ของแต่ละ Item ไว้ใช้ตอนสร้าง Maintenance
+
+            // 1. จัดการเรื่องค่าปรับและความเสียหาย (เฉพาะรายการที่มีการแจ้ง)
             foreach ($itemsDamage as $damage) {
                 $rentalItem = RentalItem::where('rental_id', $rental->rental_id)
                     ->where('item_id', $damage['item_id'])
                     ->first();
+
                 if ($rentalItem) {
+                    // อัปเดตประวัติใน RentalItem
                     $newNote = "[เสีย {$damage['qty']} ชิ้น: {$damage['note']} (ปรับ " . number_format($damage['fine']) . ")]";
                     $rentalItem->description = trim($rentalItem->description . ' ' . $newNote);
                     $rentalItem->fine_amount += $damage['fine'];
                     $rentalItem->save();
+
                     $totalDamageFine += $damage['fine'];
+
+                    // เก็บ Note ไว้ใส่ใน Maintenance (ถ้ามีหลายรายการในชิ้นเดียวก็ต่อข้อความกัน)
+                    if (!isset($damageNotes[$damage['item_id']])) {
+                        $damageNotes[$damage['item_id']] = "";
+                    }
+                    $damageNotes[$damage['item_id']] .= $damage['note'] . ", ";
                 }
             }
+
+            // 2. ✅ ส่งชุด "ทุกชุด" ในบิลนี้ ไปหน้าจัดการซัก-ซ่อม (Maintenance) เสมอ
+            foreach ($rental->items as $rentalItem) {
+                // ดึง Note ความเสียหายมาใส่ (ถ้าไม่มี แสดงว่าเป็นชุดปกติ ส่งซักธรรมดา)
+                $note = isset($damageNotes[$rentalItem->item_id])
+                    ? rtrim($damageNotes[$rentalItem->item_id], ", ")
+                    : 'ส่งซักปกติ (Normal Laundry)';
+
+                // สร้างรายการ Maintenance
+                \App\Models\ItemMaintenance::create([
+                    'item_id' => $rentalItem->item_id,
+                    'rental_id' => $rental->rental_id,
+                    'status' => 'pending', // รอส่งร้าน
+                    'damage_description' => $note,
+                ]);
+
+                // เปลี่ยนสถานะสินค้าเป็น maintenance (ไม่ว่าง)
+                $item = Item::find($rentalItem->item_id);
+                if ($item) {
+                    $item->status = 'maintenance';
+                    $item->save();
+                }
+            }
+
+            // 3. จัดการเรื่องการชำระเงินและปิดบิล
             $grandTotalToPay = $remainingAmount + $overdueFine + $totalDamageFine;
+
             if ($grandTotalToPay > 0) {
                 Payment::create([
                     'rental_id' => $rental->rental_id,
@@ -489,9 +530,12 @@ class ReceptionController extends Controller
                     'payment_date' => now(),
                 ]);
             }
+
             $rental->status = 'returned';
             $rental->fine_amount = $overdueFine + $totalDamageFine;
             $rental->save();
+
+            // ให้แต้มสมาชิก
             if ($rental->member_id) {
                 $pointsEarned = floor($rental->total_amount / 100);
                 if ($pointsEarned > 0) {
@@ -509,6 +553,7 @@ class ReceptionController extends Controller
                     }
                 }
             }
+
             DB::commit();
             return response()->json(['success' => true, 'message' => 'บันทึกการคืนและรับชำระเงินเรียบร้อยแล้ว']);
         } catch (\Exception $e) {

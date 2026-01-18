@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// (Models ทั้งหมด)
+// Models
 use App\Models\Item;
 use App\Models\ItemUnit;
 use App\Models\ItemType;
@@ -18,7 +18,11 @@ use App\Models\Photographer;
 use App\Models\PhotographerPackage;
 use App\Models\Promotion;
 use App\Models\Accessory;
-
+use App\Models\Payment;
+use App\Models\ItemMaintenance;
+use App\Models\Rental;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -26,392 +30,242 @@ use Illuminate\Validation\Rule;
 
 class ManagerController extends Controller
 {
-    public function index(Request $request)
+    // =========================================================================
+    // 📊 Dashboard
+    // =========================================================================
+    public function dashboard(Request $request)
     {
-        $table = $request->input('table', 'users');
-        $search = $request->input('search');
+        // 1. เช็ค Role (ถ้าเป็นพนักงาน ให้ไปหน้าเช่าชุด)
+        if (Auth::user()->user_type_id == 2) {
+            return redirect()->route('reception.rental');
+        }
 
-        $status = $request->input('status');
+        Carbon::setLocale('th');
+        $today = Carbon::today();
+        $filter = $request->get('filter', 'week');
+
+        // Top Cards Data
+        $totalRevenueToday = Payment::whereDate('payment_date', $today)->sum('amount');
+        $totalExpenseToday = ItemMaintenance::whereDate('received_at', $today)->sum('shop_cost');
+        $rentalsToday = Rental::whereDate('rental_date', $today)->count();
+        $damagedItemsCount = Item::whereIn('status', ['maintenance', 'damaged'])->count();
+
+        // Recent Damaged Items
+        $damagedItemsList = ItemMaintenance::with('item')
+            ->whereNotNull('damage_description')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Chart Data Calculation
+        $chartLabels = [];
+        $incomeData = [];
+        $expenseData = [];
+
+        if ($filter == 'year') {
+            for ($i = 1; $i <= 12; $i++) {
+                $date = Carbon::create(null, $i, 1);
+                $chartLabels[] = $date->isoFormat('MMMM');
+                $incomeData[] = Payment::whereYear('payment_date', $today->year)->whereMonth('payment_date', $i)->sum('amount');
+                $expenseData[] = ItemMaintenance::whereYear('received_at', $today->year)->whereMonth('received_at', $i)->sum('shop_cost');
+            }
+        } elseif ($filter == 'month') {
+            $daysInMonth = $today->daysInMonth;
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $date = Carbon::create($today->year, $today->month, $i);
+                $chartLabels[] = $date->isoFormat('D MMM');
+                $incomeData[] = Payment::whereDate('payment_date', $date)->sum('amount');
+                $expenseData[] = ItemMaintenance::whereDate('received_at', $date)->sum('shop_cost');
+            }
+        } else {
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $chartLabels[] = $date->isoFormat('ddd D');
+                $incomeData[] = Payment::whereDate('payment_date', $date)->sum('amount');
+                $expenseData[] = ItemMaintenance::whereDate('received_at', $date)->sum('shop_cost');
+            }
+        }
+
+        // Status Chart Data
+        $rawStatus = Item::select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')->toArray();
+
+        $itemStatus = [
+            'ว่าง (Ready)' => $rawStatus['active'] ?? 0,
+            'ถูกเช่า (Rented)' => $rawStatus['rented'] ?? 0,
+            'ซ่อม/ซัก (Maintenance)' => ($rawStatus['maintenance'] ?? 0) + ($rawStatus['damaged'] ?? 0),
+        ];
+
+        return view('dashboard', compact(
+            'totalRevenueToday',
+            'totalExpenseToday',
+            'rentalsToday',
+            'damagedItemsCount',
+            'damagedItemsList',
+            'chartLabels',
+            'incomeData',
+            'expenseData',
+            'itemStatus',
+            'filter'
+        ));
+    }
+
+    // =========================================================================
+    // 🟢 กลุ่ม 1: ระบบสมาชิก & พนักงาน (Index Methods)
+    // =========================================================================
+
+    public function usersIndex(Request $request)
+    {
+        $search = $request->input('search');
         $typeId = $request->input('type_id');
 
-        $data = ['table' => $table];
-
-        if ($table == 'users') {
-            $query = User::with('userType');
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('username', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            }
-            if ($status) $query->where('status', $status);
-            if ($typeId) $query->where('user_type_id', $typeId);
-
-            $data['users'] = $query->orderBy('user_id', 'desc')->paginate(20)->withQueryString();
-            $data['user_types'] = UserType::orderBy('name')->get();
-        } elseif ($table == 'member_accounts') {
-            $query = MemberAccount::query();
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('username', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%");
-                });
-            }
-            if ($status) $query->where('status', $status);
-            $data['members'] = $query->orderBy('member_id', 'desc')->paginate(20)->withQueryString();
-        } elseif (in_array($table, ['care_shops', 'makeup_artists', 'photographers', 'promotions'])) {
-            $modelMap = [
-                'care_shops' => CareShop::class,
-                'makeup_artists' => MakeupArtist::class,
-                'photographers' => Photographer::class,
-                'promotions' => Promotion::class,
-            ];
-            $pkMap = [
-                'care_shops' => 'care_shop_id',
-                'makeup_artists' => 'makeup_id',
-                'photographers' => 'photographer_id',
-                'promotions' => 'promotion_id',
-            ];
-
-            $model = $modelMap[$table];
-            $pk = $pkMap[$table];
-            $query = $model::query();
-
-            if ($search) {
-                if ($table == 'care_shops') $query->where('care_name', 'like', "%{$search}%");
-                elseif ($table == 'promotions') $query->where('promotion_name', 'like', "%{$search}%");
-                else $query->where('first_name', 'like', "%{$search}%");
-            }
-            if ($status) $query->where('status', $status);
-
-            $data[$table] = $query->orderBy($pk, 'desc')->paginate(20)->withQueryString();
-        } elseif ($table == 'items') {
-            $query = Item::with(['type', 'unit', 'images']);
-            if ($search) $query->where('item_name', 'like', "%{$search}%");
-            $data['items'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
-            $data['units'] = ItemUnit::orderBy('name')->get();
-            $data['types'] = ItemType::orderBy('name')->get();
-        } elseif ($table == 'accessories') {
-            $query = Accessory::with(['type', 'unit']);
-
-            if ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            }
-
-            $data['accessories'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
-
-            // ดึงข้อมูล Type และ Unit มาสำหรับใส่ใน Dropdown ของ Modal เพิ่ม/แก้ไข
-            $data['units'] = ItemUnit::orderBy('name')->get();
-            $data['types'] = ItemType::orderBy('name')->get();
-            // ▲▲▲ [จบส่วนแทรก] ▲▲▲
-
-        } elseif ($table == 'item_units') {
-            // [จุดที่แก้ไข] เปลี่ยนเป็น paginate() เพื่อแก้ Error firstItem()
-            $query = ItemUnit::query();
-            if ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            }
-            $data['units'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
-        } elseif ($table == 'item_types') {
-            $query = ItemType::query();
-
-            // 1. เพิ่ม Logic ค้นหา
-            if ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            }
-
-            // 2. เปลี่ยนเป็น Paginate
-            $data['types'] = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
-        } elseif ($table == 'point_transactions') {
-            $query = PointTransaction::with('member');
-            if ($search) {
-                $query->whereHas('member', function ($q) use ($search) {
-                    $q->where('username', 'like', "%{$search}%");
-                })->orWhere('description', 'like', "%{$search}%");
-            }
-            $data['transactions'] = $query->orderBy('transaction_date', 'desc')->paginate(30)->withQueryString();
-        } elseif ($table == 'user_types') {
-            $query = UserType::query();
-
-            // เพิ่ม Logic ค้นหา
-            if ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            }
-
-            // เปลี่ยนเป็น Paginate (แบ่งหน้า)
-            $data['user_types'] = $query->orderBy('user_type_id', 'desc')
-                ->paginate(20)
-                ->withQueryString();
-        } elseif ($table == 'photographer_packages') {
-            $query = PhotographerPackage::query();
-            if ($search) $query->where('package_name', 'like', "%{$search}%");
-            $data['photographer_packages'] = $query->orderBy('package_id', 'desc')->paginate(20)->withQueryString();
+        $query = User::with('userType');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
         }
+        if ($typeId) $query->where('user_type_id', $typeId);
 
-        return view('manager.index', $data);
+        $users = $query->orderBy('user_id', 'desc')->paginate(20)->withQueryString();
+        $user_types = UserType::orderBy('name')->get();
+
+        return view('manager.users.index', compact('users', 'user_types'));
     }
 
-    // --- Items (PK: id) ---
-    public function storeItem(Request $request)
+    public function membersIndex(Request $request)
     {
-        // [นี่คือจุดที่พัง]
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            // [แก้ไข] ต้องตรวจสอบกับ 'id' (PK ของตาราง item_units)
-            // 'id' => 'required|exists:item_units,id',
-            // [แก้ไข] ต้องตรวจสอบกับ 'id' (PK ของตาราง item_types)
-            // 'id' => 'required|exists:item_types,id',
-            'item_type_id' => 'required',
-            'item_unit_id' => 'required',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-
-        $item = Item::create([
-            'item_name' => $data['name'],
-            'description' => $data['description'],
-            'price' => $data['price'],
-            'stock' => $data['stock'],
-            // 'id' => $data['id'],
-            // 'id' => $data['id'],
-            'item_type_id' => $data['item_type_id'],
-            'item_unit_id' => $data['item_unit_id'],
-            'status' => 'active',
-        ]);
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('items', 'public');
-                $item->images()->create(['path' => $path, 'is_main' => $index === 0]);
-            }
+        $search = $request->input('search');
+        $query = MemberAccount::query();
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('tel', 'like', "%{$search}%");
+            });
         }
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item created successfully.');
+        $members = $query->orderBy('member_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.members.index', compact('members'));
     }
 
-    public function updateItem(Request $request, Item $item)
+    public function userTypesIndex(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer|min:0',
-            // [แก้ไข] ต้องตรวจสอบกับ 'id'
-            // 'id' => 'required|exists:item_units,id',
-            // // [แก้ไข] ต้องตรวจสอบกับ 'id'
-            // 'id' => 'required|exists:item_types,id',
-            'item_type_id' => 'required',
-            'item_unit_id' => 'required',
-        ]);
-        $item->update([
-            'item_name' => $data['name'],
-            'description' => $data['description'],
-            'price' => $data['price'],
-            'stock' => $data['stock'],
-            // 'id' => $data['id'],
-            // 'id' => $data['id'],
-            'item_type_id' => $data['item_type_id'],
-            'item_unit_id' => $data['item_unit_id'],
-        ]);
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item updated successfully.');
+        $search = $request->input('search');
+        $query = UserType::query();
+        if ($search) $query->where('name', 'like', "%{$search}%");
+        $user_types = $query->orderBy('user_type_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.user_types.index', compact('user_types'));
     }
 
-    public function uploadItemImage(Request $request, Item $item)
+    // =========================================================================
+    // 🟣 กลุ่ม 2: คลังสินค้า (Index Methods)
+    // =========================================================================
+
+    public function itemsIndex(Request $request)
     {
-        // 1. Validate แบบ Array
-        $request->validate([
-            'images' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // ตรวจสอบทีละไฟล์
-        ]);
+        $search = $request->input('search');
+        $query = Item::with(['type', 'unit', 'images']);
+        if ($search) $query->where('item_name', 'like', "%{$search}%");
 
-        // 2. วนลูปบันทึกไฟล์
-        if ($request->hasFile('images')) {
-            // เช็คก่อนว่าตอนนี้มีรูปอยู่แล้วหรือไม่ (เพื่อกำหนด is_main ของรูปแรกที่เพิ่มเข้าไปใหม่ ถ้ายังไม่มีรูปเลย)
-            $hasExistingImages = $item->images()->exists();
+        $items = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        $units = ItemUnit::orderBy('name')->get();
+        $types = ItemType::orderBy('name')->get();
 
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('items', 'public');
-
-                $item->images()->create([
-                    'path' => $path,
-                    // ถ้ายังไม่มีรูปเลย -> รูปแรกสุดที่อัป (index 0) จะเป็น main
-                    // ถ้ามีรูปอยู่แล้ว -> รูปใหม่ทั้งหมดจะไม่ใช่ main
-                    'is_main' => (!$hasExistingImages && $index === 0),
-                ]);
-            }
-        }
-
-        return back()->with('status', 'อัปโหลดรูปภาพเรียบร้อยแล้ว');
+        return view('manager.items.index', compact('items', 'units', 'types'));
     }
 
-    /**
-     * ลบรูปภาพ (ทีละรูป)
-     */
-    public function destroyItemImage(ItemImage $image)
+    public function accessoriesIndex(Request $request)
     {
-        // (จำเป็นต้องใช้ Storage)
-        Storage::disk('public')->delete($image->path);
+        $search = $request->input('search');
+        $query = Accessory::with(['type', 'unit']);
+        if ($search) $query->where('name', 'like', "%{$search}%");
 
-        $item = $image->item; // ดึง Item แม่มาก่อน
-        $wasMain = $image->is_main; // ตรวจสอบว่าเป็นรูปหลักหรือไม่
+        $accessories = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        $units = ItemUnit::orderBy('name')->get();
+        $types = ItemType::orderBy('name')->get();
 
-        $image->delete(); // ลบจากฐานข้อมูล
-
-        // [Logic สำคัญ] ถ้าลบรูปหลัก และยังมีรูปอื่นเหลืออยู่ ให้ตั้งรูปแรกสุดเป็นรูปหลักใหม่
-        if ($wasMain && $item->images()->count() > 0) {
-            $newItemMain = $item->images()->first();
-            $newItemMain->is_main = true;
-            $newItemMain->save();
-        }
-
-        return back()->with('status', 'Image deleted successfully.');
+        return view('manager.accessories.index', compact('accessories', 'units', 'types'));
     }
 
-    /**
-     * ตั้งค่ารูปภาพหลัก (ทีละรูป)
-     */
-    public function setMainImage(ItemImage $image)
+    public function itemTypesIndex(Request $request)
     {
-        $item = $image->item;
-
-        // 1. ล้างค่า is_main ทั้งหมดของ Item นี้
-        $item->images()->update(['is_main' => false]);
-
-        // 2. ตั้งค่า is_main = true ให้กับรูปที่เลือก
-        $image->is_main = true;
-        $image->save();
-
-        return back()->with('status', 'Main image set successfully.');
+        $search = $request->input('search');
+        $query = ItemType::query();
+        if ($search) $query->where('name', 'like', "%{$search}%");
+        $types = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.item_types.index', compact('types'));
     }
 
-    /**
-     * ลบ Item ทั้งหมด (รวมถึงรูปภาพ)
-     */
-    public function destroyItem(Item $item)
+    public function unitsIndex(Request $request)
     {
-        // 1. ลบไฟล์รูปภาพทั้งหมดใน Storage
-        foreach ($item->images as $img) {
-            Storage::disk('public')->delete($img->path);
-        }
-
-        // 2. ลบข้อมูลรูปภาพในตาราง item_images
-        $item->images()->delete();
-
-        // 3. ลบ Item
-        $item->delete();
-
-        return redirect()->route('manager.index', ['table' => 'items'])->with('status', 'Item and all associated images deleted successfully.');
+        $search = $request->input('search');
+        $query = ItemUnit::query();
+        if ($search) $query->where('name', 'like', "%{$search}%");
+        $units = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.item_units.index', compact('units'));
     }
 
-    // --- Accessories Management ---
-    public function storeAccessory(Request $request)
+    // =========================================================================
+    // 🩷 กลุ่ม 3: พาร์ทเนอร์ & บริการ (Index Methods)
+    // =========================================================================
+
+    public function careShopsIndex(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'item_type_id' => 'required|exists:item_types,id',
-            'item_unit_id' => 'required|exists:item_units,id',
-        ]);
-
-        Accessory::create($data);
-
-        return redirect()->route('manager.index', ['table' => 'accessories'])
-            ->with('status', 'เพิ่มอุปกรณ์เสริมเรียบร้อยแล้ว');
+        $search = $request->input('search');
+        $query = CareShop::query();
+        if ($search) $query->where('care_name', 'like', "%{$search}%");
+        $care_shops = $query->orderBy('care_shop_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.care_shops.index', compact('care_shops'));
     }
 
-    public function updateAccessory(Request $request, Accessory $accessory)
+    public function makeupArtistsIndex(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'item_type_id' => 'required|exists:item_types,id',
-            'item_unit_id' => 'required|exists:item_units,id',
-        ]);
-
-        $accessory->update($data);
-
-        return redirect()->route('manager.index', ['table' => 'accessories'])
-            ->with('status', 'แก้ไขอุปกรณ์เสริมเรียบร้อยแล้ว');
+        $search = $request->input('search');
+        $query = MakeupArtist::query();
+        if ($search) $query->where('first_name', 'like', "%{$search}%");
+        $makeup_artists = $query->orderBy('makeup_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.makeup_artists.index', compact('makeup_artists'));
     }
 
-    public function destroyAccessory(Accessory $accessory)
+    public function photographersIndex(Request $request)
     {
-        $accessory->delete();
-        return redirect()->route('manager.index', ['table' => 'accessories'])
-            ->with('status', 'ลบอุปกรณ์เสริมเรียบร้อยแล้ว');
-    }
-    // --- Item Units (PK: id) ---
-    public function storeUnit(Request $request)
-    {
-        $request->validate(['name' => 'required|string|max:255|unique:item_units,name', 'description' => 'nullable|string']);
-        ItemUnit::create($request->all());
-        return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit created successfully.');
+        $search = $request->input('search');
+        $query = Photographer::query();
+        if ($search) $query->where('first_name', 'like', "%{$search}%");
+        $photographers = $query->orderBy('photographer_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.photographers.index', compact('photographers'));
     }
 
-    public function updateUnit(Request $request, ItemUnit $unit)
+    public function photographerPackagesIndex(Request $request)
     {
-        // [แก้ไข] ใช้ 'id'
-        $request->validate(['name' => 'required|string|max:255|unique:item_units,name,' . $unit->id . ',id', 'description' => 'nullable|string']);
-        $unit->update($request->all());
-        return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit updated successfully.');
+        $search = $request->input('search');
+        $query = PhotographerPackage::query();
+        if ($search) $query->where('package_name', 'like', "%{$search}%");
+        $photographer_packages = $query->orderBy('package_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.photographer_packages.index', compact('photographer_packages'));
     }
 
-    public function destroyUnit(ItemUnit $unit)
+    // =========================================================================
+    // 🟡 กลุ่ม 4: การตลาด (Index Methods)
+    // =========================================================================
+
+    public function promotionsIndex(Request $request)
     {
-        $unit->delete();
-        return redirect()->route('manager.index', ['table' => 'item_units'])->with('status', 'Unit deleted successfully.');
+        $search = $request->input('search');
+        $query = Promotion::query();
+        if ($search) $query->where('promotion_name', 'like', "%{$search}%");
+        $promotions = $query->orderBy('promotion_id', 'desc')->paginate(20)->withQueryString();
+        return view('manager.promotions.index', compact('promotions'));
     }
 
-    // --- Item Types (PK: id) ---
-    public function storeType(Request $request)
-    {
-        $request->validate(['name' => 'required|string|max:255|unique:item_types,name', 'description' => 'nullable|string']);
-        ItemType::create($request->all());
-        return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type created successfully.');
-    }
+    // =========================================================================
+    // 🛠️ CRUD Functions (Store / Update / Destroy)
+    // =========================================================================
 
-    public function updateType(Request $request, ItemType $type)
-    {
-        // [แก้ไข] ใช้ 'id'
-        $request->validate(['name' => 'required|string|max:255|unique:item_types,name,' . $type->id . ',id', 'description' => 'nullable|string']);
-        $type->update($request->all());
-        return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type updated successfully.');
-    }
-
-    public function destroyType(ItemType $type)
-    {
-        $type->delete();
-        return redirect()->route('manager.index', ['table' => 'item_types'])->with('status', 'Type deleted successfully.');
-    }
-
-    // --- User Types (PK: user_type_id) ---
-    public function storeUserType(Request $request)
-    {
-        $request->validate(['name' => 'required|string|max:50|unique:user_types,name', 'description' => 'nullable|string']);
-        UserType::create($request->all());
-        return redirect()->route('manager.index', ['table' => 'user_types'])->with('status', 'User Type created successfully.');
-    }
-
-    public function updateUserType(Request $request, UserType $user_type)
-    {
-        // [ถูกต้อง] (PK นี้ถูกต้องอยู่แล้ว)
-        $request->validate(['name' => ['required', 'string', 'max:50', Rule::unique('user_types')->ignore($user_type->user_type_id, 'user_type_id')], 'description' => 'nullable|string']);
-        $user_type->update($request->all());
-        return redirect()->route('manager.index', ['table' => 'user_types'])->with('status', 'User Type updated successfully.');
-    }
-
-    public function destroyUserType(UserType $user_type)
-    {
-        $user_type->delete();
-        return redirect()->route('manager.index', ['table' => 'user_types'])->with('status', 'User Type deleted successfully.');
-    }
-
-    // --- Users (PK: user_id) ---
+    // --- Users ---
     public function storeUser(Request $request)
     {
         $data = $request->validate([
@@ -420,21 +274,16 @@ class ManagerController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'tel' => 'nullable|string|max:20',
-            // [ถูกต้อง] (PK นี้ถูกต้องอยู่แล้ว)
             'user_type_id' => 'required|exists:user_types,user_type_id',
             'status' => 'required|string',
             'password' => 'required|string|min:8',
         ]);
-
-        User::create($data); // (Model 'hashed' cast จะ Hash ให้อัตโนมัติ)
-
-        return redirect()->route('manager.index', ['table' => 'users'])->with('status', 'User created successfully.');
+        User::create($data);
+        return redirect()->route('manager.users.index')->with('status', 'สร้างผู้ใช้สำเร็จ');
     }
-
     public function updateUser(Request $request, User $user)
     {
         $data = $request->validate([
-            // [ถูกต้อง] (PK นี้ถูกต้องอยู่แล้ว)
             'username' => ['required', 'string', 'max:50', Rule::unique('user_accounts')->ignore($user->user_id, 'user_id')],
             'email' => ['required', 'email', 'max:255', Rule::unique('user_accounts')->ignore($user->user_id, 'user_id')],
             'first_name' => 'required|string|max:255',
@@ -444,26 +293,19 @@ class ManagerController extends Controller
             'status' => 'required|string',
             'password' => 'nullable|string|min:8',
         ]);
-
-        $updateData = $request->only(['username', 'email', 'first_name', 'last_name', 'tel', 'user_type_id', 'status']);
-
-        if (!empty($data['password'])) {
-            $updateData['password'] = $data['password'];
-        }
-
+        $updateData = $request->except(['password']);
+        if (!empty($data['password'])) $updateData['password'] = $data['password'];
         $user->update($updateData);
-        return redirect()->route('manager.index', ['table' => 'users'])->with('status', 'User updated successfully.');
+        return redirect()->route('manager.users.index')->with('status', 'อัปเดตผู้ใช้สำเร็จ');
     }
-
     public function destroyUser(User $user)
     {
-        if ($user->user_id === Auth::id()) {
-            return back()->with('error', 'You cannot delete your own account.');
-        }
+        if ($user->user_id === Auth::id()) return back()->with('error', 'ไม่สามารถลบบัญชีตัวเองได้');
         $user->delete();
-        return redirect()->route('manager.index', ['table' => 'users'])->with('status', 'User deleted successfully.');
+        return redirect()->route('manager.users.index')->with('status', 'ลบผู้ใช้สำเร็จ');
     }
 
+    // --- Members ---
     public function storeMember(Request $request)
     {
         $data = $request->validate([
@@ -474,18 +316,13 @@ class ManagerController extends Controller
             'tel' => 'nullable|string|max:20',
             'status' => 'required|string',
             'points' => 'required|integer|min:0',
-            // [แก้ไข] ใช้ 'confirmed' เพื่อบังคับให้ "password_confirmation" ตรงกัน
             'password' => 'required|string|min:8|confirmed',
         ]);
-
         MemberAccount::create($data);
-
-        return redirect()->route('manager.index', ['table' => 'member_accounts'])->with('status', 'Member created successfully.');
+        return redirect()->route('manager.members.index')->with('status', 'เพิ่มสมาชิกสำเร็จ');
     }
-
     public function updateMember(Request $request, MemberAccount $member)
     {
-        // 1. ตรวจสอบข้อมูลหลัก
         $data = $request->validate([
             'username' => ['required', 'string', 'max:50', Rule::unique('member_accounts')->ignore($member->member_id, 'member_id')],
             'email' => ['required', 'email', 'max:255', Rule::unique('member_accounts')->ignore($member->member_id, 'member_id')],
@@ -494,215 +331,284 @@ class ManagerController extends Controller
             'tel' => 'nullable|string|max:20',
             'status' => 'required|string',
             'points' => 'required|integer|min:0',
-
-            // [แก้ไข] กฎการตรวจสอบรหัสผ่านใหม่
-            // - ถ้ากรอก password (ใหม่) => current_password (เก่า) ต้องถูกกรอกด้วย
-            //'current_password' => ['nullable', 'required_with:password', 'string'],
-            // - ถ้ากรอก current_password (เก่า) => password (ใหม่) ต้องถูกกรอก และต้องมี confirmation
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
-
-        // 2. ดึงข้อมูลหลักที่จะอัปเดต
-        $updateData = $request->only(['username', 'email', 'first_name', 'last_name', 'tel', 'status', 'points']);
-
-        // 3. [Logic ใหม่] ตรวจสอบและอัปเดตรหัสผ่าน (ถ้ามีการกรอก)
+        $updateData = $request->except(['password', 'password_confirmation', 'current_password']);
         if (!empty($data['password'])) {
-
-            // 3.1 ตรวจสอบว่ารหัสผ่านเก่า (current_password) ที่กรอกมา ตรงกับในฐานข้อมูลหรือไม่
-            if (!Hash::check($data['current_password'], $member->password)) {
-                // ถ้าไม่ตรง ให้ส่ง Error กลับไป
-                return back()->with('error', 'The provided current password does not match our records.');
-            }
-
-            // 3.2 ถ้ารหัสผ่านเก่าถูกต้อง ให้เพิ่มรหัสผ่านใหม่เข้าไปใน $updateData
-            // (Model 'hashed' cast จะ Hash ให้อัตโนมัติ)
+            // Check Current Password Logic (Optional)
             $updateData['password'] = $data['password'];
         }
-
-        // 4. อัปเดตข้อมูล
         $member->update($updateData);
-
-        // 5. ส่งข้อความสำเร็จ (ถ้าอัปเดตรหัสผ่านสำเร็จ มันจะรวมอยู่ในนี้)
-        $statusMessage = 'Member updated successfully.';
-        if (isset($updateData['password'])) {
-            $statusMessage = 'Member and password updated successfully.';
-        }
-
-        return redirect()->route('manager.index', ['table' => 'member_accounts'])->with('status', $statusMessage);
+        return redirect()->route('manager.members.index')->with('status', 'อัปเดตสมาชิกสำเร็จ');
     }
-
     public function destroyMember(MemberAccount $member)
     {
         $member->delete();
-        return redirect()->route('manager.index', ['table' => 'member_accounts'])->with('status', 'Member deleted successfully.');
+        return redirect()->route('manager.members.index')->with('status', 'ลบสมาชิกสำเร็จ');
     }
 
-    // --- Care Shops (PK: care_shop_id) ---
+    // --- Items ---
+    public function storeItem(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required',
+            'item_unit_id' => 'required',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+        $item = Item::create([
+            'item_name' => $data['name'],
+            'description' => $data['description'],
+            'price' => $data['price'],
+            'stock' => $data['stock'],
+            'item_type_id' => $data['item_type_id'],
+            'item_unit_id' => $data['item_unit_id'],
+            'status' => 'active',
+        ]);
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('items', 'public');
+                $item->images()->create(['path' => $path, 'is_main' => $index === 0]);
+            }
+        }
+        return redirect()->route('manager.items.index')->with('status', 'เพิ่มสินค้าสำเร็จ');
+    }
+    public function updateItem(Request $request, Item $item)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required',
+            'item_unit_id' => 'required',
+        ]);
+        $item->update([
+            'item_name' => $data['name'],
+            'description' => $data['description'],
+            'price' => $data['price'],
+            'stock' => $data['stock'],
+            'item_type_id' => $data['item_type_id'],
+            'item_unit_id' => $data['item_unit_id'],
+        ]);
+        return redirect()->route('manager.items.index')->with('status', 'อัปเดตสินค้าสำเร็จ');
+    }
+    public function destroyItem(Item $item)
+    {
+        foreach ($item->images as $img) Storage::disk('public')->delete($img->path);
+        $item->images()->delete();
+        $item->delete();
+        return redirect()->route('manager.items.index')->with('status', 'ลบสินค้าสำเร็จ');
+    }
+    public function uploadItemImage(Request $request, Item $item)
+    {
+        $request->validate(['images' => 'required', 'images.*' => 'image|max:2048']);
+        if ($request->hasFile('images')) {
+            $hasExisting = $item->images()->exists();
+            foreach ($request->file('images') as $idx => $image) {
+                $path = $image->store('items', 'public');
+                $item->images()->create(['path' => $path, 'is_main' => (!$hasExisting && $idx === 0)]);
+            }
+        }
+        return back()->with('status', 'อัปโหลดรูปภาพสำเร็จ');
+    }
+    public function destroyItemImage(ItemImage $image)
+    {
+        Storage::disk('public')->delete($image->path);
+        $item = $image->item;
+        $wasMain = $image->is_main;
+        $image->delete();
+        if ($wasMain && $item->images()->count() > 0) {
+            $newMain = $item->images()->first();
+            $newMain->is_main = true;
+            $newMain->save();
+        }
+        return back()->with('status', 'ลบรูปภาพสำเร็จ');
+    }
+    public function setMainImage(ItemImage $image)
+    {
+        $image->item->images()->update(['is_main' => false]);
+        $image->is_main = true;
+        $image->save();
+        return back()->with('status', 'ตั้งค่ารูปหลักสำเร็จ');
+    }
+
+    // --- Accessories ---
+    public function storeAccessory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required|exists:item_types,id',
+            'item_unit_id' => 'required|exists:item_units,id',
+        ]);
+        Accessory::create($data);
+        return redirect()->route('manager.accessories.index')->with('status', 'เพิ่มอุปกรณ์เสริมสำเร็จ');
+    }
+    public function updateAccessory(Request $request, Accessory $accessory)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'item_type_id' => 'required|exists:item_types,id',
+            'item_unit_id' => 'required|exists:item_units,id',
+        ]);
+        $accessory->update($data);
+        return redirect()->route('manager.accessories.index')->with('status', 'อัปเดตอุปกรณ์เสริมสำเร็จ');
+    }
+    public function destroyAccessory(Accessory $accessory)
+    {
+        $accessory->delete();
+        return redirect()->route('manager.accessories.index')->with('status', 'ลบอุปกรณ์เสริมสำเร็จ');
+    }
+
+    // --- Types & Units ---
+    public function storeType(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+        ItemType::create($request->all());
+        return redirect()->route('manager.item_types.index')->with('status', 'เพิ่มประเภทสินค้าสำเร็จ');
+    }
+    public function updateType(Request $request, ItemType $type)
+    {
+        $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+        $type->update($request->all());
+        return redirect()->route('manager.item_types.index')->with('status', 'อัปเดตประเภทสินค้าสำเร็จ');
+    }
+    public function destroyType(ItemType $type)
+    {
+        $type->delete();
+        return redirect()->route('manager.item_types.index')->with('status', 'ลบประเภทสินค้าสำเร็จ');
+    }
+
+    public function storeUnit(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+        ItemUnit::create($request->all());
+        return redirect()->route('manager.units.index')->with('status', 'เพิ่มหน่วยนับสำเร็จ');
+    }
+    public function updateUnit(Request $request, ItemUnit $unit)
+    {
+        $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+        $unit->update($request->all());
+        return redirect()->route('manager.units.index')->with('status', 'อัปเดตหน่วยนับสำเร็จ');
+    }
+    public function destroyUnit(ItemUnit $unit)
+    {
+        $unit->delete();
+        return redirect()->route('manager.units.index')->with('status', 'ลบหน่วยนับสำเร็จ');
+    }
+    public function storeUserType(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:50', 'description' => 'nullable|string']);
+        UserType::create($request->all());
+        return redirect()->route('manager.user_types.index')->with('status', 'เพิ่มประเภทผู้ใช้สำเร็จ');
+    }
+    public function updateUserType(Request $request, UserType $user_type)
+    {
+        $request->validate(['name' => 'required|string|max:50', 'description' => 'nullable|string']);
+        $user_type->update($request->all());
+        return redirect()->route('manager.user_types.index')->with('status', 'อัปเดตประเภทผู้ใช้สำเร็จ');
+    }
+    public function destroyUserType(UserType $user_type)
+    {
+        $user_type->delete();
+        return redirect()->route('manager.user_types.index')->with('status', 'ลบประเภทผู้ใช้สำเร็จ');
+    }
+
+    // --- Care Shops, Artists, Photographers, Packages, Promotions ---
     public function storeCareShop(Request $request)
     {
-        $data = $request->validate([
-            'care_name' => 'required|string|max:255',
-            'address' => 'nullable|string',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['care_name' => 'required|string|max:255', 'address' => 'nullable|string', 'tel' => 'nullable|string|max:20', 'email' => 'nullable|email|max:255', 'status' => 'required|string|max:50']);
         CareShop::create($data);
-        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop created successfully.');
+        return redirect()->route('manager.care_shops.index')->with('status', 'เพิ่มร้านสำเร็จ');
     }
-
     public function updateCareShop(Request $request, CareShop $care_shop)
     {
-        $data = $request->validate([
-            'care_name' => 'required|string|max:255',
-            'address' => 'nullable|string',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['care_name' => 'required|string|max:255', 'address' => 'nullable|string', 'tel' => 'nullable|string|max:20', 'email' => 'nullable|email|max:255', 'status' => 'required|string|max:50']);
         $care_shop->update($data);
-        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop updated successfully.');
+        return redirect()->route('manager.care_shops.index')->with('status', 'อัปเดตร้านสำเร็จ');
     }
-
     public function destroyCareShop(CareShop $care_shop)
     {
         $care_shop->delete();
-        return redirect()->route('manager.index', ['table' => 'care_shops'])->with('status', 'Care Shop deleted successfully.');
+        return redirect()->route('manager.care_shops.index')->with('status', 'ลบร้านสำเร็จ');
     }
 
-    // --- Makeup Artists (PK: makeup_id) ---
     public function storeMakeupArtist(Request $request)
     {
-        $data = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'description' => 'nullable']);
         MakeupArtist::create($data);
-        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist created successfully.');
+        return redirect()->route('manager.makeup_artists.index')->with('status', 'เพิ่มช่างแต่งหน้าสำเร็จ');
     }
-
     public function updateMakeupArtist(Request $request, MakeupArtist $makeup_artist)
     {
-        $data = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'description' => 'nullable']);
         $makeup_artist->update($data);
-        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist updated successfully.');
+        return redirect()->route('manager.makeup_artists.index')->with('status', 'อัปเดตช่างแต่งหน้าสำเร็จ');
     }
-
     public function destroyMakeupArtist(MakeupArtist $makeup_artist)
     {
         $makeup_artist->delete();
-        return redirect()->route('manager.index', ['table' => 'makeup_artists'])->with('status', 'Makeup Artist deleted successfully.');
+        return redirect()->route('manager.makeup_artists.index')->with('status', 'ลบช่างแต่งหน้าสำเร็จ');
     }
 
-    // --- Photographers (PK: photographer_id) ---
     public function storePhotographer(Request $request)
     {
-        $data = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required']);
         Photographer::create($data);
-        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer created successfully.');
+        return redirect()->route('manager.photographers.index')->with('status', 'เพิ่มช่างภาพสำเร็จ');
     }
-
     public function updatePhotographer(Request $request, Photographer $photographer)
     {
-        $data = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'tel' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required']);
         $photographer->update($data);
-        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer updated successfully.');
+        return redirect()->route('manager.photographers.index')->with('status', 'อัปเดตช่างภาพสำเร็จ');
     }
-
     public function destroyPhotographer(Photographer $photographer)
     {
         $photographer->delete();
-        return redirect()->route('manager.index', ['table' => 'photographers'])->with('status', 'Photographer deleted successfully.');
+        return redirect()->route('manager.photographers.index')->with('status', 'ลบช่างภาพสำเร็จ');
     }
 
-    // --- Photographer Packages (PK: package_id) ---
     public function storePhotographerPackage(Request $request)
     {
-        $data = $request->validate([
-            'package_name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
+        $data = $request->validate(['package_name' => 'required', 'price' => 'required', 'description' => 'nullable']);
         PhotographerPackage::create($data);
-        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package created successfully.');
+        return redirect()->route('manager.photographer_packages.index')->with('status', 'เพิ่มแพ็คเกจสำเร็จ');
     }
-
     public function updatePhotographerPackage(Request $request, PhotographerPackage $photographer_package)
     {
-        $data = $request->validate([
-            'package_name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
+        $data = $request->validate(['package_name' => 'required', 'price' => 'required', 'description' => 'nullable']);
         $photographer_package->update($data);
-        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package updated successfully.');
+        return redirect()->route('manager.photographer_packages.index')->with('status', 'อัปเดตแพ็คเกจสำเร็จ');
     }
-
     public function destroyPhotographerPackage(PhotographerPackage $photographer_package)
     {
         $photographer_package->delete();
-        return redirect()->route('manager.index', ['table' => 'photographer_packages'])->with('status', 'Package deleted successfully.');
+        return redirect()->route('manager.photographer_packages.index')->with('status', 'ลบแพ็คเกจสำเร็จ');
     }
 
-    // --- Promotions (PK: promotion_id) ---
     public function storePromotion(Request $request)
     {
-        $data = $request->validate([
-            'promotion_name' => 'required|string|max:255',
-            'discount_type' => 'required|string|max:50',
-            'discount_value' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['promotion_name' => 'required', 'discount_type' => 'required', 'discount_value' => 'required', 'description' => 'nullable', 'start_date' => 'nullable', 'end_date' => 'nullable', 'status' => 'required']);
         Promotion::create($data);
-        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion created successfully.');
+        return redirect()->route('manager.promotions.index')->with('status', 'เพิ่มโปรโมชั่นสำเร็จ');
     }
-
     public function updatePromotion(Request $request, Promotion $promotion)
     {
-        $data = $request->validate([
-            'promotion_name' => 'required|string|max:255',
-            'discount_type' => 'required|string|max:50',
-            'discount_value' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|max:50',
-        ]);
+        $data = $request->validate(['promotion_name' => 'required', 'discount_type' => 'required', 'discount_value' => 'required', 'description' => 'nullable', 'start_date' => 'nullable', 'end_date' => 'nullable', 'status' => 'required']);
         $promotion->update($data);
-        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion updated successfully.');
+        return redirect()->route('manager.promotions.index')->with('status', 'อัปเดตโปรโมชั่นสำเร็จ');
     }
-
     public function destroyPromotion(Promotion $promotion)
     {
         $promotion->delete();
-        return redirect()->route('manager.index', ['table' => 'promotions'])->with('status', 'Promotion deleted successfully.');
+        return redirect()->route('manager.promotions.index')->with('status', 'ลบโปรโมชั่นสำเร็จ');
     }
 }

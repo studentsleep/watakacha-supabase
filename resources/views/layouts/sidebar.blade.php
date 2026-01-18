@@ -24,6 +24,39 @@
             height: 1.25rem;
             margin-right: 0.75rem;
         }
+
+        /* --- เพิ่ม CSS สำหรับ Hover สีต่างๆ (โดยไม่แก้โครงสร้างหลัก) --- */
+        .hover-blue:hover {
+            color: #60a5fa !important;
+        }
+
+        .hover-blue:hover i {
+            color: #60a5fa !important;
+        }
+
+        .hover-indigo:hover {
+            color: #818cf8 !important;
+        }
+
+        .hover-indigo:hover i {
+            color: #818cf8 !important;
+        }
+
+        .hover-pink:hover {
+            color: #f472b6 !important;
+        }
+
+        .hover-pink:hover i {
+            color: #f472b6 !important;
+        }
+
+        .hover-yellow:hover {
+            color: #facc15 !important;
+        }
+
+        .hover-yellow:hover i {
+            color: #facc15 !important;
+        }
     </style>
 
     <div>
@@ -47,6 +80,9 @@
 
         <nav>
             <ul class="space-y-2 text-sm">
+
+                {{-- Dashboard --}}
+                @if(Auth::user()->user_type_id == 1)
                 <li>
                     <a href="{{ route('dashboard') }}"
                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
@@ -56,11 +92,13 @@
                         <span class="ml-3" x-show="sidebarOpen" x-transition>แดชบอร์ด</span>
                     </a>
                 </li>
+                @endif
 
                 @if(Auth::user()->user_type_id == 1)
 
+                {{-- 🔵 กลุ่ม 1: จัดการผู้ใช้ (สีฟ้า) --}}
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
-                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md hover-blue"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="users-round" class="w-5 h-5"></i>
                         <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการผู้ใช้</span>
@@ -76,17 +114,19 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ระบบสมาชิก</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'member_accounts']) }}" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
+                                {{-- ✅ แก้ Link --}}
+                                <li><a href="{{ route('manager.members.index') }}" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">ระบบพนักงาน</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'users']) }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชีผู้ใช้</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'user_types']) }}" class="flyout-link"><i data-lucide="contact" class="icon-size"></i> ประเภทผู้ใช้</a></li>
+                                <li><a href="{{ route('manager.users.index') }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชีผู้ใช้</a></li>
+                                <li><a href="{{ route('manager.user_types.index') }}" class="flyout-link"><i data-lucide="contact" class="icon-size"></i> ประเภทผู้ใช้</a></li>
                             </ul>
                         </div>
                     </div>
                 </li>
 
+                {{-- 🟣 กลุ่ม 2: จัดการสินค้า (สีม่วง/Indigo) --}}
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
-                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md hover-indigo"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="package" class="w-5 h-5"></i>
                         <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการสินค้า</span>
@@ -102,19 +142,23 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">คลังสินค้า</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'items']) }}" class="flyout-link"><i data-lucide="shopping-bag" class="icon-size"></i> รายการสินค้า</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'accessories']) }}" class="flyout-link"><i data-lucide="headphones" class="icon-size"></i> อุปกรณ์เสริม</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'item_types']) }}" class="flyout-link"><i data-lucide="list-tree" class="icon-size"></i> ประเภทสินค้า</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'item_units']) }}" class="flyout-link"><i data-lucide="box-select" class="icon-size"></i> หน่วยนับ</a></li>
+                                {{-- ✅ แก้ Link --}}
+                                <li><a href="{{ route('manager.items.index') }}" class="flyout-link"><i data-lucide="shopping-bag" class="icon-size"></i> รายการสินค้า</a></li>
+                                <li><a href="{{ route('manager.accessories.index') }}" class="flyout-link"><i data-lucide="headphones" class="icon-size"></i> อุปกรณ์เสริม</a></li>
+                                <li><a href="{{ route('manager.item_types.index') }}" class="flyout-link"><i data-lucide="list-tree" class="icon-size"></i> ประเภทสินค้า</a></li>
+                                <li><a href="{{ route('manager.units.index') }}" class="flyout-link"><i data-lucide="box-select" class="icon-size"></i> หน่วยนับ</a></li>
+
+                                {{-- 🟡 การตลาด (ย้ายมาไว้ตรงนี้ หรือแยกปุ่มก็ได้ แต่นี่ใส่ตามกลุ่มเดิม) --}}
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">การตลาด</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'promotions']) }}" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
+                                <li><a href="{{ route('manager.promotions.index') }}" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
                             </ul>
                         </div>
                     </div>
                 </li>
 
+                {{-- 🩷 กลุ่ม 3: จัดการบริการ (สีชมพู) --}}
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
-                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                    <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md hover-pink"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="briefcase" class="w-5 h-5"></i>
                         <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการบริการ</span>
@@ -130,16 +174,18 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">พาร์ทเนอร์</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'care_shops']) }}" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านซักรีด/ดูแลชุด</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'makeup_artists']) }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'photographers']) }}" class="flyout-link"><i data-lucide="camera" class="icon-size"></i> ช่างภาพ</a></li>
+                                {{-- ✅ แก้ Link --}}
+                                <li><a href="{{ route('manager.care_shops.index') }}" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านซักรีด/ดูแลชุด</a></li>
+                                <li><a href="{{ route('manager.makeup_artists.index') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
+                                <li><a href="{{ route('manager.photographers.index') }}" class="flyout-link"><i data-lucide="camera" class="icon-size"></i> ช่างภาพ</a></li>
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">แพ็คเกจ</span></li>
-                                <li><a href="{{ route('manager.index', ['table' => 'photographer_packages']) }}" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจถ่ายภาพ</a></li>
+                                <li><a href="{{ route('manager.photographer_packages.index') }}" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจถ่ายภาพ</a></li>
                             </ul>
                         </div>
                     </div>
                 </li>
 
+                {{-- ประวัติ (ของ Manager) --}}
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
                     <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
@@ -187,6 +233,15 @@
                     </a>
                 </li>
 
+                <li>
+                    <a href="{{ route('maintenance.index') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-orange-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="wrench" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>ซัก-ซ่อม</span>
+                    </a>
+                </li>
+
                 <li x-data="{ open: false }" class="relative" @mouseenter="open = true; $nextTick(() => lucide.createIcons())" @mouseleave="open = false">
                     <button class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
@@ -198,7 +253,7 @@
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="transform opacity-0 scale-95"
                         x-transition:enter-end="transform opacity-100 scale-100"
-                        class="absolute left-full top-0 w-64 pl-2"
+                        class="absolute left-full bottom-0 w-64 pl-2" {{-- 🔴 แก้จุดที่ 2: ใช้ bottom-0 --}}
                         style="display: none;">
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
@@ -212,11 +267,13 @@
                         </div>
                     </div>
                 </li>
+
                 @endif
             </ul>
         </nav>
     </div>
 
+    {{-- ✅ Account: ใช้แบบใหม่ตามที่ขอ --}}
     <div class="mt-auto border-t border-gray-700 pt-4" x-data="{ profileOpen: false }">
         <div class="relative">
             <div x-show="profileOpen"
@@ -229,10 +286,6 @@
                 x-transition:leave-end="transform opacity-0 scale-95"
                 class="absolute bottom-full left-0 right-0 mb-2 w-full bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
                 style="display: none;">
-
-                <!-- <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-xs text-gray-300 hover:bg-gray-700 hover:text-white">
-                    {{ __('Profile') }}
-                </a> -->
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -249,12 +302,15 @@
                 :class="sidebarOpen ? '' : 'justify-center'"
                 :title="sidebarOpen ? '' : '{{ Auth::user()->name }}'">
 
-                <i data-lucide="user-circle" class="w-6 h-6"></i>
+                {{-- เปลี่ยนเป็น Avatar --}}
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-transparent group-hover:ring-gray-500 transition-all">
+                    {{ mb_strtoupper(mb_substr(Auth::user()->first_name ?? 'U', 0, 1)) }}
+                </div>
 
-                <div class="ml-3 text-left" x-show="sidebarOpen" x-transition>
-                    <span class="text-xs font-medium">{{ Auth::user()->name }}</span>
-                    <span class="ml-1 text-xs text-gray-400" x-show="sidebarOpen" x-transition>
-                        {{ mb_strtoupper(mb_substr(Auth::user()->first_name ?? '', 0, 1, 'UTF-8'), 'UTF-8') }}{{ mb_strtoupper(mb_substr(Auth::user()->last_name ?? '', 0, 1, 'UTF-8'), 'UTF-8') }}
+                <div class="ml-3 text-left overflow-hidden" x-show="sidebarOpen" x-transition>
+                    <span class="block text-xs font-medium text-white truncate w-32">{{ Auth::user()->first_name }}</span>
+                    <span class="block text-[10px] text-gray-400 truncate w-32">
+                        {{ Auth::user()->user_type_id == 1 ? 'ผู้จัดการ' : 'พนักงาน' }}
                     </span>
                 </div>
 
