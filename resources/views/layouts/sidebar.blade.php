@@ -174,12 +174,20 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">พาร์ทเนอร์</span></li>
-                                {{-- ✅ แก้ Link --}}
                                 <li><a href="{{ route('manager.care_shops.index') }}" class="flyout-link"><i data-lucide="washing-machine" class="icon-size"></i> ร้านซักรีด/ดูแลชุด</a></li>
                                 <li><a href="{{ route('manager.makeup_artists.index') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ช่างแต่งหน้า</a></li>
                                 <li><a href="{{ route('manager.photographers.index') }}" class="flyout-link"><i data-lucide="camera" class="icon-size"></i> ช่างภาพ</a></li>
-                                <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">แพ็คเกจ</span></li>
+                                <li><span class="block px-2 pt-1 pb-1 text-xs font-semibold text-gray-500 uppercase">แพ็คเกจ</span></li>
                                 <li><a href="{{ route('manager.photographer_packages.index') }}" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจถ่ายภาพ</a></li>
+                                <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">บำรุงรักษา</span></li>
+                                <li>
+                                    <a href="{{ route('maintenance.index') }}"
+                                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-orange-700 hover:text-white rounded-md"
+                                        :class="sidebarOpen ? '' : 'justify-center'">
+                                        <i data-lucide="wrench" class="w-5 h-5"></i>
+                                        <span class="ml-3" x-show="sidebarOpen" x-transition>ซัก-ซ่อม</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -214,6 +222,15 @@
                 </li>
 
                 @elseif(Auth::user()->user_type_id == 2)
+
+                <li>
+                    <a href="{{ route('reception.member.create') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-indigo-600 hover:text-white rounded-md transition-colors"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>สมัครสมาชิก</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="{{ route('reception.rental') }}"

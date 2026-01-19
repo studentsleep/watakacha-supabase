@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'member' => [
+            'driver' => 'session',
+            'provider' => 'members', // อ้างอิง provider ด้านล่าง
+        ],
     ],
 
     /*
@@ -63,6 +67,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'members' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\MemberAccount::class, // ชี้ไปที่ Model ของเรา
         ],
 
         // 'users' => [

@@ -441,6 +441,7 @@ class ManagerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'item_type_id' => 'required|exists:item_types,id',
@@ -453,6 +454,7 @@ class ManagerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'item_type_id' => 'required|exists:item_types,id',
@@ -542,13 +544,13 @@ class ManagerController extends Controller
 
     public function storeMakeupArtist(Request $request)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'description' => 'nullable']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'lineid' => 'nullable|string|max:100', 'description' => 'nullable']);
         MakeupArtist::create($data);
         return redirect()->route('manager.makeup_artists.index')->with('status', 'เพิ่มช่างแต่งหน้าสำเร็จ');
     }
     public function updateMakeupArtist(Request $request, MakeupArtist $makeup_artist)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'description' => 'nullable']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required', 'price' => 'required', 'lineid' => 'nullable|string|max:100', 'description' => 'nullable']);
         $makeup_artist->update($data);
         return redirect()->route('manager.makeup_artists.index')->with('status', 'อัปเดตช่างแต่งหน้าสำเร็จ');
     }
@@ -560,13 +562,13 @@ class ManagerController extends Controller
 
     public function storePhotographer(Request $request)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable','lineid' => 'nullable|string|max:100', 'status' => 'required']);
         Photographer::create($data);
         return redirect()->route('manager.photographers.index')->with('status', 'เพิ่มช่างภาพสำเร็จ');
     }
     public function updatePhotographer(Request $request, Photographer $photographer)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'status' => 'required']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable','lineid' => 'nullable|string|max:100', 'status' => 'required']);
         $photographer->update($data);
         return redirect()->route('manager.photographers.index')->with('status', 'อัปเดตช่างภาพสำเร็จ');
     }

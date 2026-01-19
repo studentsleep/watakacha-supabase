@@ -29,8 +29,8 @@
                         <div>
                             <x-input-label for="status-{{ $shop->care_shop_id }}" :value="__('สถานะ')" />
                             <select name="status" id="status-{{ $shop->care_shop_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active" @selected($shop->status == 'active')>Active</option>
-                                <option value="inactive" @selected($shop->status == 'inactive')>Inactive</option>
+                                <option value="active" @selected($shop->status == 'active')>กำลังใช้งาน</option>
+                                <option value="inactive" @selected($shop->status == 'inactive')>ระงับการใช้งาน</option>
                             </select>
                         </div>
                     </div>

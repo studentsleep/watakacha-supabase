@@ -1,4 +1,10 @@
 <x-app-layout>
+    {{-- ✅ เพิ่ม SweetAlert2 --}}
+
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-green-100 rounded-lg text-green-600">
@@ -170,18 +176,34 @@
                     {{-- Body --}}
                     <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
 
-                        {{-- รายการสินค้า --}}
+                        {{-- รายการสินค้าและอุปกรณ์เสริม --}}
                         <div class="space-y-4">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">รายการสินค้าที่ต้องคืน</h4>
+                            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex justify-between">
+                                <span>รายการสินค้าที่ต้องคืน</span>
+                                <span>(ทั้งหมด <span x-text="returnItems.length"></span> รายการ)</span>
+                            </h4>
+
                             <template x-for="(item, index) in returnItems" :key="index">
-                                <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                                <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                                    :class="item.is_accessory ? 'border-orange-200 bg-orange-50/30' : ''">
+
                                     <div class="flex justify-between items-center mb-3">
                                         <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                            {{-- ไอคอนลำดับ --}}
+                                            <div class="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-lg"
+                                                :class="item.is_accessory ? 'bg-orange-100 text-orange-600' : 'bg-indigo-50 text-indigo-600'">
                                                 <span x-text="index + 1"></span>
                                             </div>
+
                                             <div>
-                                                <div class="font-bold text-gray-800 text-sm" x-text="item.item_name"></div>
+                                                {{-- ชื่อสินค้า --}}
+                                                <div class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                                    <span x-text="item.item_name"></span>
+                                                    {{-- Badge บอกว่าเป็นอุปกรณ์เสริม --}}
+                                                    <template x-if="item.is_accessory">
+                                                        <span class="px-2 py-0.5 rounded text-[10px] bg-orange-100 text-orange-600 border border-orange-200">Accessory</span>
+                                                    </template>
+                                                </div>
                                                 <div class="text-xs text-gray-500">จำนวนที่ยืม: <span class="font-bold" x-text="item.rented_qty"></span></div>
                                             </div>
                                         </div>
@@ -197,39 +219,48 @@
                                         </button>
                                     </div>
 
-                                    {{-- รายการเสียหายย่อย --}}
+                                    {{-- พื้นที่กรอกรายละเอียดความเสียหาย --}}
                                     <div class="space-y-2 pl-12" x-show="item.damages.length > 0">
                                         <template x-for="(dmg, dmgIndex) in item.damages" :key="dmgIndex">
-                                            <div class="bg-red-50/50 border border-red-100 rounded-lg p-3 grid grid-cols-12 gap-3 items-center">
-                                                {{-- จำนวน --}}
+                                            <div class="bg-red-50/50 border border-red-100 rounded-lg p-3 grid grid-cols-12 gap-3 items-center animate-pulse-once">
+
+                                                {{-- 1. จำนวนที่เสียหาย --}}
                                                 <div class="col-span-2">
                                                     <label class="text-[10px] text-gray-400 block mb-1">จำนวน</label>
-                                                    <input type="number" x-model="dmg.qty" min="1" :max="item.rented_qty" @change="recalcSummary()" class="w-full text-xs border-gray-200 rounded text-center h-8">
+                                                    <input type="number" x-model="dmg.qty" min="1" :max="item.rented_qty" @change="recalcSummary()" class="w-full text-xs border-gray-200 rounded text-center h-8 focus:ring-red-500 focus:border-red-500">
                                                 </div>
-                                                {{-- สาเหตุ --}}
+
+                                                {{-- 2. สาเหตุ / รายละเอียด --}}
                                                 <div class="col-span-6">
                                                     <label class="text-[10px] text-gray-400 block mb-1">สาเหตุ / รายละเอียด</label>
                                                     <div class="flex gap-2 mb-1">
-                                                        <span @click="setDamageDetails(dmg, 'ขาด', 500)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border" :class="dmg.cause==='ขาด' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500 border-gray-200'">ขาด</span>
-                                                        <span @click="setDamageDetails(dmg, 'เปื้อน', 200)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border" :class="dmg.cause==='เปื้อน' ? 'bg-yellow-400 text-white border-yellow-400' : 'bg-white text-gray-500 border-gray-200'">เปื้อน</span>
-                                                        <span @click="setDamageDetails(dmg, 'อื่นๆ', 0)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border" :class="dmg.cause==='อื่นๆ' ? 'bg-gray-500 text-white border-gray-500' : 'bg-white text-gray-500 border-gray-200'">อื่นๆ</span>
+                                                        <span @click="setDamageDetails(dmg, 'ขาด', 500)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border hover:bg-red-50" :class="dmg.cause==='ขาด' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500 border-gray-200'">ขาด</span>
+                                                        <span @click="setDamageDetails(dmg, 'เปื้อน', 200)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border hover:bg-yellow-50" :class="dmg.cause==='เปื้อน' ? 'bg-yellow-400 text-white border-yellow-400' : 'bg-white text-gray-500 border-gray-200'">เปื้อน</span>
+                                                        <span @click="setDamageDetails(dmg, 'ชำรุด', 300)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border hover:bg-orange-50" :class="dmg.cause==='ชำรุด' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-500 border-gray-200'">ชำรุด</span>
+                                                        <span @click="setDamageDetails(dmg, 'หาย', item.item_price || 0)" class="cursor-pointer px-2 py-0.5 text-[10px] rounded border hover:bg-gray-50" :class="dmg.cause==='หาย' ? 'bg-black text-white border-black' : 'bg-white text-gray-500 border-gray-200'">หาย</span>
                                                     </div>
-                                                    <input type="text" x-model="dmg.note" placeholder="ระบุเพิ่มเติม..." class="w-full text-xs border-gray-200 rounded h-8">
+                                                    <input type="text" x-model="dmg.note" placeholder="ระบุเพิ่มเติม..." class="w-full text-xs border-gray-200 rounded h-8 focus:ring-red-500 focus:border-red-500">
                                                 </div>
-                                                {{-- ค่าปรับ --}}
+
+                                                {{-- 3. ค่าปรับ --}}
                                                 <div class="col-span-3">
-                                                    <label class="text-[10px] text-red-400 block mb-1">ค่าปรับ</label>
-                                                    <input type="number" x-model="dmg.fine" min="0" @change="recalcSummary()" class="w-full text-xs border-red-200 rounded text-right h-8 font-bold text-red-600 bg-white">
+                                                    <label class="text-[10px] text-red-400 block mb-1">ค่าปรับ (บาท)</label>
+                                                    <input type="number" x-model="dmg.fine" min="0" @change="recalcSummary()" class="w-full text-xs border-red-200 rounded text-right h-8 font-bold text-red-600 bg-white focus:ring-red-500 focus:border-red-500">
                                                 </div>
-                                                {{-- ลบ --}}
+
+                                                {{-- 4. ปุ่มลบ --}}
                                                 <div class="col-span-1 text-center pt-4">
-                                                    <button @click="removeDamage(index, dmgIndex)" class="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <button @click="removeDamage(index, dmgIndex)" class="text-gray-400 hover:text-red-500 transition">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg></button>
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
+
+                                    {{-- แสดงจำนวนที่สภาพปกติ --}}
                                     <div class="mt-2 text-right text-xs text-gray-500" x-show="getDamagedQty(item) < item.rented_qty">
                                         สภาพปกติ: <span class="font-bold text-green-600" x-text="item.rented_qty - getDamagedQty(item)"></span> ชิ้น
                                     </div>
@@ -237,7 +268,7 @@
                             </template>
                         </div>
 
-                        {{-- สรุปยอดเงิน --}}
+                        {{-- สรุปยอดเงิน (ส่วนนี้เหมือนเดิม) --}}
                         <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -276,40 +307,13 @@
             </div>
         </div>
 
-        {{-- 🟢 Custom Confirmation Dialog (Modal ซ้อน Modal) --}}
-        <div x-show="showConfirmDialog" class="fixed inset-0 z-[60] overflow-y-auto" style="display: none;"
-            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-            <div class="flex items-center justify-center min-h-screen px-4 text-center">
-                <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-                <div class="inline-block w-full max-w-sm p-6 my-8 overflow-hidden text-center align-middle transition-all transform bg-white rounded-2xl shadow-2xl relative z-50">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900">ยืนยันการคืนชุด?</h3>
-                    <div class="mt-2">
-                        <p class="text-sm text-gray-500">ยอดสุทธิที่ต้องรับ: <span class="font-bold text-gray-800" x-text="formatNumber(grandTotal)"></span> บาท</p>
-                    </div>
-                    <div class="mt-6 flex gap-3 justify-center">
-                        <button @click="showConfirmDialog = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition">กลับไปแก้ไข</button>
-                        <button @click="submitFinal" :disabled="isSubmitting" class="px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition flex items-center gap-2">
-                            <span x-show="isSubmitting" class="animate-spin">⏳</span>
-                            <span>ยืนยัน</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
         function returnSystem() {
             return {
                 isModalOpen: false,
-                showConfirmDialog: false, // Control Custom Alert
+                showConfirmDialog: false,
                 isSubmitting: false,
                 currentRental: null,
                 returnItems: [],
@@ -323,21 +327,43 @@
 
                 openModal(rental) {
                     this.currentRental = rental;
+
+                    // 1. คำนวณยอดที่จ่ายไปแล้ว
                     let totalPaid = 0;
                     if (rental.payments && rental.payments.length > 0) {
-                        totalPaid = rental.payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                        totalPaid = rental.payments
+                            .filter(p => p.status === 'paid')
+                            .reduce((sum, p) => sum + parseFloat(p.amount), 0);
                     }
                     this.remainingAmount = Math.max(0, parseFloat(rental.total_amount) - totalPaid);
 
-                    this.returnItems = rental.items.map(item => ({
-                        item_id: item.item_id,
-                        item_name: item.item ? item.item.item_name : 'Unknown',
-                        rented_qty: item.quantity,
-                        is_accessory: false,
-                        damages: []
-                    }));
+                    // 2. ดึงข้อมูลสินค้า (รวมทั้ง Item และ Accessory ในลูปเดียว)
+                    this.returnItems = rental.items.map(line => {
+                        let id = null;
+                        let name = '';
+                        let isAcc = false;
 
-                    // (เพิ่ม logic accessories ถ้ามี)
+                        // ✅ แก้ไข Logic การดึงชื่อ: ถ้าเป็น accessory ให้ดึงชื่อจาก accessory
+                        if (line.accessory_id) {
+                            id = line.accessory_id;
+                            // Check if line.accessory exists (loaded via controller)
+                            let accName = line.accessory ? line.accessory.name : 'Unknown Accessory';
+                            name = accName;
+                            isAcc = true;
+                        } else {
+                            id = line.item_id;
+                            name = line.item ? line.item.item_name : 'Unknown Item';
+                            isAcc = false;
+                        }
+
+                        return {
+                            item_id: id,
+                            item_name: name,
+                            rented_qty: line.quantity,
+                            is_accessory: isAcc,
+                            damages: []
+                        };
+                    });
 
                     this.calculateOverdue();
                     this.recalcSummary();
@@ -378,6 +404,7 @@
                 },
 
                 calculateOverdue() {
+                    if (!this.currentRental.return_date) return;
                     const returnDate = new Date(this.currentRental.return_date);
                     const today = new Date();
                     returnDate.setHours(0, 0, 0, 0);
@@ -402,31 +429,54 @@
                     }).format(num);
                 },
 
-                // 1. กดปุ่มยืนยันใน Modal หลัก -> เปิด Custom Dialog
                 confirmReturn() {
+                    // ใช้ SweetAlert2 Confirmation (Optional: ถ้าอยากใช้ SweetAlert แทน Dialog ปกติ)
+                    /*
+                    Swal.fire({
+                        title: 'ยืนยันการคืนชุด?',
+                        text: `ยอดสุทธิที่ต้องรับ: ${this.formatNumber(this.grandTotal)} บาท`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#16a34a',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'ยืนยัน',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submitFinal();
+                        }
+                    });
+                    */
+                    // แต่ในที่นี้เราใช้ Modal ซ้อน Modal (Dialog) ที่ทำไว้แล้ว
                     this.showConfirmDialog = true;
                 },
 
-                // 2. กดปุ่มยืนยันใน Custom Dialog -> ส่งข้อมูลจริง
                 async submitFinal() {
                     this.isSubmitting = true;
 
                     let payloadDamages = [];
+
                     this.returnItems.forEach(item => {
-                        item.damages.forEach(d => {
-                            let finalNote = d.cause;
-                            if (d.note) finalNote += ": " + d.note;
-                            payloadDamages.push({
-                                item_id: item.item_id,
-                                qty: d.qty,
-                                fine: d.fine,
-                                note: finalNote
+                        if (item.damages && item.damages.length > 0) {
+                            item.damages.forEach(d => {
+                                let finalNote = d.cause;
+                                if (d.note) finalNote += ": " + d.note;
+
+                                payloadDamages.push({
+                                    item_id: item.item_id,
+                                    is_accessory: item.is_accessory,
+                                    qty: d.qty,
+                                    fine: d.fine,
+                                    note: finalNote
+                                });
                             });
-                        });
+                        }
                     });
 
                     try {
-                        const res = await fetch(`/reception/return/${this.currentRental.rental_id}`, {
+                        const url = `{{ url('admin/reception/return') }}/${this.currentRental.rental_id}`;
+
+                        const res = await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -440,16 +490,34 @@
                         });
 
                         const data = await res.json();
+
                         if (data.success) {
-                            window.location.reload(); // สำเร็จ รีโหลดหน้า
+                            // ✅ ใช้ SweetAlert2 แจ้งเตือนสำเร็จ
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'เรียบร้อย!',
+                                text: 'บันทึกการคืนและรับชำระเงินสำเร็จ',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.reload();
+                            });
                         } else {
-                            alert('เกิดข้อผิดพลาด: ' + data.message); // Error ใช้ alert ธรรมดาไปก่อน
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: data.message
+                            });
                             this.isSubmitting = false;
                             this.showConfirmDialog = false;
                         }
                     } catch (e) {
-                        console.error(e);
-                        alert('Connection Error');
+                        console.error("Error:", e);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Connection Error',
+                            text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                        });
                         this.isSubmitting = false;
                         this.showConfirmDialog = false;
                     }

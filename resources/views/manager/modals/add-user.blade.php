@@ -58,8 +58,8 @@
                             <div>
                                 <x-input-label for="status" :value="__('สถานะ')" />
                                 <select name="status" id="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="active">กำลังใช้งาน</option>
+                                    <option value="inactive">ระงับการใช้งาน</option>
                                 </select>
                             </div>
                         </div>

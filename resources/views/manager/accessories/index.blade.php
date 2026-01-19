@@ -29,6 +29,7 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase w-16">รหัส</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase">ชื่ออุปกรณ์ / ประเภท</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase">รายละเอียด</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase">ราคา</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase">คงเหลือ / หน่วย</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase">จัดการ</th>
@@ -44,6 +45,11 @@
                                     {{ $acc->type->name ?? '-' }}
                                 </div>
                             </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                <div class="max-w-xs truncate" title="{{ $acc->description }}">
+                                    {{ $acc->description ?? '-' }}
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-right text-white font-mono">{{ number_format($acc->price, 2) }}</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
@@ -55,9 +61,19 @@
                             </td>
                             <td class="px-6 py-4 text-right font-medium">
                                 <button onclick="toggleModal('updateAccessoryModal-{{ $acc->id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
-                                <form action="{{ route('manager.accessories.destroy', $acc->id) }}" method="POST" class="inline-block" onsubmit="return confirm('ยืนยัน?')">
-                                    @csrf @method('DELETE')
-                                    <button class="text-red-400 hover:text-red-300"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                <form id="delete-form-{{ $acc->id }}"
+                                    action="{{ route('manager.accessories.destroy', $acc->id) }}"
+                                    method="POST"
+                                    class="inline-block">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="button"
+                                        onclick="confirmDelete('delete-form-{{ $acc->id }}')"
+                                        class="text-red-400 hover:text-red-300">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

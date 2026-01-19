@@ -71,9 +71,19 @@
                                 <td class="px-6 py-4 text-right font-medium">
                                     <button onclick="toggleModal('updateItemModal-{{ $item->id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
                                     <button onclick="toggleModal('updateImageModal-{{ $item->id }}', true)" class="text-indigo-400 hover:text-indigo-300 mr-2"><i data-lucide="image" class="w-5 h-5"></i></button>
-                                    <form action="{{ route('manager.items.destroy', $item->id) }}" method="POST" class="inline-block" onsubmit="return confirm('ยืนยันการลบ?')">
-                                        @csrf @method('DELETE')
-                                        <button class="text-red-400 hover:text-red-300"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                    <form id="delete-form-{{ $item->id }}"
+                                        action="{{ route('manager.items.destroy', $item->id) }}"
+                                        method="POST"
+                                        class="inline-block">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="button"
+                                            onclick="confirmDelete('delete-form-{{ $item->id }}')"
+                                            class="text-red-400 hover:text-red-300">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>

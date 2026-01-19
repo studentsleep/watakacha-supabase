@@ -42,14 +42,24 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <span class="px-2 py-1 rounded-full text-xs font-bold {{ $shop->status == 'active' ? 'bg-green-900 text-green-300 border border-green-700' : 'bg-red-900 text-red-300 border border-red-700' }}">
-                                    {{ $shop->status }}
+                                    {{ $shop->status == 'active' ? 'กำลังใช้งาน' : 'ระงับการใช้งาน' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right font-medium">
                                 <button onclick="toggleModal('updateCareShopModal-{{ $shop->care_shop_id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
-                                <form action="{{ route('manager.care_shops.destroy', $shop->care_shop_id) }}" method="POST" class="inline-block" onsubmit="return confirm('ลบ?')">
-                                    @csrf @method('DELETE')
-                                    <button class="text-red-400 hover:text-red-300"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                <form id="delete-form-{{ $shop->care_shop_id }}"
+                                    action="{{ route('manager.care_shops.destroy', $shop->care_shop_id) }}"
+                                    method="POST"
+                                    class="inline-block">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="button"
+                                        onclick="confirmDelete('delete-form-{{ $shop->care_shop_id }}')"
+                                        class="text-red-400 hover:text-red-300">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

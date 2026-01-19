@@ -12,18 +12,21 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     {{-- ป้องกันการกระพริบของ AlpineJS --}}
-    <style> [x-cloak] { display: none !important; } </style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
-{{-- 
-    ▼▼▼ แก้ไข Logic: 
-    localStorage.getItem('sidebarOpen') !== 'false' 
-    (แปลว่า: ถ้าไม่เคยตั้งค่ามาก่อน หรือค่าไม่ใช่ 'false' ให้เป็น true เสมอ -> เปิด Sidebar เป็นค่าเริ่มต้น) 
+{{--
+    Logic: ตรวจสอบ localStorage ถ้าไม่มีค่า หรือไม่ใช่ 'false' ให้เปิด Sidebar เป็นค่าเริ่มต้น 
 --}}
+
 <body class="font-sans antialiased"
-      x-data="{ 
+    x-data="{ 
           sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',
           init() {
               this.$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', value))
@@ -57,25 +60,30 @@
         </div>
     </div>
 
-    {{-- ▼▼▼ Scripts รวม ▼▼▼ --}}
+    {{-- ================================================================= --}}
+    {{-- 🛠️ Scripts Zone --}}
+    {{-- ================================================================= --}}
+
+    {{-- 1. SweetAlert2 CDN (สำหรับ Alert สวยๆ) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. เริ่มทำงาน Lucide Icons
+            // 2. เริ่มทำงาน Lucide Icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
         });
 
-        // 2. ✅ [สำคัญมาก] ฟังก์ชันสำหรับเปิด Modal แบบเก่า (Manager CRUD)
-        // ต้องมีฟังก์ชันนี้ ไม่อย่างนั้นปุ่ม "เพิ่ม/แก้ไข" ในหน้า Manager จะกดไม่ไป
+        // 3. ✅ ฟังก์ชันเปิด Modal แบบเก่า (Manager CRUD)
         window.toggleModal = function(modalID, show) {
             const modal = document.getElementById(modalID);
             if (modal) {
                 if (show) {
                     modal.classList.remove('hidden');
                     modal.style.display = 'block';
-                    
-                    // Re-render Icons ใน Modal (เผื่อมี icon ใหม่)
+
+                    // Re-render Icons ใน Modal
                     if (typeof lucide !== 'undefined') {
                         setTimeout(() => lucide.createIcons(), 100);
                     }
@@ -87,6 +95,51 @@
                 console.error('Modal ID not found:', modalID);
             }
         }
+
+        // 4. ✅ ฟังก์ชันยืนยันการลบ (Global Delete Confirmation)
+        // เรียกใช้โดย: onclick="confirmDelete('form-id')"
+        window.confirmDelete = function(formId, title = 'ยืนยันการลบ?', text = 'ข้อมูลที่ถูกลบจะไม่สามารถกู้คืนได้!') {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                // ปรับแต่งสีให้เข้ากับ Dark Mode
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#ef4444', // สีแดง
+                cancelButtonColor: '#6b7280', // สีเทา
+                confirmButtonText: 'ลบข้อมูล',
+                cancelButtonText: 'ยกเลิก',
+                customClass: {
+                    popup: 'rounded-xl border border-gray-700 shadow-xl'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            })
+        }
+
+        // 5. ✅ แสดง Alert เมื่อทำรายการสำเร็จ (ดึงจาก session('status'))
+        const sessionStatus = `{{ session('status') }}`;
+
+        if (sessionStatus) {
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ!',
+                text: sessionStatus, // เรียกใช้ตัวแปร JS ตรงนี้
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#4f46e5',
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'rounded-xl border border-gray-700 shadow-xl'
+                }
+            });
+        }
     </script>
 </body>
+
 </html>

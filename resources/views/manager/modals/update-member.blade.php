@@ -62,8 +62,8 @@
                             <div>
                                 <x-input-label for="status-{{ $member->member_id }}" :value="__('สถานะ')" />
                                 <select name="status" id="status-{{ $member->member_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="active" @selected($member->status == 'active')>Active</option>
-                                    <option value="inactive" @selected($member->status == 'inactive')>Inactive</option>
+                                    <option value="active" @selected($member->status == 'active')>กำลังใช้งาน</option>
+                                    <option value="inactive" @selected($member->status == 'inactive')>ระงับการใช้งาน</option>
                                 </select>
                             </div>
                         </div>

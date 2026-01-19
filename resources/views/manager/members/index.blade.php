@@ -28,7 +28,7 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase w-16">รหัส</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase">ชื่อผู้ใช้ / ชื่อ-นามสกุล</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase">ติดต่อ</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase">ติดต่อ (Tel / Line)</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase">แต้มสะสม</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-indigo-400 uppercase">สถานะ</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase">จัดการ</th>
@@ -43,20 +43,49 @@
                                 <div class="text-sm text-gray-400">{{ $member->first_name }} {{ $member->last_name }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-400">
-                                <div><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i> {{ $member->tel }}</div>
-                                <div class="text-xs text-gray-500">{{ $member->email }}</div>
+                                {{-- เบอร์โทร --}}
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <i data-lucide="phone" class="w-3.5 h-3.5 text-gray-500"></i>
+                                    <span class="text-gray-300">{{ $member->tel }}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-1.5 ml-5">{{ $member->email }}</div>
+
+                                {{-- สถานะ LINE (เพิ่มใหม่) --}}
+                                @if($member->line_user_id)
+                                {{-- กรณีเชื่อมต่อแล้ว --}}
+                                <div class="flex items-center gap-1.5 text-green-400 bg-green-900/20 px-2 py-0.5 rounded-md w-fit border border-green-900/30" title="ผูกบัญชี LINE แล้ว">
+                                    <i data-lucide="link" class="w-3 h-3"></i>
+                                    <span class="text-[10px] font-medium">เชื่อม LINE แล้ว</span>
+                                </div>
+                                @else
+                                {{-- กรณีไม่ได้เชื่อมต่อ --}}
+                                <div class="flex items-center gap-1.5 text-gray-500 bg-gray-700/30 px-2 py-0.5 rounded-md w-fit border border-gray-700" title="ลูกค้ายังไม่เคยกดเข้าใช้งานผ่าน LINE">
+                                    <i data-lucide="unlink" class="w-3 h-3"></i>
+                                    <span class="text-[10px]">ยังไม่เชื่อม LINE</span>
+                                </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-right text-yellow-400 font-bold font-mono">{{ number_format($member->points) }}</td>
                             <td class="px-6 py-4 text-center">
                                 <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $member->status == 'active' ? 'bg-green-900 text-green-300 border border-green-700' : 'bg-red-900 text-red-300 border border-red-700' }}">
-                                    {{ $member->status }}
+                                    {{ $member->status == 'active' ? 'กำลังใช้งาน' : 'ระงับการใช้งาน' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right font-medium">
                                 <button onclick="toggleModal('updateMemberModal-{{ $member->member_id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
-                                <form action="{{ route('manager.members.destroy', $member->member_id) }}" method="POST" class="inline-block" onsubmit="return confirm('ลบ?')">
-                                    @csrf @method('DELETE')
-                                    <button class="text-red-400 hover:text-red-300"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                <form id="delete-form-{{ $member->member_id }}"
+                                    action="{{ route('manager.members.destroy', $member->member_id) }}"
+                                    method="POST"
+                                    class="inline-block">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="button"
+                                        onclick="confirmDelete('delete-form-{{ $member->member_id }}')"
+                                        class="text-red-400 hover:text-red-300">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

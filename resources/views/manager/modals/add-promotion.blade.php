@@ -30,15 +30,15 @@
                                 <x-text-input type="date" name="start_date" id="start_date" class="mt-1 block w-full" require/>
                             </div>
                             <div>
-                                <x-input-label for="end_date" :value="__('วันสิ้นสุด')" />
-                                <x-text-input type="date" name="end_date" id="end_date" class="mt-1 block w-full" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-input-label for="end_date" :value="__('วันสิ้นสุด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-text-input type="date" name="end_date" id="end_date" class="mt-1 block w-full" required/>
                             </div>
                         </div>
                         <div>
                             <x-input-label for="status_promo" :value="__('สถานะ')" />
                             <select name="status" id="status_promo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">ใช้งาน</option>
+                                <option value="inactive">ระงับการใช้งาน</option>
                             </select>
                         </div>
                         <div>

@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class MemberAccount extends Model
+class MemberAccount extends Authenticatable
 {
     use HasFactory;
 
@@ -21,6 +22,7 @@ class MemberAccount extends Model
         'status',
         'points',
         'password',
+        'line_user_id',
     ];
 
     /**
@@ -29,14 +31,15 @@ class MemberAccount extends Model
      * @var array<int, string>
      */
     protected $hidden = [
-        'password', // <-- [เพิ่ม] ซ่อนรหัสผ่าน
+        'password',
+        'remember_token',
     ];
 
     protected function casts(): array
     {
         return [
             'points' => 'integer',
-            'password' => 'hashed', 
+            'password' => 'hashed',
         ];
     }
 

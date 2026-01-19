@@ -16,8 +16,8 @@
                             <div>
                                 <x-input-label for="discount_type-{{ $promo->promotion_id }}" :value="__('ประเภทส่วนลด')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
                                 <select name="discount_type" id="discount_type-{{ $promo->promotion_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300" require>
-                                    <option value="percentage" @selected($promo->discount_type == 'percentage')>Percentage (%)</option>
-                                    <option value="fixed" @selected($promo->discount_type == 'fixed')>Fixed Amount (THB)</option>
+                                    <option value="percentage" @selected($promo->discount_type == 'percentage')>เปอร์เซ็นต์ (%)</option>
+                                    <option value="fixed" @selected($promo->discount_type == 'fixed')>บาท (THB)</option>
                                 </select>
                             </div>
                             <div>
@@ -38,8 +38,8 @@
                         <div>
                             <x-input-label for="status_promo-{{ $promo->promotion_id }}" :value="__('สถานะ')" />
                             <select name="status" id="status_promo-{{ $promo->promotion_id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
-                                <option value="active" @selected($promo->status == 'active')>Active</option>
-                                <option value="inactive" @selected($promo->status == 'inactive')>Inactive</option>
+                                <option value="active" @selected($promo->status == 'active')>ใช้งาน</option>
+                                <option value="inactive" @selected($promo->status == 'inactive')>ระงับการใช้งาน</option>
                             </select>
                         </div>
                         <div>

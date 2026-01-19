@@ -63,32 +63,51 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($pending as $item)
+                                @forelse($pending as $mt)
                                 <tr class="hover:bg-gray-50 transition group">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                                                {{ substr($item->item->item_name, 0, 1) }}
+                                            {{-- ✅ แสดงรูปภาพ (เช็คว่าเป็น Item หรือ Accessory) --}}
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                                @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}"
+                                                    alt="Img" class="w-full h-full object-cover">
+                                                @elseif($mt->accessory && $mt->accessory->image_path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}"
+                                                    alt="Acc" class="w-full h-full object-cover">
+                                                @else
+                                                <div class="w-full h-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold">
+                                                    {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
+                                                </div>
+                                                @endif
                                             </div>
+
                                             <div>
-                                                <div class="font-bold text-gray-100">{{ $item->item->item_name }}</div>
-                                                <div class="text-xs text-gray-500">รหัส: {{ $item->item->id }}</div>
+                                                <div class="font-bold text-gray-800 dark:text-gray-100">
+                                                    {{ $mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name . ' (อุปกรณ์)' : 'ไม่ทราบชื่อ') }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    รหัส: {{ $mt->item_id ?? $mt->accessory_id }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
-                                            {{ $item->damage_description }}
+                                            {{ $mt->damage_description }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-600">
                                         <div class="flex flex-col">
-                                            <span class="font-bold text-gray-400">{{ $item->rental && $item->rental->member ? $item->rental->member->first_name : 'ลูกค้าทั่วไป' }}</span>
-                                            <span class="text-xs text-gray-400">จาก การเช่า #{{ $item->rental_id }}</span>
+                                            <span class="font-bold text-gray-400">
+                                                {{ $mt->rental && $mt->rental->member ? $mt->rental->member->first_name : 'ลูกค้าทั่วไป' }}
+                                            </span>
+                                            <span class="text-xs text-gray-400">จาก การเช่า #{{ $mt->rental_id }}</span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <button @click="openSendModal({{ Js::from($item) }})" class="inline-flex items-center px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-md transition transform hover:-translate-y-0.5">
+                                        <button @click="openSendModal({{ Js::from($mt) }}, '{{ $mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '') }}')"
+                                            class="inline-flex items-center px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-md transition transform hover:-translate-y-0.5">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
@@ -99,9 +118,6 @@
                                 @empty
                                 <tr>
                                     <td colspan="4" class="px-6 py-12 text-center text-gray-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
                                         <p>ไม่มีรายการรอซ่อม</p>
                                     </td>
                                 </tr>
@@ -112,7 +128,7 @@
                 </div>
 
                 {{-- TAB 2: In Progress --}}
-                <div x-show="activeTab === 'in_progress'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                <div x-show="activeTab === 'in_progress'" x-transition:enter="transition ease-out duration-300" style="display: none;">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50/80 dark:bg-gray-700/50">
@@ -124,26 +140,43 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($inProgress as $item)
+                                @forelse($inProgress as $mt)
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-6 py-4">
-                                        <div class="font-bold text-gray-100">{{ $item->item->item_name }}</div>
-                                        <div class="text-xs text-gray-500 mt-0.5 bg-gray-100 inline-block px-1.5 rounded border border-gray-200">
-                                            จาก รหัสการเช่า #{{ $item->rental_id }}
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                                @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}" class="w-full h-full object-cover">
+                                                @elseif($mt->accessory && $mt->accessory->image_path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}" class="w-full h-full object-cover">
+                                                @else
+                                                <div class="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold">
+                                                    {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
+                                                </div>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-800 dark:text-gray-100">
+                                                    {{ $mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '') }}
+                                                </div>
+                                                <div class="text-xs text-gray-500 mt-0.5 bg-gray-100 inline-block px-1.5 rounded border border-gray-200">
+                                                    จาก การเช่า #{{ $mt->rental_id }}
+                                                </div>
+                                                <div class="text-xs text-red-500 mt-1">อาการ: {{ $mt->damage_description }}</div>
+                                            </div>
                                         </div>
-                                        <div class="text-xs text-red-500 mt-1">อาการ: {{ $item->damage_description }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-blue-600">{{ $item->careShop->care_name ?? '-' }}</div>
+                                        <div class="text-sm font-bold text-blue-600">{{ $mt->careShop->care_name ?? '-' }}</div>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 mt-1">
-                                            @if($item->type == 'laundry') ซักรีด @elseif($item->type == 'repair') ซ่อมแซม @else ซัก+ซ่อม @endif
+                                            @if($mt->type == 'laundry') ซักรีด @elseif($mt->type == 'repair') ซ่อมแซม @else ซัก+ซ่อม @endif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ \Carbon\Carbon::parse($item->sent_at)->locale('th')->translatedFormat('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($mt->sent_at)->locale('th')->translatedFormat('d M Y') }}
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <button @click="openReceiveModal({{ Js::from($item) }})" class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg shadow-md transition transform hover:-translate-y-0.5">
+                                        <button @click="openReceiveModal({{ Js::from($mt) }})" class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg shadow-md transition transform hover:-translate-y-0.5">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
@@ -162,7 +195,7 @@
                 </div>
 
                 {{-- TAB 3: History --}}
-                <div x-show="activeTab === 'history'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                <div x-show="activeTab === 'history'" x-transition:enter="transition ease-out duration-300" style="display: none;">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50/80 dark:bg-gray-700/50">
@@ -174,29 +207,40 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($history as $item)
+                                @forelse($history as $mt)
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-6 py-4">
-                                        <div class="font-bold text-gray-100">{{ $item->item->item_name }}</div>
-                                        <div class="text-xs text-gray-400 mt-0.5">รหัสการเช่า #{{ $item->rental_id }}</div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                                @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}" class="w-full h-full object-cover">
+                                                @elseif($mt->accessory && $mt->accessory->image_path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}" class="w-full h-full object-cover">
+                                                @else
+                                                <div class="w-full h-full flex items-center justify-center bg-green-100 text-green-600 font-bold">
+                                                    {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
+                                                </div>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-800 dark:text-gray-100">
+                                                    {{ $mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '') }}
+                                                </div>
+                                                <div class="text-xs text-gray-400 mt-0.5">รหัสการเช่า #{{ $mt->rental_id }}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $item->careShop->care_name ?? '-' }}
+                                        {{ $mt->careShop->care_name ?? '-' }}
                                         <span class="text-xs text-gray-400">
-                                            @if($item->type == 'laundry')
-                                            (ซักรีด)
-                                            @elseif($item->type == 'repair')
-                                            (ซ่อมแซม)
-                                            @else
-                                            (ซักและซ่อม)
-                                            @endif
+                                            @if($mt->type == 'laundry') (ซักรีด) @elseif($mt->type == 'repair') (ซ่อมแซม) @else (ซักและซ่อม) @endif
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <span class="font-mono font-bold text-red-500">{{ number_format($item->shop_cost, 2) }}</span>
+                                        <span class="font-mono font-bold text-red-500">{{ number_format($mt->shop_cost, 2) }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-center text-sm text-green-600 font-bold">
-                                        {{ \Carbon\Carbon::parse($item->received_at)->locale('th')->translatedFormat('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($mt->received_at)->locale('th')->translatedFormat('d M Y') }}
                                     </td>
                                 </tr>
                                 @empty
@@ -207,8 +251,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    {{-- ✅ ซ่อนแถบขาวถ้าไม่มีหน้า Pagination --}}
                     @if($history->hasPages())
                     <div class="p-4 bg-gray-50 border-t border-gray-200">
                         {{ $history->links() }}
@@ -237,7 +279,7 @@
                     <div class="space-y-4">
                         <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
                             <p class="text-xs text-orange-800 font-bold mb-1">สินค้า:</p>
-                            <p class="text-sm text-gray-900 font-medium" x-text="currentItem?.item?.item_name"></p>
+                            <p class="text-sm text-gray-900 font-medium" x-text="currentItemName"></p>
                             <p class="text-xs text-red-500 mt-1">อาการ: <span x-text="currentItem?.damage_description"></span></p>
                         </div>
 
@@ -311,6 +353,7 @@
                 showSendModal: false,
                 showReceiveModal: false,
                 currentItem: null,
+                currentItemName: '',
 
                 sendForm: {
                     care_shop_id: '',
@@ -320,8 +363,10 @@
                     shop_cost: ''
                 },
 
-                openSendModal(item) {
+                // ปรับฟังก์ชันให้รับชื่อสินค้ามาด้วยเพื่อความสะดวก
+                openSendModal(item, name) {
                     this.currentItem = item;
+                    this.currentItemName = name;
                     this.sendForm = {
                         care_shop_id: '',
                         type: 'repair'
@@ -333,7 +378,7 @@
                     if (!this.sendForm.care_shop_id) return alert('กรุณาเลือกร้าน');
 
                     try {
-                        const res = await fetch(`/maintenance/${this.currentItem.id}/send`, {
+                        const res = await fetch(`{{ url('admin/maintenance') }}/${this.currentItem.id}/send`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -358,7 +403,7 @@
                     if (this.receiveForm.shop_cost === '') return alert('กรุณาระบุค่าใช้จ่าย (ใส่ 0 หากไม่มี)');
 
                     try {
-                        const res = await fetch(`/maintenance/${this.currentItem.id}/receive`, {
+                        const res = await fetch(`{{ url('admin/maintenance') }}/${this.currentItem.id}/receive`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

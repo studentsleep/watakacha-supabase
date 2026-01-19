@@ -16,6 +16,7 @@ class RentalItem extends Model
     protected $fillable = [
         'rental_id',
         'item_id',
+        'accessory_id',
         'quantity',
         'price',
         'fine_amount',
@@ -44,5 +45,21 @@ class RentalItem extends Model
     {
         // เชื่อมกับ Model Item โดยใช้ 'id' ในตารางนี้ เชื่อมกับ 'id' ในตาราง items
         return $this->belongsTo(Item::class, 'item_id', 'id');
+    }
+
+    public function accessory()
+    {
+        // เชื่อมกับ Model Accessory (ต้องแน่ใจว่ามี Model นี้แล้ว)
+        return $this->belongsTo(Accessory::class, 'accessory_id', 'id');
+    }
+
+    public function getNameAttribute()
+    {
+        if ($this->item_id) {
+            return $this->item->item_name ?? 'ไม่มีไอเทม';
+        } elseif ($this->accessory_id) {
+            return $this->accessory->name ?? 'ไม่มีอุปกรณ์เสริม'; // สมมติใน Accessory ใช้ name
+        }
+        return '-';
     }
 }

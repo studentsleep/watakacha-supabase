@@ -36,9 +36,31 @@
                             <td class="px-6 py-4 text-sm text-gray-400 max-w-sm truncate">{{ $type->description ?? '-' }}</td>
                             <td class="px-6 py-4 text-right font-medium">
                                 <button onclick="toggleModal('updateUserTypeModal-{{ $type->user_type_id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
-                                <form action="{{ route('manager.user_types.destroy', $type->user_type_id) }}" method="POST" class="inline-block" onsubmit="return confirm('ลบ?')">
-                                    @csrf @method('DELETE')
-                                    <button class="text-red-400 hover:text-red-300"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                <form id="delete-form-{{ $type->user_type_id }}"
+
+                                    action="{{ route('manager.user_types.destroy', $type->user_type_id) }}"
+
+                                    method="POST"
+
+                                    class="inline-block">
+
+
+
+                                    @csrf
+
+                                    @method('DELETE')
+
+
+
+                                    <button type="button"
+
+                                        onclick="confirmDelete('delete-form-{{ $type->user_type_id }}')"
+
+                                        class="text-red-400 hover:text-red-300">
+
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+
+                                    </button>
                                 </form>
                             </td>
                         </tr>

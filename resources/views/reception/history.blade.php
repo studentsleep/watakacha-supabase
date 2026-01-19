@@ -229,10 +229,8 @@
                     {{-- 🟢 เนื้อหาใบเสร็จ --}}
                     <div class="p-6 bg-white relative">
                         {{-- ลายน้ำ (ถ้าต้องการ) --}}
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none">
-                            <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L1 21h22L12 2zm0 3.5L18.5 19H5.5L12 5.5z" />
-                            </svg>
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.3] pointer-events-none">
+                            <img src="{{ asset('images/logo.png') }}" class="w-80 h-80 object-contain grayscale">
                         </div>
 
                         {{-- ข้อมูลลูกค้า --}}
