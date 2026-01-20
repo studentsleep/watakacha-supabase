@@ -40,8 +40,7 @@
     <div class="flex min-h-screen">
         <div class="hidden lg:flex w-1/2 bg-gray-100 relative items-center justify-center overflow-hidden">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1550614000-4b9519e003ac?q=80&w=2000&auto=format&fit=crop"
-                    class="w-full h-full object-cover" alt="Login Background">
+                <img src="{{ asset('images/wa2.png') }}" class="w-full h-full object-cover" alt="Banner">
                 <div class="absolute inset-0 bg-gradient-to-tr from-brand-900/60 to-purple-900/40 backdrop-blur-[1px]"></div>
             </div>
             <div class="relative z-10 text-white p-12 text-center">

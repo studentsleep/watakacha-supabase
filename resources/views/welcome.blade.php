@@ -70,13 +70,26 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center">
 
+                {{-- ✅ LOGO ร้าน --}}
                 <div class="flex items-center gap-2">
-                    <div class="bg-gradient-to-tr from-brand-500 to-purple-600 text-white p-2 rounded-lg shadow-lg">
-                        <i data-lucide="gem" class="w-6 h-6"></i>
-                    </div>
-                    <span class="text-2xl font-bold tracking-tight" :class="scrolled ? 'text-gray-900' : 'text-gray-900 lg:text-white'">
-                        Watakacha
-                    </span>
+                    {{--
+                        วิธีใช้: เอารูปโลโก้ชื่อ 'logo.png' ไปวางไว้ที่ folder 'public/images/' 
+                        ถ้าไม่มีรูป ระบบจะแสดง Icon แทนครับ
+                    --}}
+                    <a href="#" class="flex items-center gap-2">
+                        @if(file_exists(public_path('images/logo.png')))
+                        <img src="{{ asset('images/logo.png') }}" alt="Watakacha Logo" class="h-10 w-auto">
+                        @else
+                        {{-- Fallback Logo (ถ้ายังไม่มีไฟล์รูป) --}}
+                        <div class="bg-gradient-to-tr from-brand-500 to-purple-600 text-white p-2 rounded-lg shadow-lg">
+                            <i data-lucide="gem" class="w-6 h-6"></i>
+                        </div>
+                        @endif
+
+                        <span class="text-2xl font-bold tracking-tight" :class="scrolled ? 'text-gray-900' : 'text-gray-900 lg:text-white'">
+                            Watakacha
+                        </span>
+                    </a>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8">
@@ -121,8 +134,12 @@
 
     <div class="relative h-[600px] lg:h-[700px] w-full overflow-hidden">
         <div class="absolute inset-0">
+            @if(file_exists(public_path('images/banner.jpg')))
+            <img src="{{ asset('images/banner.png') }}" class="w-full h-full object-cover" alt="Banner">
+            @else
             <img src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=2574&auto=format&fit=crop"
-                class="w-full h-full object-cover" alt="Background">
+                class="w-full h-full object-cover" alt="Default Banner">
+            @endif
             <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
         </div>
 
@@ -170,20 +187,43 @@
             {{-- Loop Items --}}
             @if(isset($items) && count($items) > 0)
             @foreach($items as $item)
+            @php
+            // ✅ Logic หา Path รูปภาพ (เหมือนหน้า Maintenance)
+            $imagePath = null;
+            // หาภาพหลักก่อน
+            $mainImg = $item->images->where('is_main', true)->first();
+            // ถ้าไม่มีภาพหลัก เอาภาพแรก
+            if (!$mainImg) {
+            $mainImg = $item->images->first();
+            }
+
+            if ($mainImg && $mainImg->path) {
+            // ลบ public/ ออกจาก path (ถ้ามี) แล้วสร้าง URL
+            $cleanPath = str_replace('public/', '', $mainImg->path);
+            $imagePath = asset('storage/' . $cleanPath);
+            } else {
+            // Placeholder ถ้าไม่มีรูป
+            $imagePath = 'https://via.placeholder.com/400x533?text=No+Image';
+            }
+            @endphp
+
             {{-- Card --}}
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer"
-                @click="selectedItem = {{ Js::from($item) }}; activeImage = '{{ $item->images->first()->image_path ?? '' }}'; itemModalOpen = true">
+                @click="selectedItem = {{ Js::from($item) }}; 
+                        // ✅ Alpine Logic: เซ็ตภาพแรกให้ Modal
+                        let firstImg = selectedItem.images.find(i => i.is_main) || selectedItem.images[0];
+                        if(firstImg) {
+                            activeImage = '{{ asset('storage') }}/' + firstImg.path.replace('public/', '');
+                        } else {
+                            activeImage = 'https://via.placeholder.com/400x533?text=No+Image';
+                        }
+                        itemModalOpen = true">
 
                 <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                    @if($item->images && $item->images->count() > 0)
-                    <img src="{{ asset('storage/' . $item->images->first()->image_path) }}"
+                    <img src="{{ $imagePath }}"
                         alt="{{ $item->item_name }}"
-                        class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                    @else
-                    <div class="w-full h-full flex items-center justify-center text-gray-400">
-                        <i data-lucide="image-off" class="w-12 h-12"></i>
-                    </div>
-                    @endif
+                        class="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/400x533?text=No+Image';">
 
                     {{-- Badge Status --}}
                     @if($item->stock > 0)
@@ -208,31 +248,17 @@
             @endforeach
             @else
             {{-- Mockup Data (กรณีไม่มีข้อมูลจริง) --}}
-            @for ($i = 1; $i <= 4; $i++)
-                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer"
-                @click="selectedItem = { item_name: 'ชุดราตรีสีแดงไวน์ (ตัวอย่าง)', price: 1500, description: 'ชุดราตรีผ้ากำมะหยี่เข้ารูป สีแดงไวน์ขับผิว เหมาะสำหรับงานกาล่าดินเนอร์', images: [{image_path: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800'}, {image_path: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800'}] }; activeImage = 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800'; itemModalOpen = true">
-                <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                    <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&auto=format&fit=crop"
-                        class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                    <span class="absolute top-3 right-3 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm">ว่าง</span>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition truncate">ชุดราตรีสีแดงไวน์ (ตัวอย่าง)</h3>
-                    <div class="flex justify-between items-center mt-2">
-                        <p class="text-brand-600 font-bold">฿1,500</p>
-                        <span class="text-xs text-gray-400">เช่า 7 วัน</span>
-                    </div>
-                </div>
+            <div class="col-span-full text-center py-10 text-gray-500">
+                ไม่พบข้อมูลสินค้า
+            </div>
+            @endif
         </div>
-        @endfor
-        @endif
-    </div>
 
-    <div class="text-center mt-12">
-        <button class="px-8 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-full hover:bg-gray-50 transition shadow-sm">
-            ดูทั้งหมด
-        </button>
-    </div>
+        <div class="text-center mt-12">
+            <button class="px-8 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-full hover:bg-gray-50 transition shadow-sm">
+                ดูทั้งหมด
+            </button>
+        </div>
     </div>
 
     <footer id="contact" class="bg-gray-900 text-white pt-16 pb-8">
@@ -240,7 +266,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-gray-800 pb-12">
                 <div class="space-y-4">
                     <div class="flex items-center gap-2">
+                        @if(file_exists(public_path('images/logo.png')))
+                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto brightness-0 invert"> {{-- Logo ขาว --}}
+                        @else
                         <i data-lucide="gem" class="w-6 h-6 text-brand-500"></i>
+                        @endif
                         <span class="text-xl font-bold">Watakacha</span>
                     </div>
                     <p class="text-gray-400 text-sm leading-relaxed">
@@ -294,24 +324,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-2">
                     <div class="bg-gray-100 p-4 flex flex-col justify-center">
                         <div class="aspect-[3/4] w-full rounded-xl overflow-hidden shadow-sm mb-4">
-                            <img :src="activeImage" class="w-full h-full object-cover" alt="Main Image">
+                            <img :src="activeImage" class="w-full h-full object-cover" alt="Main Image"
+                                onerror="this.src='https://via.placeholder.com/400x533?text=No+Image'">
                         </div>
 
                         <div class="flex gap-2 overflow-x-auto scrollbar-hide py-2">
                             <template x-if="selectedItem?.images">
                                 <template x-for="img in selectedItem.images" :key="img.id">
-                                    <div @click="activeImage = '{{ asset('storage') }}/' + img.image_path"
+                                    {{-- ✅ Alpine Logic: เปลี่ยนจาก img.image_path เป็น img.path --}}
+                                    <div @click="activeImage = '{{ asset('storage') }}/' + img.path.replace('public/', '')"
                                         class="w-16 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 transition"
-                                        :class="activeImage.includes(img.image_path) ? 'border-brand-500' : 'border-transparent'">
-                                        <img :src="'{{ asset('storage') }}/' + img.image_path" class="w-full h-full object-cover">
+                                        :class="activeImage.includes(img.path.replace('public/', '')) ? 'border-brand-500' : 'border-transparent'">
+                                        <img :src="'{{ asset('storage') }}/' + img.path.replace('public/', '')" class="w-full h-full object-cover">
                                     </div>
                                 </template>
-                            </template>
-
-                            <template x-if="!selectedItem?.images && selectedItem?.item_name">
-                                <div class="w-16 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 border-brand-500">
-                                    <img :src="selectedItem.activeImage || activeImage" class="w-full h-full object-cover">
-                                </div>
                             </template>
                         </div>
                     </div>

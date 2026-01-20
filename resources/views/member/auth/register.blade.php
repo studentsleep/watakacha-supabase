@@ -118,7 +118,7 @@
         {{-- Right Side Image --}}
         <div class="hidden lg:flex w-1/2 bg-brand-50 relative items-center justify-center overflow-hidden">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1585916420730-d7f95e942d43?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover">
+                <img src="{{ asset('images/wa2.png') }}" class="w-full h-full object-cover" alt="Banner">
                 <div class="absolute inset-0 bg-gradient-to-bl from-brand-900/50 to-black/30 backdrop-blur-[1px]"></div>
             </div>
             <div class="relative z-10 text-white p-12 max-w-lg">
