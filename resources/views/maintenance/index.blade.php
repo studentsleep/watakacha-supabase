@@ -1,4 +1,10 @@
 <x-app-layout>
+    {{-- ✅ เพิ่ม SweetAlert2 --}}
+
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+
     {{-- Header --}}
     <x-slot name="header">
         <div class="flex items-center gap-3">
@@ -67,13 +73,13 @@
                                 <tr class="hover:bg-gray-50 transition group">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            {{-- ✅ แสดงรูปภาพ (เช็คว่าเป็น Item หรือ Accessory) --}}
+                                            {{-- ✅ ส่วนรูปภาพ (รองรับทั้ง Item และ Accessory) --}}
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                                 @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}"
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}"
                                                     alt="Img" class="w-full h-full object-cover">
-                                                @elseif($mt->accessory && $mt->accessory->image_path)
-                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}"
+                                                @elseif($mt->accessory && $mt->accessory->path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}"
                                                     alt="Acc" class="w-full h-full object-cover">
                                                 @else
                                                 <div class="w-full h-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold">
@@ -146,9 +152,9 @@
                                         <div class="flex items-center gap-3">
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                                 @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}" class="w-full h-full object-cover">
-                                                @elseif($mt->accessory && $mt->accessory->image_path)
-                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}" class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}" class="w-full h-full object-cover">
+                                                @elseif($mt->accessory && $mt->accessory->path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}" class="w-full h-full object-cover">
                                                 @else
                                                 <div class="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold">
                                                     {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
@@ -213,9 +219,9 @@
                                         <div class="flex items-center gap-3">
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                                 @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $mt->item->images->first()->image_path) }}" class="w-full h-full object-cover">
-                                                @elseif($mt->accessory && $mt->accessory->image_path)
-                                                <img src="{{ asset('storage/' . $mt->accessory->image_path) }}" class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}" class="w-full h-full object-cover">
+                                                @elseif($mt->accessory && $mt->accessory->path)
+                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}" class="w-full h-full object-cover">
                                                 @else
                                                 <div class="w-full h-full flex items-center justify-center bg-green-100 text-green-600 font-bold">
                                                     {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
@@ -375,7 +381,14 @@
                 },
 
                 async submitSend() {
-                    if (!this.sendForm.care_shop_id) return alert('กรุณาเลือกร้าน');
+                    if (!this.sendForm.care_shop_id) {
+                        return Swal.fire({
+                            icon: 'warning',
+                            title: 'แจ้งเตือน',
+                            text: 'กรุณาเลือกร้านซัก/ซ่อม',
+                            confirmButtonColor: '#d97706'
+                        });
+                    }
 
                     try {
                         const res = await fetch(`{{ url('admin/maintenance') }}/${this.currentItem.id}/send`, {
@@ -387,9 +400,21 @@
                             body: JSON.stringify(this.sendForm)
                         });
                         const data = await res.json();
-                        if (data.success) window.location.reload();
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'สำเร็จ',
+                                text: 'ส่งซ่อมเรียบร้อยแล้ว',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => window.location.reload());
+                        }
                     } catch (e) {
-                        alert('Error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                        });
                     }
                 },
 
@@ -400,7 +425,14 @@
                 },
 
                 async submitReceive() {
-                    if (this.receiveForm.shop_cost === '') return alert('กรุณาระบุค่าใช้จ่าย (ใส่ 0 หากไม่มี)');
+                    if (this.receiveForm.shop_cost === '') {
+                        return Swal.fire({
+                            icon: 'warning',
+                            title: 'แจ้งเตือน',
+                            text: 'กรุณาระบุค่าใช้จ่าย (ใส่ 0 หากไม่มี)',
+                            confirmButtonColor: '#d97706'
+                        });
+                    }
 
                     try {
                         const res = await fetch(`{{ url('admin/maintenance') }}/${this.currentItem.id}/receive`, {
@@ -412,9 +444,21 @@
                             body: JSON.stringify(this.receiveForm)
                         });
                         const data = await res.json();
-                        if (data.success) window.location.reload();
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'สำเร็จ',
+                                text: 'บันทึกรับคืนเรียบร้อยแล้ว',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => window.location.reload());
+                        }
                     } catch (e) {
-                        alert('Error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+                        });
                     }
                 }
             }

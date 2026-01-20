@@ -13,29 +13,40 @@ class MaintenanceController extends Controller
     public function index()
     {
         // 1. รายการรอส่ง (Pending)
-        $pending = ItemMaintenance::with(['item', 'rental.member'])
+        $pending = ItemMaintenance::with([
+            'item.images',   // ✅ เพิ่ม .images เพื่อดึงรูปภาพของสินค้า
+            'accessory',     // ✅ เพิ่ม accessory เพื่อดึงข้อมูลอุปกรณ์เสริม
+            'rental.member'
+        ])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
 
         // 2. รายการกำลังซ่อม/ซัก (In Progress)
-        $inProgress = ItemMaintenance::with(['item', 'careShop'])
+        $inProgress = ItemMaintenance::with([
+            'item.images',   // ✅ เพิ่ม .images
+            'accessory',     // ✅ เพิ่ม accessory
+            'careShop'
+        ])
             ->where('status', 'in_progress')
             ->orderBy('sent_at', 'desc')
             ->get();
 
         // 3. ประวัติ (History)
-        $history = ItemMaintenance::with(['item', 'careShop'])
+        $history = ItemMaintenance::with([
+            'item.images',   // ✅ เพิ่ม .images
+            'accessory',     // ✅ เพิ่ม accessory
+            'careShop'
+        ])
             ->where('status', 'completed')
             ->orderBy('received_at', 'desc')
             ->paginate(10);
 
-        // ดึงรายชื่อร้านค้า (สำหรับ Dropdown) - ใช้ PK: care_shop_id
+        // ดึงรายชื่อร้านค้า
         $shops = CareShop::where('status', 'active')->get();
 
         return view('maintenance.index', compact('pending', 'inProgress', 'history', 'shops'));
     }
-
     // ส่งร้าน
     public function sendToShop(Request $request, $id)
     {

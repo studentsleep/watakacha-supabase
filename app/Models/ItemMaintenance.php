@@ -12,6 +12,7 @@ class ItemMaintenance extends Model
     protected $fillable = [
         'item_id',
         'rental_id',
+        'accessory_id',
         'care_shop_id',
         'type',
         'status',
@@ -29,6 +30,12 @@ class ItemMaintenance extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id');
+    }
+
+    public function accessory()
+    {
+        // ต้องแน่ใจว่ามี Model Accessory อยู่จริง (App\Models\Accessory)
+        return $this->belongsTo(Accessory::class, 'accessory_id');
     }
 
     // ✅ เชื่อมกับ Rental (ระบุ Key: rental_id)
