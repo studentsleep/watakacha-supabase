@@ -6,6 +6,23 @@
         </h2>
     </x-slot>
 
+    @if ($errors->any())
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 mx-8 mt-4 rounded shadow-md relative" role="alert">
+        <strong class="font-bold">เกิดข้อผิดพลาด!</strong>
+        <span class="block sm:inline">บันทึกข้อมูลไม่สำเร็จ โปรดตรวจสอบ:</span>
+        <ul class="mt-2 list-disc list-inside text-sm">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if (session('success'))
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-8 mt-4 rounded shadow-md">
+        {{ session('success') }}
+    </div>
+    @endif
     <div class="py-8 bg-gray-900 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 

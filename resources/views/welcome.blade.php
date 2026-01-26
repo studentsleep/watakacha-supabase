@@ -93,14 +93,18 @@
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#" class="font-medium hover:text-brand-500 transition" :class="scrolled ? 'text-gray-600' : 'text-white shadow-black drop-shadow-md'">หน้าแรก</a>
-                    <a href="#catalog" class="font-medium hover:text-brand-500 transition" :class="scrolled ? 'text-gray-600' : 'text-white drop-shadow-md'">ชุดทั้งหมด</a>
-                    <a href="#promotions" class="font-medium hover:text-brand-500 transition" :class="scrolled ? 'text-gray-600' : 'text-white drop-shadow-md'">โปรโมชั่น</a>
-                    <a href="#contact" class="font-medium hover:text-brand-500 transition" :class="scrolled ? 'text-gray-600' : 'text-white drop-shadow-md'">ติดต่อเรา</a>
+                    <a href="{{ route('welcome') }}" class="font-medium hover:text-brand-500 transition" ...>หน้าแรก</a>
+                    {{-- ✅ ลิงก์ไปหน้า Catalog --}}
+                    <a href="{{ route('catalog') }}" class="font-medium hover:text-brand-500 transition" ...>ชุดทั้งหมด</a>
+                    {{-- ✅ ลิงก์ไปหน้า Promotions --}}
+                    <a href="{{ route('promotions') }}" class="font-medium hover:text-brand-500 transition" ...>โปรโมชั่น</a>
+                    {{-- ✅ ลิงก์ไปหน้า Contact --}}
+                    <a href="{{ route('contact') }}" class="font-medium hover:text-brand-500 transition" ...>ติดต่อเรา</a>
                 </div>
 
                 <div class="hidden md:flex items-center gap-3">
-                    {{-- ปุ่ม Login / Register สำหรับ Member เท่านั้น --}}
+                    {{-- 🔴 กรณี: ยังไม่ได้ล็อกอิน (Guest) --}}
+                    @guest('member') {{-- ✅ ระบุ guard member --}}
                     <a href="{{ route('member.login') }}" class="px-4 py-2 rounded-full text-sm font-bold transition border"
                         :class="scrolled ? 'border-brand-500 text-brand-600 hover:bg-brand-50' : 'border-white text-white hover:bg-white/20'">
                         เข้าสู่ระบบ
@@ -108,6 +112,77 @@
                     <a href="{{ route('member.register') }}" class="px-4 py-2 rounded-full text-sm font-bold bg-brand-600 text-white hover:bg-brand-700 shadow-lg transition transform hover:-translate-y-0.5">
                         สมัครสมาชิก
                     </a>
+                    @endguest
+
+                    {{-- 🟢 กรณี: ล็อกอินแล้ว (Member) --}}
+                    @auth('member') {{-- ✅ ระบุ guard member --}}
+                    <div class="relative ml-3" x-data="{ open: false }">
+                        <div>
+                            <button @click="open = !open" type="button"
+                                class="flex items-center gap-3 bg-white/90 backdrop-blur rounded-full p-1 pr-4 border border-gray-200 shadow-sm hover:shadow-md transition">
+
+                                {{-- Avatar --}}
+                                <img class="h-9 w-9 rounded-full object-cover border-2 border-brand-100"
+                                    {{-- ✅ ดึงชื่อจาก guard member --}}
+                                    src="https://ui-avatars.com/api/?name={{ Auth::guard('member')->user()->first_name }}+{{ Auth::guard('member')->user()->last_name }}&background=ec4899&color=fff"
+                                    alt="Profile">
+
+                                <div class="flex flex-col items-start text-left">
+                                    {{-- ชื่อ --}}
+                                    <span class="text-xs font-bold text-gray-800 leading-tight">
+                                        คุณ{{ Auth::guard('member')->user()->first_name }}
+                                    </span>
+                                    {{-- แต้ม --}}
+                                    <span class="text-[10px] font-bold text-yellow-600 flex items-center gap-1 bg-yellow-50 px-1.5 rounded-full mt-0.5">
+                                        <i data-lucide="coins" class="w-3 h-3"></i>
+                                        {{ number_format(Auth::guard('member')->user()->points ?? 0) }} แต้ม
+                                    </span>
+                                </div>
+
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                            </button>
+                        </div>
+
+                        {{-- Dropdown Menu --}}
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 py-1 z-50 divide-y divide-gray-100">
+
+                            <div class="px-4 py-3">
+                                <p class="text-xs text-gray-500">บัญชีผู้ใช้</p>
+                                <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::guard('member')->user()->username }}</p>
+                                <p class="text-xs text-gray-400 truncate">{{ Auth::guard('member')->user()->email }}</p>
+                            </div>
+
+                            <div class="py-1">
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">
+                                    <i data-lucide="user" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i>
+                                    ข้อมูลส่วนตัว
+                                </a>
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">
+                                    <i data-lucide="history" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i>
+                                    ประวัติการเช่า
+                                </a>
+                            </div>
+
+                            <div class="py-1">
+                                {{-- ✅ Logout Route --}}
+                                <form method="POST" action="{{ route('member.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="group flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i data-lucide="log-out" class="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500"></i>
+                                        ออกจากระบบ
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endauth
                 </div>
 
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-md" :class="scrolled ? 'text-gray-800' : 'text-white'">
@@ -123,23 +198,44 @@
             <button @click="mobileMenuOpen = false"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
         </div>
         <div class="flex flex-col space-y-4 text-lg">
+
+            {{-- ส่วนแสดงผลสมาชิกในมือถือ --}}
+            @auth('member') {{-- ✅ ระบุ guard member --}}
+            <div class="bg-brand-50 p-4 rounded-xl flex items-center gap-3 mb-2">
+                <img class="h-10 w-10 rounded-full border border-white shadow-sm"
+                    src="https://ui-avatars.com/api/?name={{ Auth::guard('member')->user()->first_name }}&background=ec4899&color=fff">
+                <div>
+                    <p class="font-bold text-gray-900">คุณ{{ Auth::guard('member')->user()->first_name }}</p>
+                    <p class="text-xs text-brand-600 font-bold bg-white px-2 py-0.5 rounded-full inline-block shadow-sm">
+                        ⭐ {{ number_format(Auth::guard('member')->user()->points ?? 0) }} แต้ม
+                    </p>
+                </div>
+            </div>
+            <a href="#" class="text-gray-800 font-medium ml-2">จัดการข้อมูลส่วนตัว</a>
+            <a href="#" class="text-gray-800 font-medium ml-2">ประวัติการเช่า</a>
+
+            <form method="POST" action="{{ route('member.logout') }}">
+                @csrf
+                <button class="text-red-600 font-bold ml-2">ออกจากระบบ</button>
+            </form>
+            <hr class="my-2">
+            @endauth
+
             <a href="#" class="text-gray-800 font-medium">หน้าแรก</a>
             <a href="#catalog" class="text-gray-800 font-medium">ชุดทั้งหมด</a>
             <a href="#promotions" class="text-gray-800 font-medium">โปรโมชั่น</a>
+
+            @guest('member') {{-- ✅ ระบุ guard member --}}
             <hr>
             <a href="{{ route('member.login') }}" class="text-brand-600 font-bold">เข้าสู่ระบบ (สมาชิก)</a>
             <a href="{{ route('member.register') }}" class="bg-brand-600 text-white px-4 py-2 rounded-lg text-center shadow">สมัครสมาชิกใหม่</a>
+            @endguest
         </div>
     </div>
 
     <div class="relative h-[600px] lg:h-[700px] w-full overflow-hidden">
         <div class="absolute inset-0">
-            @if(file_exists(public_path('images/banner.jpg')))
             <img src="{{ asset('images/banner.png') }}" class="w-full h-full object-cover" alt="Banner">
-            @else
-            <img src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=2574&auto=format&fit=crop"
-                class="w-full h-full object-cover" alt="Default Banner">
-            @endif
             <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
         </div>
 
@@ -174,13 +270,6 @@
             <p class="mt-4 text-gray-500">คัดสรรชุดคุณภาพดี ดีไซน์ทันสมัย เพื่อคุณโดยเฉพาะ</p>
         </div>
 
-        {{-- Filter Categories (Mockup) --}}
-        <div class="flex flex-wrap justify-center gap-2 mb-10">
-            <button class="px-4 py-2 rounded-full bg-brand-600 text-white font-medium shadow-md">ทั้งหมด</button>
-            <button class="px-4 py-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 font-medium transition">ชุดราตรี</button>
-            <button class="px-4 py-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 font-medium transition">ชุดไทย</button>
-            <button class="px-4 py-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 font-medium transition">สูทผู้ชาย</button>
-        </div>
 
         {{-- Grid Items --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -223,6 +312,8 @@
                     <img src="{{ $imagePath }}"
                         alt="{{ $item->item_name }}"
                         class="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
                         onerror="this.onerror=null; this.src='https://via.placeholder.com/400x533?text=No+Image';">
 
                     {{-- Badge Status --}}
@@ -255,9 +346,9 @@
         </div>
 
         <div class="text-center mt-12">
-            <button class="px-8 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-full hover:bg-gray-50 transition shadow-sm">
+            <a href="{{ route('catalog') }}" class="inline-block px-8 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-full hover:bg-gray-50 transition shadow-sm">
                 ดูทั้งหมด
-            </button>
+            </a>
         </div>
     </div>
 
@@ -281,7 +372,7 @@
                     <h3 class="font-bold text-lg mb-4">ติดต่อเรา</h3>
                     <ul class="space-y-3 text-gray-400 text-sm">
                         <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> ต.ต้นธง อ.เมือง จ.ลำพูน</li>
-                        <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> 081-234-5678</li>
+                        <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> 093-130-9899</li>
                         <li class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> เปิดทุกวัน 09:00 - 20:00 น.</li>
                     </ul>
                 </div>
@@ -360,7 +451,7 @@
                                     <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> บริการซักแห้งฟรี
                                 </div>
                                 <div class="flex items-center gap-3 text-sm text-gray-600">
-                                    <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> ปรับแก้ทรงฟรี 1 ครั้ง
+                                    <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> ปรับแก้ทรงฟรี 1 ครั้ง (ชั่วคราว)
                                 </div>
                                 <div class="flex items-center gap-3 text-sm text-gray-600">
                                     <i data-lucide="clock" class="w-4 h-4 text-brand-500"></i> ระยะเวลาเช่า 7 วัน

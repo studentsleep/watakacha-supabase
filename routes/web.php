@@ -19,7 +19,12 @@ use App\Http\Controllers\MemberAuthController;
 */
 
 // 🏠 1. หน้าบ้าน (Public) - คนทั่วไปเข้าหน้านี้
-Route::get('/', [WelcomeController::class, 'index'])->name('welcome'); // ใช้ Controller เพื่อดึงข้อมูลสินค้ามาโชว์
+Route::controller(WelcomeController::class)->group(function () {
+    Route::get('/', 'index')->name('welcome');           // หน้าแรก (9 ชิ้น)
+    Route::get('/catalog', 'catalog')->name('catalog');  // หน้าสินค้าทั้งหมด + ค้นหา
+    Route::get('/promotions', 'promotions')->name('promotions'); // หน้าโปรโมชั่น
+    Route::get('/contact', 'contact')->name('contact');  // หน้าติดต่อเรา
+});
 
 // 👤 โซนสมาชิก (Member Auth)
 Route::prefix('member')->name('member.')->group(function () {

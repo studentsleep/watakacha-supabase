@@ -112,6 +112,13 @@
                         มีบัญชีอยู่แล้ว? <a href="{{ route('member.login') }}" class="font-bold text-brand-600 hover:text-brand-500 ml-1">เข้าสู่ระบบ</a>
                     </div>
                 </form>
+
+                {{-- Back to Home --}}
+                <div class="text-center">
+                    <a href="{{ route('welcome') }}" class="inline-flex items-center text-xs font-medium text-gray-400 hover:text-gray-800 transition py-2 px-4 rounded-full hover:bg-gray-100">
+                        <i data-lucide="arrow-left" class="w-3 h-3 mr-1"></i> กลับหน้าหลัก
+                    </a>
+                </div>
             </div>
         </div>
 

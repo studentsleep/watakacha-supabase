@@ -431,7 +431,6 @@
 
                 confirmReturn() {
                     // ใช้ SweetAlert2 Confirmation (Optional: ถ้าอยากใช้ SweetAlert แทน Dialog ปกติ)
-                    /*
                     Swal.fire({
                         title: 'ยืนยันการคืนชุด?',
                         text: `ยอดสุทธิที่ต้องรับ: ${this.formatNumber(this.grandTotal)} บาท`,
@@ -446,7 +445,6 @@
                             this.submitFinal();
                         }
                     });
-                    */
                     // แต่ในที่นี้เราใช้ Modal ซ้อน Modal (Dialog) ที่ทำไว้แล้ว
                     this.showConfirmDialog = true;
                 },

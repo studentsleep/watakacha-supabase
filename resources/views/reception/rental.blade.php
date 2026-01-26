@@ -624,8 +624,8 @@
                                 </div>
                                 <div class="mt-6 border-t border-gray-700 pt-4 flex justify-between items-end">
                                     <div>
-                                        <h4 class="font-bold text-sm">ร้านเช่าชุด Watakacha</h4>
-                                        <p class="text-xs text-gray-400 mt-0.5">สาขาลำพูน โทร. 081-234-5678</p>
+                                        <h4 class="font-bold text-sm">Watakacha Wedding & Studio</h4>
+                                        <p class="text-xs text-gray-400 mt-0.5">โทร. 093-130-9899</p>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-xs text-gray-400">วันที่ทำรายการ</p>

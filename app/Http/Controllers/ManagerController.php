@@ -357,7 +357,7 @@ class ManagerController extends Controller
             'stock' => 'required|integer|min:0',
             'item_type_id' => 'required',
             'item_unit_id' => 'required',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
         $item = Item::create([
             'item_name' => $data['name'],
