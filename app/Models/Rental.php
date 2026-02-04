@@ -9,97 +9,65 @@ class Rental extends Model
 {
     use HasFactory;
 
-    /**
-     * ระบุชื่อตารางและ Primary Key
-     */
     protected $table = 'rentals';
     protected $primaryKey = 'rental_id';
 
-    /**
-     * ข้อมูลที่อนุญาตให้เพิ่ม/แก้ไขได้ผ่าน Mass Assignment
-     */
+    // กำหนด Status เป็น Constant เพื่อเรียกใช้สะดวกและลดความผิดพลาด
+    const STATUS_PENDING_PAYMENT = 'pending_payment'; // รอชำระเงิน
+    const STATUS_AWAITING_PICKUP = 'awaiting_pickup'; // ชำระแล้ว รอรับของ
+    const STATUS_RENTED = 'rented';                   // รับของแล้ว/กำลังเช่า
+    const STATUS_RETURNED = 'returned';               // คืนแล้ว
+    const STATUS_CANCELLED = 'cancelled';             // ยกเลิก
+
     protected $fillable = [
         'member_id',
         'user_id',
         'promotion_id',
-        'makeup_id',       // [เพิ่ม] ช่างแต่งหน้า
-        'photographer_id', // [เพิ่ม] ช่างภาพ
-        'package_id',      // [เพิ่ม] แพ็กเกจถ่ายภาพ
+        'makeup_id',
+        'photographer_id',
+        'package_id',
         'rental_date',
         'return_date',
         'total_amount',
-        'status', // rented, returned, overdue
+        'fine_amount', // อย่าลืมเพิ่ม field นี้ถ้ายังไม่มี
+        'status',
         'description',
     ];
 
-    /**
-     * แปลงประเภทข้อมูลอัตโนมัติ
-     */
     protected $casts = [
         'rental_date' => 'date',
         'return_date' => 'date',
         'total_amount' => 'decimal:2',
+        'fine_amount' => 'decimal:2',
     ];
 
-    /* --- ความสัมพันธ์ (Relationships) --- */
+    // --- Relationships (คงเดิม) ---
 
-    /**
-     * การเช่านี้เป็นของสมาชิกคนไหน
-     */
     public function member()
     {
         return $this->belongsTo(MemberAccount::class, 'member_id', 'member_id');
     }
 
-    /**
-     * การเช่านี้ทำรายการโดยพนักงานคนไหน
-     */
     public function user()
     {
-        // ตรวจสอบว่า Model User ของคุณชื่อ 'User' และ PK คือ 'user_id' หรือ 'id'
-        // ถ้า PK ของ User คือ 'user_id' ให้ใช้:
         return $this->belongsTo(User::class, 'user_id', 'user_id');
-
-        // ถ้า PK ของ User คือ 'id' (default Laravel) ให้ใช้:
-        // return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    /**
-     * การเช่านี้มีโปรโมชั่นอะไร (ถ้ามี)
-     */
     public function promotion()
     {
         return $this->belongsTo(Promotion::class, 'promotion_id', 'promotion_id');
     }
 
-    /**
-     * การเช่านี้มีรายการสินค้าอะไรบ้าง (One-to-Many)
-     */
     public function items()
     {
         return $this->hasMany(RentalItem::class, 'rental_id', 'rental_id');
     }
 
-    public function makeupArtist()
-    {
-        return $this->belongsTo(MakeupArtist::class, 'makeup_id', 'makeup_id');
-    }
-
-    public function photographer()
-    {
-        return $this->belongsTo(Photographer::class, 'photographer_id', 'photographer_id');
-    }
-
-    public function photographerPackage()
-    {
-        return $this->belongsTo(PhotographerPackage::class, 'package_id', 'package_id');
-    }
-
     public function accessories()
     {
-        // ใช้ belongsToMany เชื่อมไปหา Model Accessory โดยตรง ผ่านตารางกลาง rental_accessories
         return $this->belongsToMany(Accessory::class, 'rental_accessories', 'rental_id', 'accessory_id')
-            ->withPivot('quantity', 'price'); // ดึงข้อมูล จำนวน และ ราคา จากตารางกลางมาด้วย
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 
     public function payments()
@@ -107,9 +75,21 @@ class Rental extends Model
         return $this->hasMany(Payment::class, 'rental_id', 'rental_id');
     }
 
-    // ฟังก์ชันช่วยคำนวณยอดที่จ่ายไปแล้ว
+    // --- Helpers ---
+
+    // ยอดจ่ายแล้วทั้งหมด
     public function getTotalPaidAttribute()
     {
         return $this->payments->where('status', 'paid')->sum('amount');
+    }
+
+    // เช็คว่าสถานะนี้ ถือว่าเป็นการ "จองของ" หรือไม่ (ใช้คำนวณ Stock Type A)
+    public static function isStatusReserved($status)
+    {
+        return in_array($status, [
+            self::STATUS_PENDING_PAYMENT, // จองตั้งแต่ยังไม่จ่าย
+            self::STATUS_AWAITING_PICKUP,
+            self::STATUS_RENTED
+        ]);
     }
 }

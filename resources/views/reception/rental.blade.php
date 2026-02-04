@@ -456,14 +456,7 @@
                             </div>
 
                             {{-- Payment Method --}}
-                            <div>
-                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">วิธีชำระมัดจำ</span>
-                                <select x-model="payment_method" class="block w-full rounded-xl border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer h-11">
-                                    <option value="cash">💵 เงินสด (Cash)</option>
-                                    <option value="transfer">📱 โอนเงิน (Transfer)</option>
-                                    <option value="credit_card">💳 บัตรเครดิต (Credit Card)</option>
-                                </select>
-                            </div>
+
 
                             {{-- Price Detail --}}
                             <div class="text-sm space-y-3 pt-4 border-t border-gray-100">
@@ -527,7 +520,7 @@
                             {{-- Submit Button --}}
                             <button @click="openConfirmModal" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transform transition hover:-translate-y-0.5 flex justify-center items-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 :disabled="(!member && !isGuest) || (cart.length === 0 && accessoryCart.length === 0) || isSubmitting">
-                                <span x-show="!isSubmitting">ยืนยันการเช่า & ชำระเงิน</span>
+                                <span x-show="!isSubmitting">ยืนยันการเช่า (ชำระเงินภายหลัง)</span>
                                 <span x-show="isSubmitting" class="flex items-center gap-2">
                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1089,9 +1082,15 @@
                             });
                             const result = await res.json();
                             if (result.success) {
-                                this.receiptData.rental_id = result.rental_id;
-                                this.receiptData.staff_name = result.staff_name || 'Admin';
-                                this.showReceipt = true;
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'จองสำเร็จ!',
+                                    text: 'กำลังนำทางไปหน้ายืนยันการชำระเงิน...',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.href = result.redirect_url;
+                                });
                             } else {
                                 this.triggerAlert('เกิดข้อผิดพลาด', JSON.stringify(result.errors || result.message), 'error');
                             }

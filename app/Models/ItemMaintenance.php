@@ -11,18 +11,21 @@ class ItemMaintenance extends Model
 
     protected $fillable = [
         'item_id',
+        'accessory_id', // เพิ่มตาม Migration ที่เคยทำ
         'rental_id',
-        'accessory_id',
         'care_shop_id',
         'type',
         'status',
         'damage_description',
-        'shop_cost',
+        'shop_cost',    // ค่าซ่อมที่เรียกเก็บลูกค้า (หรือราคาประเมิน)
+        'actual_cost',  // ✅ เพิ่ม: ค่าซ่อมจริงที่ร้านจ่ายออกไป
         'sent_at',
-        'received_at'
+        'received_at',
     ];
 
     protected $casts = [
+        'shop_cost' => 'decimal:2',
+        'actual_cost' => 'decimal:2',
         'sent_at' => 'datetime',
         'received_at' => 'datetime',
     ];
@@ -34,17 +37,14 @@ class ItemMaintenance extends Model
 
     public function accessory()
     {
-        // ต้องแน่ใจว่ามี Model Accessory อยู่จริง (App\Models\Accessory)
         return $this->belongsTo(Accessory::class, 'accessory_id');
     }
 
-    // ✅ เชื่อมกับ Rental (ระบุ Key: rental_id)
     public function rental()
     {
-        return $this->belongsTo(Rental::class, 'rental_id', 'rental_id');
+        return $this->belongsTo(Rental::class, 'rental_id', 'rental_id'); // PK ของ Rental คือ rental_id
     }
 
-    // ✅ เชื่อมกับ CareShop (ระบุ Key: care_shop_id)
     public function careShop()
     {
         return $this->belongsTo(CareShop::class, 'care_shop_id', 'care_shop_id');

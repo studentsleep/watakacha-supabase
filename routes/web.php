@@ -183,6 +183,13 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/member/create', [ReceptionController::class, 'createMember'])->name('member.create');
         Route::post('/member/store', [ReceptionController::class, 'storeMember'])->name('member.store');
+
+        Route::post('/rental/{rentalId}/update', [ReceptionController::class, 'updateRental'])->name('rental.update');
+
+        //Flow การเงินและสถานะ
+        Route::post('/rental/{rentalId}/confirm-payment', [ReceptionController::class, 'confirmPayment'])->name('rental.confirmPayment');
+        Route::post('/rental/{rentalId}/confirm-pickup', [ReceptionController::class, 'confirmPickup'])->name('rental.confirmPickup');
+        Route::post('/rental/{rentalId}/cancel', [ReceptionController::class, 'cancelRental'])->name('rental.cancel');
     });
 
     // --------------------------------------------------------

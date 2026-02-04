@@ -1,5 +1,5 @@
 <x-app-layout>
-    {{-- ✅ เพิ่ม SweetAlert2 --}}
+    {{-- ✅ SweetAlert2 --}}
 
     <head>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -32,7 +32,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     รอส่งร้าน
-                    <span class="ml-1 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs" x-show="{{ $pending->count() }} > 0">{{ $pending->count() }}</span>
+                    @if($pending->count() > 0)
+                    <span class="ml-1 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">{{ $pending->count() }}</span>
+                    @endif
                 </button>
                 <button @click="activeTab = 'in_progress'"
                     :class="activeTab === 'in_progress' ? 'bg-white text-blue-600 shadow' : 'text-gray-500 hover:text-gray-700'"
@@ -41,7 +43,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
                     อยู่ที่ร้าน
-                    <span class="ml-1 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs" x-show="{{ $inProgress->count() }} > 0">{{ $inProgress->count() }}</span>
+                    @if($inProgress->count() > 0)
+                    <span class="ml-1 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs">{{ $inProgress->count() }}</span>
+                    @endif
                 </button>
                 <button @click="activeTab = 'history'"
                     :class="activeTab === 'history' ? 'bg-white text-green-600 shadow' : 'text-gray-500 hover:text-gray-700'"
@@ -73,14 +77,12 @@
                                 <tr class="hover:bg-gray-50 transition group">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            {{-- ✅ ส่วนรูปภาพ (รองรับทั้ง Item และ Accessory) --}}
+                                            {{-- ✅ ส่วนรูปภาพ --}}
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                                 @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}"
-                                                    alt="Img" class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}" alt="Img" class="w-full h-full object-cover">
                                                 @elseif($mt->accessory && $mt->accessory->path)
-                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}"
-                                                    alt="Acc" class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}" alt="Acc" class="w-full h-full object-cover">
                                                 @else
                                                 <div class="w-full h-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold">
                                                     {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}
@@ -243,7 +245,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <span class="font-mono font-bold text-red-500">{{ number_format($mt->shop_cost, 2) }}</span>
+                                        <span class="font-mono font-bold text-red-500">{{ number_format($mt->actual_cost, 2) }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-center text-sm text-green-600 font-bold">
                                         {{ \Carbon\Carbon::parse($mt->received_at)->locale('th')->translatedFormat('d M Y') }}
@@ -277,9 +279,11 @@
 
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900">ส่งร้านซัก/ซ่อม</h3>
-                        <button @click="showSendModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button @click="showSendModal = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg></button>
+                            </svg>
+                        </button>
                     </div>
 
                     <div class="space-y-4">
@@ -435,13 +439,16 @@
                     }
 
                     try {
+                        // เปลี่ยนชื่อ parameter จาก shop_cost เป็น actual_cost ตาม Controller ใหม่
                         const res = await fetch(`{{ url('admin/maintenance') }}/${this.currentItem.id}/receive`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: JSON.stringify(this.receiveForm)
+                            body: JSON.stringify({
+                                actual_cost: this.receiveForm.shop_cost
+                            })
                         });
                         const data = await res.json();
                         if (data.success) {
