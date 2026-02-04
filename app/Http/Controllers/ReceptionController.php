@@ -435,7 +435,7 @@ class ReceptionController extends Controller
 
     public function returnIndex(Request $request)
     {
-        $query = Rental::with(['member','payments', 'items.item', 'items.accessory'])->where('status', 'rented');
+        $query = Rental::with(['member', 'payments', 'items.item', 'items.accessory'])->where('status', 'rented');
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -570,15 +570,27 @@ class ReceptionController extends Controller
             $rental->save();
 
             // ----------------------------------------------------------------------
-            // 🔹 5. ให้แต้มสมาชิก
+            // 🔹 5. ให้แต้มสมาชิก (แก้ไขใหม่: เพิ่มการบันทึก Transaction)
             // ----------------------------------------------------------------------
             if ($rental->member_id) {
+                // คำนวณแต้ม (ตัวอย่าง: ยอดรวมหาร 100)
                 $pointsEarned = floor($rental->total_amount / 100);
+
                 if ($pointsEarned > 0) {
                     $member = \App\Models\MemberAccount::find($rental->member_id);
+
                     if ($member) {
+                        // 1. เพิ่มแต้มในบัญชีสมาชิก
                         $member->increment('points', $pointsEarned);
-                        // (สร้าง PointTransaction ตามโค้ดเดิม...)
+
+                        \App\Models\PointTransaction::create([
+                            'member_id'        => $member->member_id,
+                            'rental_id'        => $rental->rental_id,
+                            'point_change'     => $pointsEarned,      // จำนวนแต้มที่ได้
+                            'change_type'      => 'earn',             // ประเภท: ได้รับ
+                            'description'      => "ได้รับแต้มจากการเช่า",
+                            'transaction_date' => now(),
+                        ]);
                     }
                 }
             }

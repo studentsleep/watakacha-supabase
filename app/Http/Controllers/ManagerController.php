@@ -398,9 +398,21 @@ class ManagerController extends Controller
     }
     public function destroyItem(Item $item)
     {
-        foreach ($item->images as $img) Storage::disk('public')->delete($img->path);
-        $item->images()->delete();
-        $item->delete();
+        // 1. เก็บ Path รูปทั้งหมดใส่ Array ไว้ก่อน
+        $imagePaths = $item->images->pluck('path')->toArray();
+
+        // 2. ลบข้อมูลใน Database ก่อน (เพื่อให้ User รู้สึกว่าลบเร็ว)
+        // ใช้ Transaction เพื่อความปลอดภัยของข้อมูล
+        DB::transaction(function () use ($item) {
+            $item->images()->delete(); // ลบ record รูปใน DB
+            $item->delete();           // ลบสินค้า
+        });
+
+        // 3. สั่งลบไฟล์จริงๆ ทีเดียว (ถ้ามีไฟล์)
+        if (!empty($imagePaths)) {
+            Storage::disk('public')->delete($imagePaths);
+        }
+
         return redirect()->route('manager.items.index')->with('status', 'ลบสินค้าสำเร็จ');
     }
     public function uploadItemImage(Request $request, Item $item)
@@ -562,13 +574,13 @@ class ManagerController extends Controller
 
     public function storePhotographer(Request $request)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable','lineid' => 'nullable|string|max:100', 'status' => 'required']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'lineid' => 'nullable|string|max:100', 'status' => 'required']);
         Photographer::create($data);
         return redirect()->route('manager.photographers.index')->with('status', 'เพิ่มช่างภาพสำเร็จ');
     }
     public function updatePhotographer(Request $request, Photographer $photographer)
     {
-        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable','lineid' => 'nullable|string|max:100', 'status' => 'required']);
+        $data = $request->validate(['first_name' => 'required', 'last_name' => 'required', 'tel' => 'nullable', 'email' => 'nullable', 'lineid' => 'nullable|string|max:100', 'status' => 'required']);
         $photographer->update($data);
         return redirect()->route('manager.photographers.index')->with('status', 'อัปเดตช่างภาพสำเร็จ');
     }

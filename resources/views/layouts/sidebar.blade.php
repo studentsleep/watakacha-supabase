@@ -309,7 +309,7 @@
                     <a href="{{ route('logout') }}"
                         class="block w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-gray-700 hover:text-white"
                         onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('ออกจากระบบ') }}
                     </a>
                 </form>
             </div>
