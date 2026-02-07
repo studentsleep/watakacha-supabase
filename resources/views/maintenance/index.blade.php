@@ -80,9 +80,16 @@
                                             {{-- ✅ ส่วนรูปภาพ --}}
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                                 @if($mt->item && $mt->item->images && $mt->item->images->count() > 0)
-                                                <img src="{{ asset('storage/' . $mt->item->images->first()->path) }}" alt="Img" class="w-full h-full object-cover">
+                                                @php $path = $mt->item->images->first()->path; @endphp
+                                                <img src="{{ Str::startsWith($path, 'http') ? $path : asset('storage/' . $path) }}"
+                                                    alt="Img" class="w-full h-full object-cover">
+
                                                 @elseif($mt->accessory && $mt->accessory->path)
-                                                <img src="{{ asset('storage/' . $mt->accessory->path) }}" alt="Acc" class="w-full h-full object-cover">
+                                                {{-- กรณี Accessory ก็เช็คเหมือนกัน --}}
+                                                @php $path = $mt->accessory->path; @endphp
+                                                <img src="{{ Str::startsWith($path, 'http') ? $path : asset('storage/' . $path) }}"
+                                                    alt="Acc" class="w-full h-full object-cover">
+
                                                 @else
                                                 <div class="w-full h-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold">
                                                     {{ mb_substr($mt->item ? $mt->item->item_name : ($mt->accessory ? $mt->accessory->name : '?'), 0, 1) }}

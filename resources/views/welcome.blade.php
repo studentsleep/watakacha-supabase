@@ -58,6 +58,15 @@
 
                 {{-- Social Icons --}}
                 <div class="flex items-center gap-4 sm:gap-6">
+
+                    {{-- TikTok --}}
+                    <a href="https://www.tiktok.com/@watakachastudio" target="_blank"
+                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#000000] hover:border-[#000000] hover:scale-110 transition-all duration-300 shadow-xl">
+                        {{-- ใช้ SVG เพื่อความชัวร์ (รูปตัวโน้ตดนตรี) --}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 sm:w-6 sm:h-6">
+                            <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                        </svg>
+                    </a>
                     {{-- Facebook --}}
                     <a href="https://www.facebook.com/WATAKACHA/" target="_blank"
                         class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#1877F2] hover:border-[#1877F2] hover:scale-110 transition-all duration-300 shadow-xl">
@@ -71,15 +80,9 @@
                     </a>
 
                     {{-- Instagram --}}
-                    <a href="#" target="_blank"
+                    <a href="https://www.instagram.com/watakacha_wedding_studio/" target="_blank"
                         class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-pink-600 hover:border-pink-600 hover:scale-110 transition-all duration-300 shadow-xl">
                         <i data-lucide="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-                    </a>
-
-                    {{-- Phone --}}
-                    <a href="tel:0931309899"
-                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-green-500 hover:border-green-500 hover:scale-110 transition-all duration-300 shadow-xl">
-                        <i data-lucide="phone" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </a>
                 </div>
 
@@ -152,23 +155,52 @@
             <div class="w-24 h-1 bg-brand-500 mx-auto rounded-full"></div>
         </div>
 
-        {{-- Grid Items (เหมือนหน้า Catalog เป๊ะ) --}}
+        {{-- Grid Items --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             @foreach($items as $item)
             @php
-            $imagePath = 'https://via.placeholder.com/400x533?text=No+Image';
+            // 1. หารูปภาพหลัก
             $mainImg = $item->images->where('is_main', true)->first() ?? $item->images->first();
-            if ($mainImg && $mainImg->path) { $imagePath = asset('storage/' . str_replace('public/', '', $mainImg->path)); }
+
+            // 2. กำหนดรูป Default
+            $imagePath = 'https://via.placeholder.com/400x533?text=No+Image';
+
+            // 3. เช็ค Logic รูปภาพ (Cloudinary vs Local)
+            if ($mainImg && $mainImg->path) {
+            if (str_starts_with($mainImg->path, 'http')) {
+            // ถ้าเป็นลิงก์ Cloudinary (ขึ้นต้นด้วย http) ใช้ได้เลย
+            $imagePath = $mainImg->path;
+            } else {
+            // ถ้าเป็น Local Storage
+            $imagePath = asset('storage/' . str_replace('public/', '', $mainImg->path));
+            }
+            }
             @endphp
+
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer"
-                @click="selectedItem = {{ Js::from($item) }}; 
+                {{-- 
+                        4. แก้ไขส่วน Alpine.js ตรงนี้ 
+                        - ใช้ฟังก์ชัน imageUrl() ที่เราเพิ่งเพิ่มไปใน Layout 
+                    --}}
+                @click="
+                        selectedItem = {{ Js::from($item) }}; 
                         let firstImg = selectedItem.images.find(i => i.is_main) || selectedItem.images[0];
-                        activeImage = firstImg ? '{{ asset('storage') }}/' + firstImg.path.replace('public/', '') : 'https://via.placeholder.com/400x533?text=No+Image';
-                        itemModalOpen = true">
+                        activeImage = firstImg ? imageUrl(firstImg.path) : 'https://via.placeholder.com/400x533?text=No+Image';
+                        itemModalOpen = true;
+                    ">
+
                 <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                    <img src="{{ $imagePath }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                    @if($item->stock > 0) <span class="absolute top-3 right-3 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md">ว่าง</span> @else <span class="absolute top-3 right-3 bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md">คิวเต็ม</span> @endif
+                    {{-- รูปภาพสินค้า --}}
+                    <img src="{{ $imagePath }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" alt="{{ $item->item_name }}" loading="lazy">
+
+                    {{-- สถานะ Stock --}}
+                    @if($item->stock > 0)
+                    <span class="absolute top-3 right-3 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">ว่าง</span>
+                    @else
+                    <span class="absolute top-3 right-3 bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">คิวเต็ม</span>
+                    @endif
                 </div>
+
                 <div class="p-4">
                     <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition truncate">{{ $item->item_name }}</h3>
                     <div class="flex justify-between items-center mt-2">

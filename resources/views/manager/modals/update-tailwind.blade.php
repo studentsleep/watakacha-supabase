@@ -144,8 +144,9 @@ if (!isset($item)) $item = new \App\Models\Item();
                     <div class="grid grid-cols-3 gap-4">
                         @forelse($item->images as $image)
                         <div class="relative group">
-                            <img src="{{ asset('storage/' . $image->path) }}" alt="Item Image" class="w-full h-24 rounded object-cover border-2
-                                    {{ $image->is_main ? 'border-green-500' : 'border-gray-300 dark:border-gray-600' }}">
+                            <img src="{{ Str::startsWith($image->path, 'http') ? $image->path : asset('storage/' . $image->path) }}"
+                                alt="Item Image"
+                                class="w-full h-24 rounded object-cover border-2 {{ $image->is_main ? 'border-green-500' : 'border-gray-300 dark:border-gray-600' }}">
 
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-150 rounded flex items-center justify-center gap-2">
 

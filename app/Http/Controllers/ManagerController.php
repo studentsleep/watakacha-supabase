@@ -23,6 +23,7 @@ use App\Models\ItemMaintenance;
 use App\Models\Rental;
 use App\Models\RentalItem;
 use App\Models\RentalAccessory;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -538,8 +539,16 @@ class ManagerController extends Controller
         ]);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('items', 'public');
-                $item->images()->create(['path' => $path, 'is_main' => $index === 0]);
+                // 1. อัปโหลดขึ้น Cloudinary ไปที่โฟลเดอร์ 'items'
+                $cloudinaryImage = $image->storeOnCloudinary('items');
+                // 2. ดึง URL แบบเต็มมา (เช่น https://res.cloudinary.com/...)
+                $url = $cloudinaryImage->getSecurePath();
+                // 3. บันทึกลง Database
+                // ตรง 'path' จะเก็บเป็น URL ยาวๆ แทนที่จะเป็น items/ชื่อไฟล์.jpg
+                $item->images()->create([
+                    'path' => $url,
+                    'is_main' => $index === 0
+                ]);
             }
         }
         return redirect()->route('manager.items.index')->with('status', 'เพิ่มสินค้าสำเร็จ');
@@ -568,22 +577,21 @@ class ManagerController extends Controller
     }
     public function destroyItem(Item $item)
     {
-        // 1. เก็บ Path รูปทั้งหมดใส่ Array ไว้ก่อน
-        $imagePaths = $item->images->pluck('path')->toArray();
-
-        // 2. ลบข้อมูลใน Database ก่อน (เพื่อให้ User รู้สึกว่าลบเร็ว)
-        // ใช้ Transaction เพื่อความปลอดภัยของข้อมูล
+        // 1. วนลูปรุปภาพทั้งหมดของสินค้านี้
+        foreach ($item->images as $image) {
+            // แกะ Public ID จาก URL
+            $publicId = $this->getPublicIdFromUrl($image->path);
+            // ถ้าแกะได้ ให้สั่งลบบน Cloudinary
+            if ($publicId) {
+                Cloudinary::destroy($publicId);
+            }
+        }
+        // 2. ลบข้อมูลใน Database (ใช้ Transaction เพื่อความชัวร์)
         DB::transaction(function () use ($item) {
-            $item->images()->delete(); // ลบ record รูปใน DB
+            $item->images()->delete(); // ลบ record รูป
             $item->delete();           // ลบสินค้า
         });
-
-        // 3. สั่งลบไฟล์จริงๆ ทีเดียว (ถ้ามีไฟล์)
-        if (!empty($imagePaths)) {
-            Storage::disk('public')->delete($imagePaths);
-        }
-
-        return redirect()->route('manager.items.index')->with('status', 'ลบสินค้าสำเร็จ');
+        return redirect()->route('manager.items.index')->with('status', 'ลบสินค้าและรูปภาพสำเร็จ');
     }
     public function uploadItemImage(Request $request, Item $item)
     {
@@ -591,18 +599,31 @@ class ManagerController extends Controller
         if ($request->hasFile('images')) {
             $hasExisting = $item->images()->exists();
             foreach ($request->file('images') as $idx => $image) {
-                $path = $image->store('items', 'public');
-                $item->images()->create(['path' => $path, 'is_main' => (!$hasExisting && $idx === 0)]);
+                // ✅ แก้เป็น: อัปขึ้น Cloudinary และขอ URL มาเก็บ
+                $cloudinaryImage = $image->storeOnCloudinary('items');
+                $url = $cloudinaryImage->getSecurePath();
+
+                $item->images()->create([
+                    'path' => $url, // เก็บเป็น https://...
+                    'is_main' => (!$hasExisting && $idx === 0)
+                ]);
             }
         }
         return back()->with('status', 'อัปโหลดรูปภาพสำเร็จ');
     }
     public function destroyItemImage(ItemImage $image)
     {
-        Storage::disk('public')->delete($image->path);
+        // 1. แกะ Public ID และสั่งลบบน Cloudinary
+        $publicId = $this->getPublicIdFromUrl($image->path);
+        if ($publicId) {
+            Cloudinary::destroy($publicId);
+        }
+        // 2. จัดการเรื่องรูปหลัก (Main Image)
         $item = $image->item;
         $wasMain = $image->is_main;
+        // 3. ลบ Record ใน Database
         $image->delete();
+        // 4. ถ้าลบรูปหลักไป ให้ตั้งรูปอื่นขึ้นมาแทน (ถ้ามี)
         if ($wasMain && $item->images()->count() > 0) {
             $newMain = $item->images()->first();
             $newMain->is_main = true;
@@ -794,5 +815,17 @@ class ManagerController extends Controller
     {
         $promotion->delete();
         return redirect()->route('manager.promotions.index')->with('status', 'ลบโปรโมชั่นสำเร็จ');
+    }
+    // ฟังก์ชันสำหรับแปลง URL ยาวๆ ให้เป็น Public ID เพื่อเอาไปลบ
+    private function getPublicIdFromUrl($url)
+    {
+        // ตัวอย่าง URL: https://res.cloudinary.com/demo/image/upload/v123456789/items/my-image.jpg
+        // เราต้องการแค่: items/my-image
+
+        // ใช้ Regex จับค่าที่อยู่หลังคำว่า 'upload/' (และข้าม version 'v123..') จนถึงก่อนนามสกุลไฟล์
+        if (preg_match('/upload\/(?:v\d+\/)?(.+)\.[^.]+$/', $url, $matches)) {
+            return $matches[1];
+        }
+        return null;
     }
 }

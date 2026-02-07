@@ -64,7 +64,14 @@
         searchOpen: false,
         itemModalOpen: false,
         selectedItem: null,
-        activeImage: ''
+        activeImage: '',
+        imageUrl(path) {
+            if (!path) return '';
+            // ถ้าเป็นลิงก์ http (Cloudinary) ให้ส่งกลับเลย
+            if (path.startsWith('http')) return path;
+            // ถ้าไม่ใช่ ให้เติม storage/ ข้างหน้า
+            return '{{ asset('storage') }}/' + path.replace('public/', '');
+        }
     }"
     @scroll.window="scrolled = (window.pageYOffset > 20)">
 
@@ -224,7 +231,7 @@
                 <div>
                     <h3 class="font-bold text-lg mb-4">ติดต่อเรา</h3>
                     <ul class="space-y-3 text-gray-400 text-sm">
-                        <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> ต.ต้นธง อ.เมือง จ.ลำพูน</li>
+                        <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> 499/130 หมู่บ้านรุ่งเรือง ซ. 8 <br>อำเภอสันทราย เชียงใหม่ 50210</li>
                         <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> 082 280 6989</li>
                         <li class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> เปิดทุกวัน 09:00 - 20:00 น.</li>
                     </ul>
@@ -232,9 +239,16 @@
                 <div>
                     <h3 class="font-bold text-lg mb-4">ช่องทางออนไลน์</h3>
                     <div class="flex gap-4">
-                        <a href="#" class="p-2 bg-gray-800 rounded-full hover:bg-green-600 transition"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
-                        <a href="#" class="p-2 bg-gray-800 rounded-full hover:bg-blue-600 transition"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                        <a href="#" class="p-2 bg-gray-800 rounded-full hover:bg-pink-600 transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                        <a href="https://www.tiktok.com/@watakachastudio" target="_blank"
+                            class="p-2 bg-gray-800 rounded-full hover:bg-black transition text-white flex items-center justify-center shadow-lg">
+                            {{-- SVG ของ TikTok (ใส่ตรงนี้แทน data-lucide) --}}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                            </svg>
+                        </a>
+                        <a href="https://www.facebook.com/WATAKACHA/" class="p-2 bg-gray-800 rounded-full hover:bg-blue-600 transition"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                        <a href="https://line.me/ti/p/@yourlineid" target="_blank" class="p-2 bg-gray-800 rounded-full hover:bg-green-600 transition"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+                        <a href="https://www.instagram.com/watakacha_wedding_studio/" class="p-2 bg-gray-800 rounded-full hover:bg-pink-600 transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
                     </div>
                 </div>
             </div>
@@ -263,8 +277,12 @@
                         <div class="flex gap-2 overflow-x-auto scrollbar-hide py-2">
                             <template x-if="selectedItem?.images">
                                 <template x-for="img in selectedItem.images" :key="img.id">
-                                    <div @click="activeImage = '{{ asset('storage') }}/' + img.path.replace('public/', '')" class="w-16 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 transition" :class="activeImage.includes(img.path.replace('public/', '')) ? 'border-brand-500' : 'border-transparent'">
-                                        <img :src="'{{ asset('storage') }}/' + img.path.replace('public/', '')" class="w-full h-full object-cover">
+                                    {{-- เรียกใช้ imageUrl(img.path) แทนการต่อ String เอง --}}
+                                    <div @click="activeImage = imageUrl(img.path)"
+                                        class="w-16 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 transition"
+                                        :class="activeImage === imageUrl(img.path) ? 'border-brand-500' : 'border-transparent'">
+
+                                        <img :src="imageUrl(img.path)" class="w-full h-full object-cover">
                                     </div>
                                 </template>
                             </template>

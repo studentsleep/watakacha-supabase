@@ -689,8 +689,8 @@
                         <button @click="showReceipt=false" class="absolute top-4 right-4 text-white opacity-70 hover:opacity-100 no-print transition">✕</button>
                         <div class="relative z-10">
                             <center>
-                                <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
-                                <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
+                            <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
                             </center>
                             <div class="mt-6 border-t border-gray-700 pt-4">
                                 <div class="flex justify-between items-start">

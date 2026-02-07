@@ -79,28 +79,49 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         @forelse($items as $item)
                         @php
-                        $imagePath = 'https://via.placeholder.com/400x533?text=No+Image';
+                        // 1. หารูปภาพหลัก
                         $mainImg = $item->images->where('is_main', true)->first() ?? $item->images->first();
-                        if ($mainImg && $mainImg->path) { $imagePath = asset('storage/' . str_replace('public/', '', $mainImg->path)); }
+
+                        // 2. กำหนดรูป Default
+                        $imagePath = 'https://via.placeholder.com/400x533?text=No+Image';
+
+                        // 3. เช็ค Logic รูปภาพ (Cloudinary vs Local)
+                        if ($mainImg && $mainImg->path) {
+                        if (Str::startsWith($mainImg->path, 'http')) {
+                        // ถ้าเป็นลิงก์ Cloudinary (ขึ้นต้นด้วย http) ใช้ได้เลย
+                        $imagePath = $mainImg->path;
+                        } else {
+                        // ถ้าเป็น Local Storage
+                        $imagePath = asset('storage/' . str_replace('public/', '', $mainImg->path));
+                        }
+                        }
                         @endphp
+
                         <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer"
-                            @click="selectedItem = {{ Js::from($item) }}; 
+                            {{-- 
+                                    4. แก้ไขส่วน Alpine.js ตรงนี้ 
+                                    - ใช้ฟังก์ชัน imageUrl() ที่เราเพิ่มไปใน Layout 
+                                --}}
+                            @click="
+                                    selectedItem = {{ Js::from($item) }}; 
                                     let firstImg = selectedItem.images.find(i => i.is_main) || selectedItem.images[0];
-                                    activeImage = firstImg ? '{{ asset('storage') }}/' + firstImg.path.replace('public/', '') : 'https://via.placeholder.com/400x533?text=No+Image';
-                                    itemModalOpen = true">
+                                    activeImage = firstImg ? imageUrl(firstImg.path) : 'https://via.placeholder.com/400x533?text=No+Image';
+                                    itemModalOpen = true;
+                                ">
 
                             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                                {{-- รูปภาพสินค้า --}}
                                 <img src="{{ $imagePath }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" decoding="async">
 
                                 {{-- Badge Status --}}
                                 @if($item->stock > 0)
-                                <span class="absolute top-3 right-3 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm">ว่าง</span>
+                                <span class="absolute top-3 right-3 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm shadow-sm">ว่าง</span>
                                 @else
-                                <span class="absolute top-3 right-3 bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm">คิวเต็ม</span>
+                                <span class="absolute top-3 right-3 bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm shadow-sm">คิวเต็ม</span>
                                 @endif
 
                                 {{-- Badge Type (โชว์ประเภทสินค้า) --}}
-                                <span class="absolute bottom-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
+                                <span class="absolute bottom-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm border border-white/20">
                                     {{ $item->type->name ?? 'ทั่วไป' }}
                                 </span>
                             </div>
@@ -110,7 +131,7 @@
                                 <div class="flex justify-between items-center mt-2">
                                     <p class="text-brand-600 font-bold text-lg">฿{{ number_format($item->price) }}</p>
                                     <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                                        {{ $item->unit->name ?? 'ชิ้น' }} {{-- โชว์หน่วย --}}
+                                        {{ $item->unit->name ?? 'ชิ้น' }}
                                     </span>
                                 </div>
                             </div>

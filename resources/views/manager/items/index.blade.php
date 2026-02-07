@@ -63,9 +63,20 @@
                                 <td class="px-6 py-4 text-sm text-gray-400 font-mono">#{{ $item->id }}</td>
                                 <td class="px-6 py-4">
                                     @php
+                                    // 1. หารูปสินค้า (รูปหลัก หรือ รูปแรก)
                                     $mainImage = $item->images->firstWhere('is_main', true) ?? $item->images->first();
-                                    $imageUrl = $mainImage ? asset('storage/'. $mainImage->path) : 'https://placehold.co/100x100/374151/9ca3af?text=No+Img';
+                                    if ($mainImage) {
+                                    // ✅ มีรูป: เช็คว่าเป็น Cloudinary หรือ Local
+                                    $imageUrl = str_starts_with($mainImage->path, 'http')
+                                    ? $mainImage->path
+                                    : asset('storage/' . $mainImage->path);
+                                    } else {
+                                    // ❌ ไม่มีรูป: ให้ดึง Logo ร้านมาแสดงแทน
+                                    $imageUrl = asset('images/logo.png');
+                                    }
                                     @endphp
+
+                                    {{-- ส่วนแสดงผลรูปภาพ --}}
                                     <img src="{{ $imageUrl }}" class="w-12 h-12 rounded-lg object-cover border border-gray-600">
                                 </td>
                                 <td class="px-6 py-4">
