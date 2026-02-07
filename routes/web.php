@@ -12,6 +12,7 @@ use App\Http\Middleware\CheckUserRole;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\MemberAuthController;
 use App\Http\Controllers\ServiceCostController;
+use Illuminate\Support\Facades\Config;
 
 /*
 |--------------------------------------------------------------------------
@@ -231,4 +232,11 @@ Route::prefix('liff')->group(function () {
     Route::get('/login', [LiffController::class, 'index'])->name('liff.login');
     Route::post('/login', [LiffController::class, 'login'])->name('liff.submit');
     Route::post('/check-auto', [LiffController::class, 'checkAutoLogin'])->name('liff.check');
+});
+
+Route::get('/debug-cloudinary', function () {
+    return [
+        'cloudinary_url_from_env' => env('CLOUDINARY_URL'), // ดูว่า ENV เข้ามาไหม
+        'config_check' => config('cloudinary'), // ดูว่าไฟล์ config ถูกโหลดไหม
+    ];
 });
