@@ -540,9 +540,11 @@ class ManagerController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
                 // 1. อัปโหลดขึ้น Cloudinary ไปที่โฟลเดอร์ 'items'
-                $cloudinaryImage = $image->storeOnCloudinary('items');
-                // 2. ดึง URL แบบเต็มมา (เช่น https://res.cloudinary.com/...)
-                $url = $cloudinaryImage->getSecurePath();
+                // ใช้วิธี Upload ผ่าน Facade โดยตรง (ชัวร์กว่า)
+                $uploadedFile = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'items'
+                ]);
+                $url = $uploadedFile->getSecurePath();
                 // 3. บันทึกลง Database
                 // ตรง 'path' จะเก็บเป็น URL ยาวๆ แทนที่จะเป็น items/ชื่อไฟล์.jpg
                 $item->images()->create([

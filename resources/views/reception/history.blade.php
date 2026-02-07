@@ -689,8 +689,8 @@
                         <button @click="showReceipt=false" class="absolute top-4 right-4 text-white opacity-70 hover:opacity-100 no-print transition">✕</button>
                         <div class="relative z-10">
                             <center>
-                            <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
+                                <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
                             </center>
                             <div class="mt-6 border-t border-gray-700 pt-4">
                                 <div class="flex justify-between items-start">
@@ -779,7 +779,8 @@
                                     <p class="text-xs font-bold text-gray-800">{{ Auth::user()->first_name }}</p>
                                 </div>
                                 <div class="text-center">
-                                    <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent('Rental:' + receiptData?.rental_id)}`" class="w-16 h-16 mix-blend-multiply opacity-80 border p-1 rounded bg-white shadow-sm">
+                                    <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('https://watakacha-supabase.onrender.com/')}`"
+                                        class="w-16 h-16 mix-blend-multiply opacity-80 border p-1 rounded bg-white shadow-sm">
                                 </div>
                             </div>
                             <div class="text-center mt-4">

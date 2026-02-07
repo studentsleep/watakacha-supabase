@@ -320,7 +320,8 @@
 
                         <div class="text-center pt-4 border-t border-dashed border-gray-200">
                             <div class="flex justify-center mb-3">
-                                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('ServiceID:' + selectedService?.rental_id)}`" alt="QR Code" class="w-16 h-16 mix-blend-multiply opacity-80 border p-1 rounded bg-white">
+                                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('https://watakacha-supabase.onrender.com/')}`"
+                                    class="w-16 h-16 mix-blend-multiply opacity-80 border p-1 rounded bg-white shadow-sm">
                             </div>
                             <p class="font-bold text-gray-800 text-xs">ขอบคุณที่ใช้บริการ</p>
                             <p class="text-[10px] text-gray-400 mt-1">เอกสารนี้ออกโดยระบบอัตโนมัติ</p>
