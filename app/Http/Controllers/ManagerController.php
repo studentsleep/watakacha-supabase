@@ -598,15 +598,20 @@ class ManagerController extends Controller
     public function uploadItemImage(Request $request, Item $item)
     {
         $request->validate(['images' => 'required', 'images.*' => 'image|max:2048']);
+
         if ($request->hasFile('images')) {
             $hasExisting = $item->images()->exists();
+
             foreach ($request->file('images') as $idx => $image) {
-                // ✅ แก้เป็น: อัปขึ้น Cloudinary และขอ URL มาเก็บ
-                $cloudinaryImage = $image->storeOnCloudinary('items');
-                $url = $cloudinaryImage->getSecurePath();
+
+                // ✅ แก้ไข: ใช้ Facade แบบเดียวกับ storeItem เพื่อความเสถียร
+                $uploadedFile = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'items'
+                ]);
+                $url = $uploadedFile->getSecurePath();
 
                 $item->images()->create([
-                    'path' => $url, // เก็บเป็น https://...
+                    'path' => $url, // เก็บ URL จาก Cloudinary
                     'is_main' => (!$hasExisting && $idx === 0)
                 ]);
             }
