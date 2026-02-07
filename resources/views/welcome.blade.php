@@ -1,25 +1,146 @@
+<style>
+    .gold-glitter-text {
+        /* 1. สร้างสีทองแบบไล่เฉด (มีสีขาวแทรกเพื่อให้ดูวิบวับ) */
+        background: linear-gradient(to right,
+                #BF953F,
+                #FCF6BA,
+                #B38728,
+                #FBF5B7,
+                #AA771C);
+        background-size: 200% auto;
+
+        /* 2. ตัดพื้นหลังให้เป็นรูปตัวอักษร */
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+
+        /* 3. อนิเมชั่นขยับพื้นหลัง (สร้างความรู้สึกระยิบระยับ) */
+        animation: shine 8s linear infinite;
+
+        /* 4. แสงโกลว์ (Glow) สว่างๆ */
+        text-shadow: 0 0 10px rgba(253, 246, 186, 0.5),
+            0 0 20px rgba(191, 149, 63, 0.3);
+    }
+
+    @keyframes shine {
+        to {
+            background-position: 200% center;
+        }
+    }
+</style>
 <x-layouts.frontend>
-    {{-- Banner Section --}}
-    <div class="relative h-[600px] lg:h-[700px] w-full overflow-hidden">
+    {{-- ========================================== --}}
+    {{-- 1. BANNER SECTION (ภาพใหญ่ เต็มตา)       --}}
+    {{-- ========================================== --}}
+    <div class="relative h-[600px] lg:h-[700px] w-full overflow-hidden group">
+        {{-- Background Image --}}
         <div class="absolute inset-0">
-            <img src="{{ asset('images/banner.png') }}" class="w-full h-full object-cover" alt="Banner" loading="lazy" decoding="async">
-            <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+            <img src="{{ asset('images/banner.png') }}"
+                class="w-full h-full object-cover transition-transform duration-[3000ms] group-hover:scale-105"
+                alt="Banner"
+                loading="eager"
+                decoding="async">
+
+            {{-- Gradient Overlay --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10"></div>
         </div>
-        <div class="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-            <div class="max-w-2xl text-white space-y-6">
-                <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold tracking-wider uppercase border border-white/30">
-                    Watakacha Wedding & Studio
-                </span>
-                <h1 class="text-4xl lg:text-6xl font-bold leading-tight">
-                    เนรมิตวันพิเศษของคุณ <br> </h1>
-                <p class="text-lg text-gray-200">
-                    บริการเช่าชุดราตรี ชุดไทย สูท และอุปกรณ์เสริมครบวงจร พร้อมบริการแต่งหน้าและถ่ายภาพ จบครบในที่เดียว
+
+        {{-- Contact Channels (Overlay ลอยอยู่ด้านล่างของภาพ) --}}
+        <div class="absolute bottom-0 left-0 w-full z-10 pb-8">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center">
+
+                {{-- เส้นตกแต่ง --}}
+                <div class="w-16 h-1 bg-white/50 rounded-full mb-6 backdrop-blur-sm"></div>
+
+                <p class="text-white/90 text-sm font-light tracking-[0.25em] mb-6 uppercase text-shadow-sm">
+                    Follow Us & Contact
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                    <a href="https://line.me/ti/p/@yourlineid" target="_blank" class="px-8 py-3 bg-white hover:bg-green-500 text-gray-900 font-bold rounded-full shadow-lg transition flex items-center justify-center gap-2">
-                        <i data-lucide="message-circle" class="w-5 h-5 text-green-600"></i> สอบถามผ่าน LINE
+
+                {{-- Social Icons --}}
+                <div class="flex items-center gap-4 sm:gap-6">
+                    {{-- Facebook --}}
+                    <a href="https://www.facebook.com/WATAKACHA/" target="_blank"
+                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#1877F2] hover:border-[#1877F2] hover:scale-110 transition-all duration-300 shadow-xl">
+                        <i data-lucide="facebook" class="w-5 h-5 sm:w-6 sm:h-6 group-hover/icon:fill-white"></i>
+                    </a>
+
+                    {{-- Line --}}
+                    <a href="https://line.me/ti/p/@yourlineid" target="_blank"
+                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#06C755] hover:border-[#06C755] hover:scale-110 transition-all duration-300 shadow-xl">
+                        <i data-lucide="message-circle" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </a>
+
+                    {{-- Instagram --}}
+                    <a href="#" target="_blank"
+                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-pink-600 hover:border-pink-600 hover:scale-110 transition-all duration-300 shadow-xl">
+                        <i data-lucide="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </a>
+
+                    {{-- Phone --}}
+                    <a href="tel:0931309899"
+                        class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-green-500 hover:border-green-500 hover:scale-110 transition-all duration-300 shadow-xl">
+                        <i data-lucide="phone" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </a>
                 </div>
+
+                {{-- ✅ Scroll Down Indicator (ส่วนที่เพิ่มใหม่) --}}
+                <div class="mt-8 sm:mt-12 animate-bounce">
+                    <a href="#content-start"
+                        class="flex flex-col items-center gap-2 text-white/70 hover:text-white transition-colors duration-300 cursor-pointer group/scroll">
+                        <span class="text-[10px] uppercase tracking-widest font-light opacity-0 group-hover/scroll:opacity-100 transition-opacity">Scroll</span>
+                        <div class="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center bg-white/5 backdrop-blur-sm group-hover/scroll:bg-white/20 transition-all">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {{-- ========================================== --}}
+    {{-- 2. HERO CONTENT SECTION (ข้อความแนะนำ)   --}}
+    {{-- ========================================== --}}
+    <div id="content-start" class="bg-white relative"> {{-- ✅ เพิ่ม id="content-start" ตรงนี้ --}}
+        {{-- Decorative Background Elements --}}
+        <div class="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-4 py-20 lg:py-32 text-center relative z-10">
+            {{-- Badge --}}
+            <span class="inline-block px-5 py-2 bg-gray-50 text-gray-900 border border-gray-200 rounded-full text-xs font-bold tracking-[0.15em] uppercase mb-8 shadow-sm">
+                Watakacha Wedding & Studio
+            </span>
+
+            {{-- Title --}}
+            <h1 class="gold-glitter-text text-4xl md:text-5xl lg:text-7xl font-bold leading-tight mb-8">
+                เนรมิตวันพิเศษของคุณ <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-600 relative">
+                    {{-- ขีดเส้นใต้ตกแต่ง --}}
+                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-brand-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" />
+                    </svg>
+                </span>
+            </h1>
+
+            {{-- Description --}}
+            <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-12 max-w-3xl mx-auto font-light">
+                บริการเช่าชุดราตรี ชุดไทย สูท และอุปกรณ์เสริมครบวงจร พร้อมบริการแต่งหน้าและถ่ายภาพ
+                ดูแลคุณด้วยความใส่ใจและเป็นกันเอง เพื่อให้คุณมั่นใจที่สุดในวันสำคัญ
+            </p>
+
+            {{-- Actions --}}
+            <div class="flex flex-col sm:flex-row gap-5 justify-center">
+                <a href="#catalog"
+                    class="px-10 py-4 bg-gray-900 text-white font-bold rounded-full shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 text-lg">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    เลือกชมชุด
+                </a>
+                <a href="https://line.me/ti/p/@yourlineid" target="_blank"
+                    class="px-10 py-4 bg-white text-gray-900 border-2 border-gray-100 font-bold rounded-full shadow-md hover:border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 text-lg">
+                    <i data-lucide="message-circle" class="w-5 h-5 text-green-600"></i>
+                    สอบถามผ่าน LINE
+                </a>
             </div>
         </div>
     </div>

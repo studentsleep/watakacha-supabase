@@ -185,7 +185,14 @@
                                         class="flex items-center px-4 py-2 text-gray-300 hover:bg-orange-700 hover:text-white rounded-md"
                                         :class="sidebarOpen ? '' : 'justify-center'">
                                         <i data-lucide="wrench" class="w-5 h-5"></i>
-                                        <span class="ml-3" x-show="sidebarOpen" x-transition>ซัก-ซ่อม</span>
+                                        <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการการซัก-ซ่อม</span>
+                                    </a>
+                                </li>
+                                <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ค่าแรงช่าง</span></li>
+                                <li>
+                                    <a href="{{ route('service_costs.index') }}" class="flyout-link">
+                                        <i data-lucide="coins" class="icon-size"></i> {{-- เปลี่ยนไอคอนเป็นรูปเงิน หรือใช้ sparkles เหมือนเดิมก็ได้ --}}
+                                        จัดการค่าแรงช่าง
                                     </a>
                                 </li>
                             </ul>
@@ -213,7 +220,6 @@
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
                                 <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
                                 <li><a href="{{ route('reception.pointHistory') }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
-                                <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                                 <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>
                             </ul>
@@ -225,7 +231,7 @@
 
                 <li>
                     <a href="{{ route('reception.member.create') }}"
-                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-indigo-600 hover:text-white rounded-md transition-colors"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-pink-600 hover:text-white rounded-md transition-colors"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="user-plus" class="w-5 h-5"></i>
                         <span class="ml-3" x-show="sidebarOpen" x-transition>สมัครสมาชิก</span>
@@ -250,12 +256,22 @@
                     </a>
                 </li>
 
+                <li><a href="{{ route('reception.history') }}" class="flex items-center px-4 py-2 text-gray-300 hover:bg-purple-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span class="ml-3" x-show="sidebarOpen" x-transition>จัดการการเช่า-คืน</span></a></li>
                 <li>
                     <a href="{{ route('maintenance.index') }}"
-                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-orange-700 hover:text-white rounded-md"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-purple-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
                         <i data-lucide="wrench" class="w-5 h-5"></i>
-                        <span class="ml-3" x-show="sidebarOpen" x-transition>ซัก-ซ่อม</span>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการการซัก-ซ่อม</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('service_costs.index') }}" class="flex items-center px-4 py-2 text-gray-300 hover:bg-purple-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'">
+                        <i data-lucide="coins" class="w-5 h-5"></i><span class="ml-3" x-show="sidebarOpen" x-transition>
+                            จัดการค่าแรงช่าง</span>
                     </a>
                 </li>
 
@@ -275,9 +291,7 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ประวัติข้อมูล</span></li>
-                                <li><a href="{{ route('reception.history') }}" class="flyout-link"><i data-lucide="clipboard-list" class="icon-size"></i> ประวัติการเช่า-คืน</a></li>
                                 <li><a href="{{ route('reception.pointHistory') }}" class="flyout-link"><i data-lucide="star" class="icon-size"></i> ประวัติการใช้แต้ม</a></li>
-                                <li><a href="{{ route('reception.serviceHistory') }}" class="flyout-link"><i data-lucide="sparkles" class="icon-size"></i> ประวัติการบริการ</a></li>
                                 <li><a href="{{ route('reception.paymentHistory') }}" class="flyout-link"><i data-lucide="banknote" class="icon-size"></i> ประวัติการชำระเงิน</a></li>
                                 <li><a href="{{ route('reception.calendar') }}" class="flyout-link"><i data-lucide="calendar" class="icon-size"></i> ปฏิทินงานเช่า</a></li>
                             </ul>

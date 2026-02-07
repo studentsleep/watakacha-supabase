@@ -460,8 +460,8 @@
 
                             {{-- Price Detail --}}
                             <div class="text-sm space-y-3 pt-4 border-t border-gray-100">
-                                <div class="flex justify-between items-center text-gray-600"><span>ค่าชุดหลัก <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full" x-text="cartItemCount"></span></span><span class="font-bold text-gray-900" x-text="formatPrice(cartTotal)"></span></div>
-                                <div class="flex justify-between items-center text-gray-600" x-show="accessoryCart.length > 0"><span>อุปกรณ์เสริม <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full" x-text="accessoryItemCount"></span></span><span class="font-bold text-gray-900" x-text="formatPrice(accessoryTotal)"></span></div>
+                                <div class="flex justify-between items-center text-white"><span>ค่าชุดหลัก <span class="text-xs bg-gray-100 text-indigo-500 px-2 py-0.5 rounded-full" x-text="cartItemCount"></span></span><span class="font-bold text-indigo-200" x-text="formatPrice(cartTotal)"></span></div>
+                                <div class="flex justify-between items-center text-white" x-show="accessoryCart.length > 0"><span>อุปกรณ์เสริม <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full" x-text="accessoryItemCount"></span></span><span class="font-bold text-orange-600" x-text="formatPrice(accessoryTotal)"></span></div>
                                 <template x-if="makeupPrice > 0">
                                     <div class="flex justify-between items-center text-gray-600"><span>ค่าแต่งหน้า</span><span class="font-bold text-gray-900" x-text="formatPrice(makeupPrice)"></span></div>
                                 </template>

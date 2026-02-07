@@ -31,7 +31,7 @@ if (!isset($item)) $item = new \App\Models\Item();
 
                         <!-- Field: Name -->
                         <div>
-                            <x-input-label for="item_name-{{ $item->id }}" :value="__('ชื่อสินค้า (Name)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                            <x-input-label for="item_name-{{ $item->id }}" :value="__('ชื่อสินค้า (Name)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
                             <x-text-input type="text" name="name" id="item_name-{{ $item->id }}" value="{{ $item->item_name }}" required class="mt-1 block w-full" />
                         </div>
 
@@ -44,19 +44,19 @@ if (!isset($item)) $item = new \App\Models\Item();
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Field: Price -->
                             <div>
-                                <x-input-label for="price-{{ $item->id }}" :value="__('ราคา (Price)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-input-label for="price-{{ $item->id }}" :value="__('ราคา (Price)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
                                 <x-text-input type="number" name="price" id="price-{{ $item->id }}" value="{{ $item->price }}" step="0.01" required class="mt-1 block w-full" />
                             </div>
                             <!-- Field: Stock -->
                             <div>
-                                <x-input-label for="stock-{{ $item->id }}" :value="__('จำนวน (Stock)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-input-label for="stock-{{ $item->id }}" :value="__('จำนวน (Stock)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
                                 <x-text-input type="number" name="stock" id="stock-{{ $item->id }}" value="{{ $item->stock }}" required class="mt-1 block w-full" />
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <x-input-label for="update_item_type_id-{{ $item->id }}" :value="__('ประเภท (Type)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-input-label for="update_item_type_id-{{ $item->id }}" :value="__('ประเภท (Type)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
                                 {{-- แก้ name เป็น item_type_id --}}
                                 <select name="item_type_id" id="update_item_type_id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกประเภท --</option>
@@ -67,13 +67,22 @@ if (!isset($item)) $item = new \App\Models\Item();
                             </div>
 
                             <div>
-                                <x-input-label for="update_item_unit_id-{{ $item->id }}" :value="__('หน่วย (Unit)')" class="after:content-['*'] after:text-red-500 after:ml-0.5"/>
+                                <x-input-label for="update_item_unit_id-{{ $item->id }}" :value="__('หน่วย (Unit)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
                                 {{-- แก้ name เป็น item_unit_id --}}
                                 <select name="item_unit_id" id="update_item_unit_id-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">-- เลือกหน่วย --</option>
                                     @foreach($units as $unit)
                                     <option value="{{ $unit->id }}" @selected($item->item_unit_id == $unit->id)>{{ $unit->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <x-input-label for="status-{{ $item->id }}" :value="__('สถานะ (Status)')" class="after:content-['*'] after:text-red-500 after:ml-0.5" />
+                                <select name="status" id="status-{{ $item->id }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <option value="active" @selected($item->status == 'active')>พร้อมใช้งาน (Active)</option>
+                                    <option value="inactive" @selected($item->status == 'inactive')>ระงับการใช้งาน (Inactive)</option>
+                                    <option value="maintenance" @selected($item->status == 'maintenance')>ซ่อมบำรุง (Maintenance)</option>
                                 </select>
                             </div>
                         </div>

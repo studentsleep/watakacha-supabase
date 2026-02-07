@@ -689,16 +689,15 @@
                         <button @click="showReceipt=false" class="absolute top-4 right-4 text-white opacity-70 hover:opacity-100 no-print transition">✕</button>
                         <div class="relative z-10">
                             <center>
-                            <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
+                                <h3 class="text-xl font-bold tracking-wide mb-1" x-text="receiptData?.status === 'returned' ? 'ใบเสร็จรับเงิน (คืนชุด)' : 'ใบเสร็จรับเงิน (มัดจำ)'"></h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em]">Receipt / Tax Invoice</p>
                             </center>
                             <div class="mt-6 border-t border-gray-700 pt-4">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <h4 class="font-bold text-sm text-white">Watakacha Wedding</h4>
-                                        {{-- ✅ เพิ่มที่อยู่ร้าน --}}
-                                        <p class="text-xs text-gray-400 mt-1">123/45 ถนนนิมมานเหมินท์<br>ต.สุเทพ อ.เมือง จ.เชียงใหม่ 50200</p>
-                                        <p class="text-xs text-gray-400 mt-1">โทร. 093-130-9899</p>
+                                        <h4 class="font-bold text-sm text-white">Watakacha Wedding & Studio</h4>
+                                        <p class="text-xs text-gray-400 mt-1">499/130 หมู่บ้านรุ่งเรือง<br>ซ. 8 อำเภอสันทราย เชียงใหม่ 50210</p>
+                                        <p class="text-xs text-gray-400 mt-1">โทร. 082-280-6989</p>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-[10px] text-gray-400 uppercase mb-0.5">รหัสรายการเช่า</p>

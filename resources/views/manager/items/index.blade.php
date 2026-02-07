@@ -53,6 +53,7 @@
                                 <th class="px-6 py-4 text-left text-xs font-bold text-indigo-400 uppercase tracking-wider">ชื่อสินค้า / ประเภท</th>
                                 <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase tracking-wider">ราคาเช่า</th>
                                 <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase tracking-wider">คงเหลือ / หน่วย</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-indigo-400 uppercase tracking-wider">สถานะ</th>
                                 <th class="px-6 py-4 text-right text-xs font-bold text-indigo-400 uppercase tracking-wider">จัดการ</th>
                             </tr>
                         </thead>
@@ -84,6 +85,23 @@
                                         </span>
                                         <span class="text-sm text-gray-400">{{ $item->unit->name ?? 'ชิ้น' }}</span>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if ($item->status === 'active')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300 border border-green-700">
+                                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                                        พร้อมใช้งาน
+                                    </span>
+                                    @elseif ($item->status === 'maintenance')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                        <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-pulse"></span>
+                                        ซ่อมบำรุง
+                                    </span>
+                                    @else {{-- inactive --}}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-300 border border-red-700">
+                                        ระงับการใช้งาน
+                                    </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-right font-medium">
                                     <button onclick="toggleModal('updateItemModal-{{ $item->id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>

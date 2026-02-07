@@ -15,6 +15,7 @@ use App\Models\PointTransaction;
 use App\Models\Accessory;
 use App\Models\Payment;
 use App\Models\ItemMaintenance;
+use App\Models\RentalAccessory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -414,7 +415,7 @@ class ReceptionController extends Controller
     // =========================================================================
     public function returnIndex(Request $request)
     {
-        $query = Rental::with(['member', 'payments', 'items.item', 'items.accessory'])
+        $query = Rental::with(['member', 'payments', 'items.item', 'items.accessory', 'accessories'])
             ->where('status', Rental::STATUS_RENTED);
 
         if ($request->has('search')) {
@@ -434,7 +435,7 @@ class ReceptionController extends Controller
     {
         DB::beginTransaction();
         try {
-            $rental = Rental::with(['items', 'payments'])->findOrFail($rentalId);
+            $rental = Rental::with(['items', 'accessories', 'payments'])->findOrFail($rentalId);
 
             if ($rental->status !== Rental::STATUS_RENTED) {
                 return response()->json(['success' => false, 'message' => 'รายการนี้สถานะไม่ถูกต้อง'], 400);
@@ -450,7 +451,7 @@ class ReceptionController extends Controller
             $totalDamageFine = 0;
             $damageNotes = [];
 
-            // 1. บันทึกเสียหาย
+            // 1. จัดการความเสียหาย (Damages) & ค่าปรับ
             foreach ($itemsDamage as $damage) {
                 $isAccessory = $damage['is_accessory'] ?? false;
                 $targetId = $damage['item_id'];
@@ -458,36 +459,58 @@ class ReceptionController extends Controller
                 $qty = $damage['qty'];
                 $note = $damage['note'];
 
-                $query = RentalItem::where('rental_id', $rental->rental_id);
-                if ($isAccessory) $query->where('accessory_id', $targetId);
-                else $query->where('item_id', $targetId);
+                if ($isAccessory) {
+                    // 🔴 ลบ หรือ Comment ส่วนนี้ออกครับ (ตัวต้นเหตุ Error) 🔴
+                    /* DB::table('rental_accessories')
+                        ->where('rental_id', $rental->rental_id)
+                        ->where('accessory_id', $targetId)
+                        ->update([]); 
+                    */
 
-                $rentalItem = $query->first();
-                if ($rentalItem) {
-                    $newNote = "[เสีย {$qty} ชิ้น: {$note} (ปรับ " . number_format($fine) . ")]";
-                    $rentalItem->description = trim($rentalItem->description . ' ' . $newNote);
-                    $rentalItem->fine_amount += $fine;
-                    $rentalItem->save();
+                    // ✅ เก็บแค่ Logic คำนวณเงินและ Note ก็พอครับ
                     $totalDamageFine += $fine;
 
-                    if (!$isAccessory) {
-                        if (!isset($damageNotes[$targetId])) $damageNotes[$targetId] = "";
-                        $damageNotes[$targetId] .= $note . ", ";
+                    // เก็บ Note ไว้ใช้ตอนสร้างใบซ่อม
+                    $key = 'acc_' . $targetId;
+                    if (!isset($damageNotes[$key])) $damageNotes[$key] = "";
+                    $damageNotes[$key] .= "[เสีย {$qty}: {$note} (ปรับ " . number_format($fine) . ")] ";
+                } else {
+                    // กรณีชุดหลัก (ทำเหมือนเดิม)
+                    $rentalItem = RentalItem::where('rental_id', $rental->rental_id)
+                        ->where('item_id', $targetId)
+                        ->first();
+
+                    if ($rentalItem) {
+                        $newNote = "[เสีย {$qty}: {$note} (ปรับ " . number_format($fine) . ")]";
+                        $rentalItem->description = trim($rentalItem->description . ' ' . $newNote);
+                        $rentalItem->fine_amount += $fine;
+                        $rentalItem->save();
+
+                        $key = 'item_' . $targetId;
+                        if (!isset($damageNotes[$key])) $damageNotes[$key] = "";
+                        $damageNotes[$key] .= $note . ", ";
                     }
+                    $totalDamageFine += $fine; // บวกค่าปรับรวม
                 }
             }
 
-            // 2. ส่งซ่อม (เฉพาะ Item หลัก)
+            // 2. ส่งซัก/ซ่อม (สร้าง ItemMaintenance)
+
+            // 2.1 สำหรับชุดหลัก
             foreach ($rental->items as $rentalLine) {
                 if ($rentalLine->item_id) {
-                    $note = isset($damageNotes[$rentalLine->item_id]) ? rtrim($damageNotes[$rentalLine->item_id], ", ") : 'ส่งซักปกติ';
+                    $key = 'item_' . $rentalLine->item_id;
+                    $note = isset($damageNotes[$key]) ? rtrim($damageNotes[$key], ", ") : 'ส่งซักปกติ';
+
                     ItemMaintenance::create([
-                        'item_id' => $rentalLine->item_id,
                         'rental_id' => $rental->rental_id,
+                        'item_id' => $rentalLine->item_id,
+                        'accessory_id' => null,
                         'status' => 'pending',
                         'damage_description' => $note,
-                        'type' => isset($damageNotes[$rentalLine->item_id]) ? 'repair' : 'laundry'
+                        'type' => isset($damageNotes[$key]) ? 'repair' : 'laundry'
                     ]);
+
                     $item = Item::find($rentalLine->item_id);
                     if ($item) {
                         $item->status = 'maintenance';
@@ -496,7 +519,22 @@ class ReceptionController extends Controller
                 }
             }
 
-            // 3. จ่ายเงินปิดบิล
+            // 2.2 สำหรับอุปกรณ์เสริม
+            foreach ($rental->accessories as $acc) {
+                $key = 'acc_' . $acc->id;
+                $note = isset($damageNotes[$key]) ? rtrim($damageNotes[$key], ", ") : 'ทำความสะอาด/เช็คสภาพ';
+
+                ItemMaintenance::create([
+                    'rental_id' => $rental->rental_id,
+                    'item_id' => null,
+                    'accessory_id' => $acc->id,
+                    'status' => 'pending',
+                    'damage_description' => $note,
+                    'type' => isset($damageNotes[$key]) ? 'repair' : 'laundry'
+                ]);
+            }
+
+            // 3. จ่ายเงินส่วนต่าง
             $grandTotalToPay = $remainingAmount + $overdueFine + $totalDamageFine;
             if ($grandTotalToPay > 0) {
                 Payment::create([
@@ -509,12 +547,13 @@ class ReceptionController extends Controller
                 ]);
             }
 
+            // 4. อัปเดตสถานะบิล
             $rental->status = Rental::STATUS_RETURNED;
             $rental->return_date = now();
             $rental->fine_amount = $overdueFine + $totalDamageFine;
             $rental->save();
 
-            // 4. ให้แต้ม (เมื่อคืนสำเร็จ)
+            // 5. ให้แต้ม
             if ($rental->member_id) {
                 $pointsEarned = floor($rental->total_amount / 100);
                 if ($pointsEarned > 0) {
@@ -534,9 +573,10 @@ class ReceptionController extends Controller
             }
 
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'บันทึกการคืนสำเร็จ']);
+            return response()->json(['success' => true, 'message' => 'บันทึกการคืนสำเร็จ (ส่งซัก/ซ่อมเรียบร้อย)']);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error("Return Error: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
@@ -624,22 +664,40 @@ class ReceptionController extends Controller
 
     public function getCalendarEvents()
     {
-        $rentals = Rental::with(['member', 'items.item'])->where('status', '!=', Rental::STATUS_CANCELLED)->get();
+        // ดึง Rental พร้อมรายการสินค้า (items) และอุปกรณ์เสริม (accessories)
+        $rentals = Rental::with(['member', 'items.item', 'accessories'])->where('status', '!=', Rental::STATUS_CANCELLED)->get();
         $events = [];
         $today = Carbon::now()->startOfDay();
+
         foreach ($rentals as $rental) {
             $customerName = $rental->member ? ($rental->member->first_name . ' ' . $rental->member->last_name) : ($rental->description ?? 'Guest');
-            $itemText = 'No Item';
-            if ($rental->items->isNotEmpty() && $rental->items->first()->item) {
-                $itemText = $rental->items->first()->item->item_name;
+
+            // ✅ รวมชื่อสินค้าและอุปกรณ์เสริม
+            $itemNames = [];
+            // 1. ชุดหลัก
+            foreach ($rental->items as $rItem) {
+                if ($rItem->item) {
+                    $itemNames[] = $rItem->item->item_name;
+                }
             }
-            if ($rental->items->count() > 1) $itemText .= " +" . ($rental->items->count() - 1);
+            // 2. อุปกรณ์เสริม
+            foreach ($rental->accessories as $rAcc) {
+                $itemNames[] = $rAcc->name . " (Accessory)";
+            }
+
+            // ตัดคำถ้ายาวเกินไป
+            $itemText = count($itemNames) > 0 ? implode(', ', array_slice($itemNames, 0, 2)) : 'No Item';
+            if (count($itemNames) > 2) {
+                $itemText .= " +" . (count($itemNames) - 2);
+            }
+
             if (!$rental->rental_date || !$rental->return_date) continue;
 
             $rentalStart = Carbon::parse($rental->rental_date);
             $returnDate = Carbon::parse($rental->return_date);
             $rentalEnd = $returnDate->copy()->addDay();
 
+            // กำหนดสี
             $color = '#4285F4';
             if ($rental->status === Rental::STATUS_PENDING_PAYMENT) $color = '#F59E0B';
             elseif ($rental->status === Rental::STATUS_AWAITING_PICKUP) $color = '#8B5CF6';
@@ -658,6 +716,7 @@ class ReceptionController extends Controller
                 'extendedProps' => ['type' => 'rental', 'tel' => $rental->member ? $rental->member->tel : ($rental->guest_phone ?? '-')]
             ];
 
+            // Event ซ่อมบำรุง (Maintenance)
             $maintStart = $returnDate->copy()->addDay();
             $maintEnd = $maintStart->copy()->addDays(3);
             $events[] = [

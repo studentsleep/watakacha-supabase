@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MakeupArtist;
+use App\Models\Photographer;
+use App\Models\PhotographerPackage;
 
 class Rental extends Model
 {
@@ -32,6 +35,9 @@ class Rental extends Model
         'fine_amount', // อย่าลืมเพิ่ม field นี้ถ้ายังไม่มี
         'status',
         'description',
+        'makeup_cost',
+        'photographer_cost',
+        'service_cost_status',
     ];
 
     protected $casts = [
@@ -91,5 +97,24 @@ class Rental extends Model
             self::STATUS_AWAITING_PICKUP,
             self::STATUS_RENTED
         ]);
+    }
+
+    public function makeupArtist()
+    {
+        // Parameter 2: ชื่อ column ในตาราง rentals (makeup_id)
+        // Parameter 3: ชื่อ column primary key ในตาราง makeup_artists (makeup_id)
+        return $this->belongsTo(MakeupArtist::class, 'makeup_id', 'makeup_id');
+    }
+
+    // เชื่อมกับตาราง photographers (ช่างภาพ)
+    public function photographer()
+    {
+        return $this->belongsTo(Photographer::class, 'photographer_id', 'photographer_id');
+    }
+
+    // เชื่อมกับตาราง photographer_packages (แพ็คเกจ)
+    public function photographerPackage()
+    {
+        return $this->belongsTo(PhotographerPackage::class, 'package_id', 'package_id');
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\CheckUserRole;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\MemberAuthController;
+use App\Http\Controllers\ServiceCostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -199,6 +200,26 @@ Route::prefix('admin')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/{id}/send', [MaintenanceController::class, 'sendToShop'])->name('maintenance.send');
         Route::post('/maintenance/{id}/receive', [MaintenanceController::class, 'receiveFromShop'])->name('maintenance.receive');
+    });
+
+    // --------------------------------------------------------
+    // 🔧 MAINTENANCE Routes (ซัก-ซ่อม)
+    // --------------------------------------------------------
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
+        Route::post('/maintenance/{id}/send', [MaintenanceController::class, 'sendToShop'])->name('maintenance.send');
+        Route::post('/maintenance/{id}/receive', [MaintenanceController::class, 'receiveFromShop'])->name('maintenance.receive');
+    });
+
+    // --------------------------------------------------------
+    // 💰 SERVICE COST Routes (จัดการค่าแรงช่าง - มาแทนหน้าประวัติเดิม)
+    // --------------------------------------------------------
+    // 2️⃣ เพิ่มกลุ่มนี้เข้าไปครับ
+    Route::middleware(['auth'])->group(function () {
+        // หน้าแสดงรายการ (เหมือนหน้าซักซ่อม)
+        Route::get('/service-costs', [ServiceCostController::class, 'index'])->name('service_costs.index');
+        // ฟังก์ชันบันทึกราคาต้นทุน
+        Route::post('/service-costs/{id}/update', [ServiceCostController::class, 'updateCost'])->name('service_costs.update');
     });
 }); // 🛑 ปิด Group Admin
 

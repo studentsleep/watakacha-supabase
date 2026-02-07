@@ -11,7 +11,7 @@ class ItemMaintenance extends Model
 
     protected $fillable = [
         'item_id',
-        'accessory_id', // เพิ่มตาม Migration ที่เคยทำ
+        'accessory_id',
         'rental_id',
         'care_shop_id',
         'type',

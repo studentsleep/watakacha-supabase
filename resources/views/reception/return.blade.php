@@ -185,12 +185,14 @@
 
                             <template x-for="(item, index) in returnItems" :key="index">
                                 <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                                    {{-- ✅ เพิ่มเงื่อนไขเปลี่ยนสีขอบ/พื้นหลัง ถ้าเป็น Accessory (ใช้สีส้มอ่อนๆ ให้ดูต่างนิดหน่อยแต่ยังคุมโทน) --}}
                                     :class="item.is_accessory ? 'border-orange-200 bg-orange-50/30' : ''">
 
                                     <div class="flex justify-between items-center mb-3">
                                         <div class="flex items-center gap-3">
                                             {{-- ไอคอนลำดับ --}}
                                             <div class="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-lg"
+                                                {{-- ✅ เปลี่ยนสีไอคอนถ้าเป็น Accessory --}}
                                                 :class="item.is_accessory ? 'bg-orange-100 text-orange-600' : 'bg-indigo-50 text-indigo-600'">
                                                 <span x-text="index + 1"></span>
                                             </div>
@@ -199,7 +201,8 @@
                                                 {{-- ชื่อสินค้า --}}
                                                 <div class="font-bold text-gray-800 text-sm flex items-center gap-2">
                                                     <span x-text="item.item_name"></span>
-                                                    {{-- Badge บอกว่าเป็นอุปกรณ์เสริม --}}
+
+                                                    {{-- ✅ Badge บอกว่าเป็นอุปกรณ์เสริม --}}
                                                     <template x-if="item.is_accessory">
                                                         <span class="px-2 py-0.5 rounded text-[10px] bg-orange-100 text-orange-600 border border-orange-200">Accessory</span>
                                                     </template>
@@ -337,33 +340,33 @@
                     }
                     this.remainingAmount = Math.max(0, parseFloat(rental.total_amount) - totalPaid);
 
-                    // 2. ดึงข้อมูลสินค้า (รวมทั้ง Item และ Accessory ในลูปเดียว)
-                    this.returnItems = rental.items.map(line => {
-                        let id = null;
-                        let name = '';
-                        let isAcc = false;
-
-                        // ✅ แก้ไข Logic การดึงชื่อ: ถ้าเป็น accessory ให้ดึงชื่อจาก accessory
-                        if (line.accessory_id) {
-                            id = line.accessory_id;
-                            // Check if line.accessory exists (loaded via controller)
-                            let accName = line.accessory ? line.accessory.name : 'Unknown Accessory';
-                            name = accName;
-                            isAcc = true;
-                        } else {
-                            id = line.item_id;
-                            name = line.item ? line.item.item_name : 'Unknown Item';
-                            isAcc = false;
-                        }
-
+                    // 2. ดึงข้อมูลสินค้า (Items)
+                    let allItems = rental.items.map(line => {
                         return {
-                            item_id: id,
-                            item_name: name,
+                            item_id: line.item_id,
+                            item_name: line.item ? line.item.item_name : 'Unknown Item',
                             rented_qty: line.quantity,
-                            is_accessory: isAcc,
+                            is_accessory: false, // ระบุว่าเป็นชุดหลัก
                             damages: []
                         };
                     });
+
+                    // 3. ✅ ดึงข้อมูลอุปกรณ์เสริม (Accessories) มาต่อท้าย
+                    // (สมมติว่าใน rental object มี accessories relationship มาด้วยจากการ load ใน controller)
+                    if (rental.accessories && rental.accessories.length > 0) {
+                        let accItems = rental.accessories.map(acc => {
+                            return {
+                                item_id: acc.id, // ใช้ id ของ accessory
+                                item_name: acc.name,
+                                rented_qty: acc.pivot.quantity, // ดึงจำนวนจาก pivot
+                                is_accessory: true, // ระบุว่าเป็นอุปกรณ์เสริม
+                                damages: []
+                            };
+                        });
+                        allItems = allItems.concat(accItems); // รวม 2 array เข้าด้วยกัน
+                    }
+
+                    this.returnItems = allItems;
 
                     this.calculateOverdue();
                     this.recalcSummary();

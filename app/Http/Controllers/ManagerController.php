@@ -21,6 +21,8 @@ use App\Models\Accessory;
 use App\Models\Payment;
 use App\Models\ItemMaintenance;
 use App\Models\Rental;
+use App\Models\RentalItem;
+use App\Models\RentalAccessory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +37,7 @@ class ManagerController extends Controller
     // =========================================================================
     public function dashboard(Request $request)
     {
-        // 1. เช็ค Role (ถ้าเป็นพนักงาน ให้ไปหน้าเช่าชุด)
+        // 1. เช็ค Role
         if (Auth::user()->user_type_id == 2) {
             return redirect()->route('reception.rental');
         }
@@ -44,47 +46,196 @@ class ManagerController extends Controller
         $today = Carbon::today();
         $filter = $request->get('filter', 'week');
 
-        // Top Cards Data
-        $totalRevenueToday = Payment::whereDate('payment_date', $today)->sum('amount');
-        $totalExpenseToday = ItemMaintenance::whereDate('received_at', $today)->sum('shop_cost');
-        $rentalsToday = Rental::whereDate('rental_date', $today)->count();
-        $damagedItemsCount = Item::whereIn('status', ['maintenance', 'damaged'])->count();
+        // กำหนดช่วงเวลา (StartDate - EndDate)
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+        } else {
+            if ($filter == 'year') {
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+            } elseif ($filter == 'month') {
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+            } elseif ($filter == 'today') { // ✅ เพิ่มส่วนนี้ครับ
+                $startDate = Carbon::today(); // 00:00:00
+                $endDate = Carbon::today()->endOfDay(); // 23:59:59
+            } else {
+                $startDate = Carbon::now()->subDays(7)->startOfDay(); // Default 7 วัน
+                $endDate = Carbon::now()->endOfDay();
+            }
+        }
 
-        // Recent Damaged Items
-        $damagedItemsList = ItemMaintenance::with('item')
-            ->whereNotNull('damage_description')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
+        // ==================================================================================
+        // 📊 ส่วนที่ 1: การเงิน (Financial Stats)
+        // ==================================================================================
+
+        // ดึงรายการเช่าในช่วงเวลานี้ (ไม่เอายกเลิก)
+        // ใช้ updated_at หรือ payment_date ในการจับยอดเงิน (ที่นี่ใช้ rental_date เพื่อดู Performance ตามรอบจอง)
+        $rentals = Rental::with(['items', 'accessories', 'promotion', 'makeupArtist', 'photographerPackage'])
+            ->whereBetween('rental_date', [$startDate, $endDate])
+            ->where('status', '!=', 'cancelled')
             ->get();
 
-        // Chart Data Calculation
+        // ตัวแปรสำหรับ Pie Chart (Revenue Breakdown)
+        $revItemsNet = 0; // รายได้ชุด (หลังหักส่วนลด)
+        $revAccessories = 0; // รายได้อุปกรณ์ (ไม่หักส่วนลด)
+        $revServices = 0; // รายได้บริการ (ราคาหน้าร้าน)
+
+        // ตัวแปรสำหรับ Service Profit Chart
+        $costServices = 0; // ต้นทุนช่าง (จ่ายจริง)
+
+        foreach ($rentals as $rental) {
+            // 1. คำนวณรายได้สินค้า (Gross)
+            $itemGross = $rental->items->sum(function ($i) {
+                return $i->price * $i->quantity;
+            });
+
+            // 2. คำนวณส่วนลด (หักเฉพาะค่าชุด)
+            $discount = 0;
+            if ($rental->promotion) {
+                if ($rental->promotion->discount_type == 'percentage') {
+                    $discount = ($itemGross * $rental->promotion->discount_value) / 100;
+                } else {
+                    $discount = $rental->promotion->discount_value;
+                }
+            }
+            // ป้องกันส่วนลดเกินราคาของ
+            $discount = min($discount, $itemGross);
+
+            // บวกเข้ายอดรวม (Net Item Income)
+            $revItemsNet += ($itemGross - $discount);
+
+            // 3. คำนวณรายได้อุปกรณ์เสริม
+            $accIncome = $rental->accessories->sum(function ($a) {
+                return $a->pivot->price * $a->pivot->quantity;
+            });
+            $revAccessories += $accIncome;
+
+            // 4. คำนวณรายได้บริการ (ราคาหน้าร้าน)
+            $makeupPrice = $rental->makeupArtist ? $rental->makeupArtist->price : 0;
+            $photoPrice = $rental->photographerPackage ? $rental->photographerPackage->price : 0;
+            $revServices += ($makeupPrice + $photoPrice);
+
+            // 5. คำนวณรายจ่ายค่าช่าง (ต้นทุนจริง)
+            $costServices += ($rental->makeup_cost ?? 0) + ($rental->photographer_cost ?? 0);
+        }
+
+        // รายจ่ายค่าซ่อมบำรุง (Maintenance Cost) ในช่วงเวลานี้
+        $costMaintenance = ItemMaintenance::whereBetween('received_at', [$startDate, $endDate])->sum('actual_cost');
+
+        // รวมยอดเพื่อแสดง Top Cards (แบบสรุปช่วงเวลา)
+        $totalRevenuePeriod = $revItemsNet + $revAccessories + $revServices;
+        $totalExpensePeriod = $costServices + $costMaintenance;
+        $totalProfitPeriod = $totalRevenuePeriod - $totalExpensePeriod;
+
+        // ==================================================================================
+        // 🏆 ส่วนที่ 2: สถิติยอดนิยม (Top Stats)
+        // ==================================================================================
+
+        // 1. สินค้ายอดนิยม (Top 5 Items)
+        $topItems = RentalItem::select('item_id', DB::raw('SUM(quantity) as total_qty'))
+            ->whereHas('rental', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('rental_date', [$startDate, $endDate])->where('status', '!=', 'cancelled');
+            })
+            ->groupBy('item_id')
+            ->orderByDesc('total_qty')
+            ->take(5)
+            ->with('item') // Eager load
+            ->get();
+
+        // 2. อุปกรณ์เสริมยอดนิยม (Top 5 Accessories)
+        $topAccessories = RentalAccessory::select('accessory_id', DB::raw('SUM(quantity) as total_qty'))
+            ->whereHas('rental', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('rental_date', [$startDate, $endDate])->where('status', '!=', 'cancelled');
+            })
+            ->groupBy('accessory_id')
+            ->orderByDesc('total_qty')
+            ->take(5)
+            ->with('accessory')
+            ->get();
+
+        // 3. รายงานโปรโมชั่น (Promotion Usage)
+        $promotionStats = Rental::select('promotion_id', DB::raw('count(*) as usage_count'))
+            ->whereNotNull('promotion_id')
+            ->whereBetween('rental_date', [$startDate, $endDate])
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('promotion_id')
+            ->with('promotion')
+            ->get();
+
+        // ==================================================================================
+        // 📈 ส่วนที่ 3: เตรียมข้อมูลกราฟ (Chart Data Calculation) - แก้ Error Undefined Variable
+        // ==================================================================================
         $chartLabels = [];
         $incomeData = [];
         $expenseData = [];
 
+        // กำหนด Loop ช่วงเวลาสำหรับกราฟ
         if ($filter == 'year') {
+            // รายปี (12 เดือน)
             for ($i = 1; $i <= 12; $i++) {
-                $date = Carbon::create(null, $i, 1);
-                $chartLabels[] = $date->isoFormat('MMMM');
+                $loopDate = Carbon::create($today->year, $i, 1);
+                $chartLabels[] = $loopDate->isoFormat('MMM'); // ม.ค., ก.พ.
+
                 $incomeData[] = Payment::whereYear('payment_date', $today->year)->whereMonth('payment_date', $i)->sum('amount');
-                $expenseData[] = ItemMaintenance::whereYear('received_at', $today->year)->whereMonth('received_at', $i)->sum('shop_cost');
+
+                $mtCost = ItemMaintenance::whereYear('received_at', $today->year)->whereMonth('received_at', $i)->sum('actual_cost');
+                $svCost = Rental::whereYear('updated_at', $today->year)->whereMonth('updated_at', $i)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $expenseData[] = $mtCost + $svCost;
             }
         } elseif ($filter == 'month') {
+            // รายเดือน (ทุกวันในเดือน)
             $daysInMonth = $today->daysInMonth;
             for ($i = 1; $i <= $daysInMonth; $i++) {
-                $date = Carbon::create($today->year, $today->month, $i);
-                $chartLabels[] = $date->isoFormat('D MMM');
-                $incomeData[] = Payment::whereDate('payment_date', $date)->sum('amount');
-                $expenseData[] = ItemMaintenance::whereDate('received_at', $date)->sum('shop_cost');
+                $loopDate = Carbon::create($today->year, $today->month, $i);
+                $chartLabels[] = $loopDate->format('d'); // วันที่ 1, 2, 3...
+
+                $incomeData[] = Payment::whereDate('payment_date', $loopDate)->sum('amount');
+
+                $mtCost = ItemMaintenance::whereDate('received_at', $loopDate)->sum('actual_cost');
+                $svCost = Rental::whereDate('updated_at', $loopDate)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $expenseData[] = $mtCost + $svCost;
             }
         } else {
-            for ($i = 6; $i >= 0; $i--) {
-                $date = Carbon::today()->subDays($i);
-                $chartLabels[] = $date->isoFormat('ddd D');
-                $incomeData[] = Payment::whereDate('payment_date', $date)->sum('amount');
-                $expenseData[] = ItemMaintenance::whereDate('received_at', $date)->sum('shop_cost');
+            // Default: 7 วันย้อนหลัง หรือ ตามช่วงวันที่เลือก (ถ้าห่างกันไม่มาก)
+            // ถ้าเลือกช่วงวันเอง ให้ Loop ตามจริง
+            $loopStart = $startDate->copy();
+            $loopEnd = $endDate->copy();
+
+            // ป้องกัน Loop เยอะเกินไป (Max 30 วัน)
+            if ($loopStart->diffInDays($loopEnd) > 31) {
+                $loopStart = $loopEnd->copy()->subDays(30);
+            }
+
+            while ($loopStart->lte($loopEnd)) {
+                $chartLabels[] = $loopStart->isoFormat('D MMM'); // 1 ม.ค.
+
+                $incomeData[] = Payment::whereDate('payment_date', $loopStart)->sum('amount');
+
+                $mtCost = ItemMaintenance::whereDate('received_at', $loopStart)->sum('actual_cost');
+                $svCost = Rental::whereDate('updated_at', $loopStart)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $expenseData[] = $mtCost + $svCost;
+
+                $loopStart->addDay();
             }
         }
+        // ==================================================================================
+        // 📦 ส่วนที่ 4: ข้อมูลพื้นฐานเดิม (สำหรับแสดงผลส่วนอื่นๆ)
+        // ==================================================================================
+
+        // ยอดวันนี้ (รายวัน) - คงไว้เหมือนเดิมเพื่อให้เห็น Realtime
+        $todayRevenue = Payment::whereDate('payment_date', $today)->sum('amount');
+        $todayExpense = ItemMaintenance::whereDate('received_at', $today)->sum('actual_cost')
+            + Rental::whereDate('updated_at', $today)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+
+        // รายการชำรุดล่าสุด
+        $damagedItemsList = ItemMaintenance::with(['item', 'accessory'])
+            ->whereNotNull('damage_description')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        $damagedItemsCount = Item::whereIn('status', ['maintenance', 'damaged'])->count();
 
         // Status Chart Data
         $rawStatus = Item::select('status', DB::raw('count(*) as total'))
@@ -97,17 +248,34 @@ class ManagerController extends Controller
             'ซ่อม/ซัก (Maintenance)' => ($rawStatus['maintenance'] ?? 0) + ($rawStatus['damaged'] ?? 0),
         ];
 
+
         return view('dashboard', compact(
-            'totalRevenueToday',
-            'totalExpenseToday',
-            'rentalsToday',
-            'damagedItemsCount',
+            // Filter Data
+            'filter',
+            'startDate',
+            'endDate',
+            // Period Stats
+            'revItemsNet',
+            'revAccessories',
+            'revServices',
+            'costServices',
+            'costMaintenance',
+            'totalRevenuePeriod',
+            'totalExpensePeriod',
+            'totalProfitPeriod',
+            // Lists
+            'topItems',
+            'topAccessories',
+            'promotionStats',
+            // Daily & Basic Data
+            'todayRevenue',
+            'todayExpense',
             'damagedItemsList',
+            'damagedItemsCount',
             'chartLabels',
             'incomeData',
             'expenseData',
-            'itemStatus',
-            'filter'
+            'itemStatus'
         ));
     }
 
@@ -385,6 +553,7 @@ class ManagerController extends Controller
             'stock' => 'required|integer|min:0',
             'item_type_id' => 'required',
             'item_unit_id' => 'required',
+            'status' => 'required|string',
         ]);
         $item->update([
             'item_name' => $data['name'],
@@ -393,6 +562,7 @@ class ManagerController extends Controller
             'stock' => $data['stock'],
             'item_type_id' => $data['item_type_id'],
             'item_unit_id' => $data['item_unit_id'],
+            'status' => $data['status'],
         ]);
         return redirect()->route('manager.items.index')->with('status', 'อัปเดตสินค้าสำเร็จ');
     }
