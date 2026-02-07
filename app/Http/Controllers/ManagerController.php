@@ -24,6 +24,8 @@ use App\Models\Rental;
 use App\Models\RentalItem;
 use App\Models\RentalAccessory;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Upload\UploadApi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -538,18 +540,31 @@ class ManagerController extends Controller
             'status' => 'active',
         ]);
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                // 1. อัปโหลดขึ้น Cloudinary ไปที่โฟลเดอร์ 'items'
-                // ใช้วิธี Upload ผ่าน Facade โดยตรง (ชัวร์กว่า)
-                $uploadedFile = Cloudinary::upload($image->getRealPath(), [
-                    'folder' => 'items'
+            foreach ($request->file('images') as $idx => $image) {
+                Configuration::instance([
+                    'cloud' => [
+                        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                        'api_key'    => env('CLOUDINARY_API_KEY'),
+                        'api_secret' => env('CLOUDINARY_API_SECRET'),
+                    ],
+                    'url' => [
+                        'secure' => true
+                    ]
                 ]);
-                $url = $uploadedFile->getSecurePath();
-                // 3. บันทึกลง Database
-                // ตรง 'path' จะเก็บเป็น URL ยาวๆ แทนที่จะเป็น items/ชื่อไฟล์.jpg
+
+                // สั่ง Upload ผ่าน API โดยตรง
+                $uploadApi = new UploadApi();
+                $result = $uploadApi->upload($image->getRealPath(), [
+                    'folder' => 'items' // ชื่อโฟลเดอร์ใน Cloudinary
+                ]);
+
+                // ดึง URL กลับมา
+                $url = $result['secure_url'];
+
+                // บันทึกลง Database
                 $item->images()->create([
                     'path' => $url,
-                    'is_main' => $index === 0
+                    'is_main' => (!$hasExisting && $idx === 0)
                 ]);
             }
         }
@@ -604,14 +619,29 @@ class ManagerController extends Controller
 
             foreach ($request->file('images') as $idx => $image) {
 
-                // ✅ แก้ไข: ใช้ Facade แบบเดียวกับ storeItem เพื่อความเสถียร
-                $uploadedFile = Cloudinary::upload($image->getRealPath(), [
-                    'folder' => 'items'
+                Configuration::instance([
+                    'cloud' => [
+                        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                        'api_key'    => env('CLOUDINARY_API_KEY'),
+                        'api_secret' => env('CLOUDINARY_API_SECRET'),
+                    ],
+                    'url' => [
+                        'secure' => true
+                    ]
                 ]);
-                $url = $uploadedFile->getSecurePath();
 
+                // สั่ง Upload ผ่าน API โดยตรง
+                $uploadApi = new UploadApi();
+                $result = $uploadApi->upload($image->getRealPath(), [
+                    'folder' => 'items' // ชื่อโฟลเดอร์ใน Cloudinary
+                ]);
+
+                // ดึง URL กลับมา
+                $url = $result['secure_url'];
+
+                // บันทึกลง Database
                 $item->images()->create([
-                    'path' => $url, // เก็บ URL จาก Cloudinary
+                    'path' => $url,
                     'is_main' => (!$hasExisting && $idx === 0)
                 ]);
             }
