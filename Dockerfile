@@ -35,3 +35,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 8. คำสั่งรันเว็บเมื่อ Render สั่ง Start
 # ใช้ $PORT ที่ Render ส่งมาให้อัตโนมัติ
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+RUN npm install
+RUN npm run build
