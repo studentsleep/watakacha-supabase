@@ -118,8 +118,8 @@ Route::prefix('admin')->group(function () {
         Route::match(['put', 'patch'], '/items/{item}', [ManagerController::class, 'updateItem'])->name('items.update');
         Route::delete('/items/{item}', [ManagerController::class, 'destroyItem'])->name('items.destroy');
         Route::post('/items/{item}/image', [ManagerController::class, 'uploadItemImage'])->name('items.uploadImage');
-        Route::delete('/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('items.destroyImage');
         Route::delete('/item-images/bulk', [ManagerController::class, 'bulkDestroyImages'])->name('items.bulkDestroyImages');
+        Route::delete('/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('items.destroyImage');
         Route::patch('/item-images/{image}/set-main', [ManagerController::class, 'setMainImage'])
             ->name('items.setMainImage');
 
