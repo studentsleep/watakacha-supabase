@@ -152,4 +152,81 @@
             @endforeach
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // 1. ฟังก์ชันเปิด/ปิด Modal
+        function toggleModal(modalID, show) {
+            const modal = document.getElementById(modalID);
+            if (modal) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden'; // กันเลื่อน
+                } else {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        }
+
+        // 2. ฟังก์ชัน เลือก/ไม่เลือก ทั้งหมด (แก้ Error toggleSelectAll is not defined)
+        function toggleSelectAll(source, itemId) {
+            // ค้นหา Checkbox ลูกน้องที่มี class ตรงกับ Item ID นั้นๆ
+            const checkboxes = document.querySelectorAll(`.image-checkbox-${itemId}`);
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        // 3. ฟังก์ชัน ลบหลายรูป (Bulk Delete)
+        function confirmBulkDelete(itemId) {
+            // นับจำนวนที่ติ๊ก
+            const selectedCount = document.querySelectorAll(`.image-checkbox-${itemId}:checked`).length;
+
+            if (selectedCount === 0) {
+                Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปภาพอย่างน้อย 1 รูป', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: `ยืนยันลบ ${selectedCount} รูปภาพ?`,
+                text: "ลบแล้วไม่สามารถกู้คืนได้!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // สั่ง Submit Form
+                    document.getElementById(`bulkDeleteForm-${itemId}`).submit();
+                }
+            });
+        }
+
+        // 4. ฟังก์ชัน ลบรูปเดียว (แก้เรื่อง Form ซ้อนกัน โดยสร้าง Form ลอยๆ ขึ้นมาส่งค่า)
+        function confirmDeleteSingle(url) {
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "คุณต้องการลบรูปภาพนี้ใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ลบเลย',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // สร้าง Form ชั่วคราวด้วย JS (แก้ปัญหา 405 และ Form ซ้อนกัน 100%)
+                    let form = document.createElement('form');
+                    form.action = url;
+                    form.method = 'POST';
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form); // เอา Form ไปแปะใน Body
+                    form.submit(); // ส่งค่า
+                }
+            });
+        }
+    </script>
 </x-app-layout>
