@@ -540,6 +540,7 @@ class ManagerController extends Controller
             'status' => 'active',
         ]);
         if ($request->hasFile('images')) {
+            $hasExisting = $item->images()->exists();
             foreach ($request->file('images') as $idx => $image) {
                 Configuration::instance([
                     'cloud' => [
@@ -648,24 +649,72 @@ class ManagerController extends Controller
         }
         return back()->with('status', 'อัปโหลดรูปภาพสำเร็จ');
     }
+    public function bulkDestroyImages(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'กรุณาเลือกรูปภาพที่ต้องการลบ');
+        }
+
+        $images = ItemImage::whereIn('id', $ids)->get();
+
+        // ตั้งค่า Cloudinary Manual (กัน Error key "cloud")
+        Configuration::instance([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key'    => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+            'url' => ['secure' => true]
+        ]);
+        $uploadApi = new UploadApi();
+
+        foreach ($images as $image) {
+            // 1. ลบไฟล์บน Cloudinary
+            $publicId = $this->getPublicIdFromUrl($image->path);
+            if ($publicId) {
+                $uploadApi->destroy($publicId);
+            }
+
+            $item = $image->item;
+            $wasMain = $image->is_main;
+
+            // 2. ลบใน DB
+            $image->delete();
+
+            // 3. ถ้าลบรูปหลัก ให้ตั้งรูปใหม่แทน
+            if ($wasMain && $item->images()->count() > 0) {
+                $newMain = $item->images()->first();
+                $newMain->update(['is_main' => true]);
+            }
+        }
+
+        return back()->with('status', 'ลบรูปภาพที่เลือกเรียบร้อยแล้ว');
+    }
     public function destroyItemImage(ItemImage $image)
     {
-        // 1. แกะ Public ID และสั่งลบบน Cloudinary
+        Configuration::instance([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key'    => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+            'url' => ['secure' => true]
+        ]);
+
         $publicId = $this->getPublicIdFromUrl($image->path);
         if ($publicId) {
-            Cloudinary::destroy($publicId);
+            (new UploadApi())->destroy($publicId);
         }
-        // 2. จัดการเรื่องรูปหลัก (Main Image)
+
         $item = $image->item;
         $wasMain = $image->is_main;
-        // 3. ลบ Record ใน Database
         $image->delete();
-        // 4. ถ้าลบรูปหลักไป ให้ตั้งรูปอื่นขึ้นมาแทน (ถ้ามี)
+
         if ($wasMain && $item->images()->count() > 0) {
-            $newMain = $item->images()->first();
-            $newMain->is_main = true;
-            $newMain->save();
+            $item->images()->first()->update(['is_main' => true]);
         }
+
         return back()->with('status', 'ลบรูปภาพสำเร็จ');
     }
     public function setMainImage(ItemImage $image)
