@@ -14,11 +14,11 @@
             <div class="text-center mb-16 relative">
                 <span class="text-brand-600 font-semibold tracking-wider uppercase text-sm mb-2 block">Get in Touch</span>
                 <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
-                    ติดต่อ <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-purple-600">เรา</span>
+                    ติดต่อเรา
                 </h1>
                 <div class="w-32 h-1.5 bg-gradient-to-r from-brand-500 to-purple-500 mx-auto rounded-full shadow-lg"></div>
-                <p class="mt-4 text-gray-500 max-w-2xl mx-auto text-lg">
-                    พร้อมเนรมิตวันสำคัญของคุณให้สมบูรณ์แบบ ติดต่อสอบถามรายละเอียดหรือนัดหมายเข้าชมสตูดิโอ
+                <p class="mt-5 text-gray-500 max-w-2xl mx-auto text-lg">
+                    พร้อมเนรมิตวันสำคัญของคุณ ติดต่อสอบถามรายละเอียดหรือนัดหมายเข้าชมสตูดิโอ
                 </p>
             </div>
 
@@ -34,7 +34,7 @@
                         <div class="relative z-10 space-y-8">
                             {{-- Address --}}
                             <div class="flex items-start gap-5">
-                                <div class="flex-shrink-0 w-14 h-14 bg-white border border-gray-100 shadow-md rounded-2xl flex items-center justify-center text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300">
+                                <div class="flex-shrink-0 w-14 h-14 bg-white border border-gray-100 shadow-md rounded-2xl flex items-center justify-center text-brand-600 group-hover:bg-black group-hover:text-white transition-colors duration-300">
                                     <i data-lucide="map-pin" class="w-7 h-7"></i>
                                 </div>
                                 <div>
@@ -95,13 +95,13 @@
                         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
 
                         <div class="relative z-10 p-8 text-center">
-                            <h3 class="text-2xl font-bold text-white mb-2">ติดตามผลงานของเรา</h3>
-                            <p class="text-white/80 mb-8 text-sm">อัปเดตเทรนด์และผลงานใหม่ๆ ได้ที่โซเชียลมีเดีย</p>
+                            <h3 class="text-2xl font-bold text-black mb-2">ติดตามผลงานของเรา</h3>
+                            <p class="text-gray-600 mb-8 text-sm">อัปเดตเทรนด์และผลงานใหม่ๆ ได้ที่โซเชียลมีเดีย</p>
 
                             <div class="flex justify-center items-center gap-3 sm:gap-4 flex-wrap">
                                 {{-- TikTok --}}
                                 <a href="https://www.tiktok.com/@watakachastudio" target="_blank"
-                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-black hover:border-black hover:scale-110 transition-all duration-300 shadow-xl" title="TikTok">
+                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-black hover:text-white hover:bg-black hover:border-black hover:scale-110 transition-all duration-300 shadow-xl" title="TikTok">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 sm:w-6 sm:h-6">
                                         <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
                                     </svg>
@@ -109,19 +109,21 @@
 
                                 {{-- Facebook --}}
                                 <a href="https://www.facebook.com/WATAKACHA/" target="_blank"
-                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#1877F2] hover:border-[#1877F2] hover:scale-110 transition-all duration-300 shadow-xl" title="Facebook">
+                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-black hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] hover:scale-110 transition-all duration-300 shadow-xl" title="Facebook">
                                     <i data-lucide="facebook" class="w-5 h-5 sm:w-6 sm:h-6 group-hover/icon:fill-white"></i>
                                 </a>
 
                                 {{-- Line --}}
-                                <a href="https://line.me/ti/p/@watakacha" target="_blank"
-                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#06C755] hover:border-[#06C755] hover:scale-110 transition-all duration-300 shadow-xl" title="Line">
+                                <a href="https://line.me/ti/p/@699mhyzz" target="_blank"
+                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-black hover:text-white hover:bg-[#06C755] hover:border-[#06C755] hover:scale-110 transition-all duration-300 shadow-xl"
+                                    title="Line">
                                     <i data-lucide="message-circle" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                                 </a>
 
                                 {{-- Instagram --}}
                                 <a href="https://www.instagram.com/watakacha_wedding_studio/" target="_blank"
-                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-pink-600 hover:border-pink-600 hover:scale-110 transition-all duration-300 shadow-xl" title="Instagram">
+                                    class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-black hover:text-white hover:bg-pink-600 hover:border-pink-600 hover:scale-110 transition-all duration-300 shadow-xl"
+                                    title="Instagram">
                                     <i data-lucide="instagram" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                                 </a>
                             </div>

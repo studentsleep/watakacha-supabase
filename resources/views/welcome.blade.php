@@ -74,7 +74,7 @@
                     </a>
 
                     {{-- Line --}}
-                    <a href="https://line.me/ti/p/@yourlineid" target="_blank"
+                    <a href="https://line.me/ti/p/@699mhyzz" target="_blank"
                         class="group/icon relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-[#06C755] hover:border-[#06C755] hover:scale-110 transition-all duration-300 shadow-xl">
                         <i data-lucide="message-circle" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </a>

@@ -247,7 +247,7 @@
                             </svg>
                         </a>
                         <a href="https://www.facebook.com/WATAKACHA/" class="p-2 bg-gray-800 rounded-full hover:bg-blue-600 transition"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                        <a href="https://line.me/ti/p/@yourlineid" target="_blank" class="p-2 bg-gray-800 rounded-full hover:bg-green-600 transition"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+                        <a href="https://line.me/ti/p/@699mhyzz" target="_blank" class="p-2 bg-gray-800 rounded-full hover:bg-green-600 transition"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
                         <a href="https://www.instagram.com/watakacha_wedding_studio/" class="p-2 bg-gray-800 rounded-full hover:bg-pink-600 transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
                     </div>
                 </div>
