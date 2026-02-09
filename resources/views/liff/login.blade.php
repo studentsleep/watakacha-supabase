@@ -128,7 +128,7 @@
     </div>
 
     <script>
-        const LIFF_ID = "https://liff.line.me/2009077441-uCh3VnXy"; // 🔴 อย่าลืมใส่ LIFF ID จริงที่นี่
+        const LIFF_ID = "2009077441-uCh3VnXy"; // 🔴 อย่าลืมใส่ LIFF ID จริงที่นี่
 
         document.addEventListener('DOMContentLoaded', async function() {
             try {
