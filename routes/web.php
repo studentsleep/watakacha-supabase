@@ -12,7 +12,6 @@ use App\Http\Middleware\CheckUserRole;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\MemberAuthController;
 use App\Http\Controllers\ServiceCostController;
-use Illuminate\Support\Facades\Config;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,48 +19,55 @@ use Illuminate\Support\Facades\Config;
 |--------------------------------------------------------------------------
 */
 
-// 🏠 1. หน้าบ้าน (Public) - คนทั่วไปเข้าหน้านี้
+// ==================================================================================
+// 🏠 1. PUBLIC ZONE (หน้าบ้าน - คนทั่วไป)
+// ==================================================================================
 Route::controller(WelcomeController::class)->group(function () {
-    Route::get('/', 'index')->name('welcome');           // หน้าแรก (9 ชิ้น)
-    Route::get('/catalog', 'catalog')->name('catalog');  // หน้าสินค้าทั้งหมด + ค้นหา
-    Route::get('/promotions', 'promotions')->name('promotions'); // หน้าโปรโมชั่น
-    Route::get('/contact', 'contact')->name('contact');  // หน้าติดต่อเรา
+    Route::get('/', 'index')->name('welcome');
+    Route::get('/catalog', 'catalog')->name('catalog');
+    Route::get('/promotions', 'promotions')->name('promotions');
+    Route::get('/contact', 'contact')->name('contact');
 });
 
-// 👤 โซนสมาชิก (Member Auth)
+// ==================================================================================
+// 👤 MEMBER ZONE (โซนลูกค้า - เข้าสู่ระบบและดูข้อมูลส่วนตัว)
+// ==================================================================================
 Route::prefix('member')->name('member.')->group(function () {
-    // 1. Login
+    // 1. Authentication
     Route::get('/login', [MemberAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [MemberAuthController::class, 'login'])->name('login.store'); // รับค่า Login
-
-    // 2. Register
+    Route::post('/login', [MemberAuthController::class, 'login'])->name('login.store');
     Route::get('/register', [MemberAuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [MemberAuthController::class, 'store'])->name('store'); // ✅ ตัวแก้ Error (รับค่าสมัคร)
-
-    // 3. Logout
+    Route::post('/register', [MemberAuthController::class, 'store'])->name('store');
     Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
+
+    // 2. Member Portal (ต้อง Login แต่ไม่ต้องเช็ค Role Admin)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/history', [ReceptionController::class, 'history'])->name('history');
+        Route::get('/points', [ReceptionController::class, 'pointHistory'])->name('points');
+    });
 });
 
-// 🔒 2. หน้าแจ้งเตือน (เข้าได้แต่ไม่มีสิทธิ์)
-Route::get('/unauthorized', function () {
-    return view('errors.unauthorized');
-})->middleware(['auth'])->name('unauthorized');
+// ==================================================================================
+// 📱 LIFF ZONE (เชื่อมต่อ LINE)
+// ==================================================================================
+Route::prefix('liff')->name('liff.')->group(function () {
+    Route::get('/login', [LiffController::class, 'index'])->name('login');
+    Route::post('/login', [LiffController::class, 'login'])->name('submit');
+    Route::post('/check-auto', [LiffController::class, 'checkAutoLogin'])->name('check');
+    Route::get('/logout', [LiffController::class, 'logout'])->name('logout');
+});
 
-// 🚀 3. ทางลัด: พิมพ์ /admin ให้เด้งไป /admin/login
+// ==================================================================================
+// 🛡️ ADMIN ZONE (หลังบ้าน - ผู้จัดการและพนักงาน)
+// ==================================================================================
 Route::redirect('/admin', '/admin/login');
 
-
-// ==================================================================================
-// 🛡️ ADMIN ZONE (หลังบ้าน) - URL จะขึ้นต้นด้วย /admin ทั้งหมด
-// ==================================================================================
 Route::prefix('admin')->group(function () {
 
-    // 🅰️ นำระบบ Authentication (Login/Logout) เข้ามาในกลุ่มนี้
-    // ผลลัพธ์: หน้า Login จะเปลี่ยนจาก /login เป็น /admin/login
+    // Authentication Routes
     require __DIR__ . '/auth.php';
 
-    // 🅱️ Dashboard Router (ตัวแยกทาง)
-    // เช็คว่าใครล็อกอิน แล้วพาไปหน้าบ้านของตัวเอง
+    // Dashboard Dispatcher
     Route::get('/dashboard', function () {
         $user = Auth::user();
         $role = strtolower($user->userType->name ?? '');
@@ -74,7 +80,7 @@ Route::prefix('admin')->group(function () {
         return redirect()->route('unauthorized');
     })->middleware(['auth', 'verified'])->name('dashboard');
 
-    // 3. Profile Routes
+    // Profile Management
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -82,16 +88,15 @@ Route::prefix('admin')->group(function () {
     });
 
     // --------------------------------------------------------
-    // 🛡️ MANAGER Routes (ผู้จัดการ)
+    // 👔 MANAGER Routes
     // --------------------------------------------------------
     Route::middleware(['auth', CheckUserRole::class])->prefix('manager')->name('manager.')->group(function () {
         Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
 
-        // กลุ่มงานต่างๆ
+        // General Resources
         Route::get('/users', [ManagerController::class, 'usersIndex'])->name('users.index');
         Route::get('/members', [ManagerController::class, 'membersIndex'])->name('members.index');
         Route::get('/user-types', [ManagerController::class, 'userTypesIndex'])->name('user_types.index');
-        Route::get('/items', [ManagerController::class, 'itemsIndex'])->name('items.index');
         Route::get('/item-types', [ManagerController::class, 'itemTypesIndex'])->name('item_types.index');
         Route::get('/units', [ManagerController::class, 'unitsIndex'])->name('units.index');
         Route::get('/accessories', [ManagerController::class, 'accessoriesIndex'])->name('accessories.index');
@@ -101,7 +106,19 @@ Route::prefix('admin')->group(function () {
         Route::get('/photographer-packages', [ManagerController::class, 'photographerPackagesIndex'])->name('photographer_packages.index');
         Route::get('/promotions', [ManagerController::class, 'promotionsIndex'])->name('promotions.index');
 
-        // CRUD (Create, Update, Delete)
+        // Items Management
+        Route::get('/items', [ManagerController::class, 'itemsIndex'])->name('items.index');
+        Route::post('/items', [ManagerController::class, 'storeItem'])->name('items.store');
+        Route::match(['put', 'patch'], '/items/{item}', [ManagerController::class, 'updateItem'])->name('items.update');
+        Route::delete('/items/{item}', [ManagerController::class, 'destroyItem'])->name('items.destroy');
+        Route::post('/items/{item}/image', [ManagerController::class, 'uploadItemImage'])->name('items.uploadImage');
+
+        // Item Images (Bulk delete must be before specific ID)
+        Route::delete('/item-images/bulk', [ManagerController::class, 'bulkDestroyImages'])->name('items.bulkDestroyImages');
+        Route::delete('/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('items.destroyImage');
+        Route::patch('/item-images/{image}/set-main', [ManagerController::class, 'setMainImage'])->name('items.setMainImage');
+
+        // CRUD Operations
         Route::post('/users', [ManagerController::class, 'storeUser'])->name('users.store');
         Route::match(['put', 'patch'], '/users/{user:user_id}', [ManagerController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{user:user_id}', [ManagerController::class, 'destroyUser'])->name('users.destroy');
@@ -113,15 +130,6 @@ Route::prefix('admin')->group(function () {
         Route::post('/members', [ManagerController::class, 'storeMember'])->name('members.store');
         Route::match(['put', 'patch'], '/members/{member:member_id}', [ManagerController::class, 'updateMember'])->name('members.update');
         Route::delete('/members/{member:member_id}', [ManagerController::class, 'destroyMember'])->name('members.destroy');
-
-        Route::post('/items', [ManagerController::class, 'storeItem'])->name('items.store');
-        Route::match(['put', 'patch'], '/items/{item}', [ManagerController::class, 'updateItem'])->name('items.update');
-        Route::delete('/items/{item}', [ManagerController::class, 'destroyItem'])->name('items.destroy');
-        Route::post('/items/{item}/image', [ManagerController::class, 'uploadItemImage'])->name('items.uploadImage');
-        Route::delete('/item-images/bulk', [ManagerController::class, 'bulkDestroyImages'])->name('items.bulkDestroyImages');
-        Route::delete('/item-images/{image}', [ManagerController::class, 'destroyItemImage'])->name('items.destroyImage');
-        Route::patch('/item-images/{image}/set-main', [ManagerController::class, 'setMainImage'])
-            ->name('items.setMainImage');
 
         Route::post('/types', [ManagerController::class, 'storeType'])->name('types.store');
         Route::match(['put', 'patch'], '/types/{type:id}', [ManagerController::class, 'updateType'])->name('types.update');
@@ -161,7 +169,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // --------------------------------------------------------
-    // 👩‍💼 RECEPTION Routes (พนักงานต้อนรับ)
+    // 👩‍💼 RECEPTION Routes
     // --------------------------------------------------------
     Route::middleware(['auth', CheckUserRole::class])->prefix('reception')->name('reception.')->group(function () {
         Route::get('/rental', [ReceptionController::class, 'index'])->name('rental');
@@ -190,55 +198,34 @@ Route::prefix('admin')->group(function () {
 
         Route::post('/rental/{rentalId}/update', [ReceptionController::class, 'updateRental'])->name('rental.update');
 
-        //Flow การเงินและสถานะ
         Route::post('/rental/{rentalId}/confirm-payment', [ReceptionController::class, 'confirmPayment'])->name('rental.confirmPayment');
         Route::post('/rental/{rentalId}/confirm-pickup', [ReceptionController::class, 'confirmPickup'])->name('rental.confirmPickup');
         Route::post('/rental/{rentalId}/cancel', [ReceptionController::class, 'cancelRental'])->name('rental.cancel');
     });
 
     // --------------------------------------------------------
-    // 🔧 MAINTENANCE Routes
+    // 🔧 MAINTENANCE & SERVICE COST Routes
     // --------------------------------------------------------
     Route::middleware(['auth'])->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/{id}/send', [MaintenanceController::class, 'sendToShop'])->name('maintenance.send');
         Route::post('/maintenance/{id}/receive', [MaintenanceController::class, 'receiveFromShop'])->name('maintenance.receive');
-    });
 
-    // --------------------------------------------------------
-    // 🔧 MAINTENANCE Routes (ซัก-ซ่อม)
-    // --------------------------------------------------------
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
-        Route::post('/maintenance/{id}/send', [MaintenanceController::class, 'sendToShop'])->name('maintenance.send');
-        Route::post('/maintenance/{id}/receive', [MaintenanceController::class, 'receiveFromShop'])->name('maintenance.receive');
-    });
-
-    // --------------------------------------------------------
-    // 💰 SERVICE COST Routes (จัดการค่าแรงช่าง - มาแทนหน้าประวัติเดิม)
-    // --------------------------------------------------------
-    // 2️⃣ เพิ่มกลุ่มนี้เข้าไปครับ
-    Route::middleware(['auth'])->group(function () {
-        // หน้าแสดงรายการ (เหมือนหน้าซักซ่อม)
         Route::get('/service-costs', [ServiceCostController::class, 'index'])->name('service_costs.index');
-        // ฟังก์ชันบันทึกราคาต้นทุน
         Route::post('/service-costs/{id}/update', [ServiceCostController::class, 'updateCost'])->name('service_costs.update');
     });
-}); // 🛑 ปิด Group Admin
-
+}); // End Admin Group
 
 // ==================================================================================
-// 📱 LIFF & External (ไม่ต้องมี /admin)
+// 🚫 ERROR & DEBUG
 // ==================================================================================
-Route::prefix('liff')->group(function () {
-    Route::get('/login', [LiffController::class, 'index'])->name('liff.login');
-    Route::post('/login', [LiffController::class, 'login'])->name('liff.submit');
-    Route::post('/check-auto', [LiffController::class, 'checkAutoLogin'])->name('liff.check');
-});
+Route::get('/unauthorized', function () {
+    return view('errors.unauthorized');
+})->name('unauthorized');
 
 Route::get('/debug-cloudinary', function () {
     return [
-        'cloudinary_url_from_env' => env('CLOUDINARY_URL'), // ดูว่า ENV เข้ามาไหม
-        'config_check' => config('cloudinary'), // ดูว่าไฟล์ config ถูกโหลดไหม
+        'cloudinary_url_from_env' => env('CLOUDINARY_URL'),
+        'config_check' => config('cloudinary'),
     ];
 });

@@ -67,6 +67,29 @@ class ReceptionController extends Controller
     // =========================================================================
     public function history(Request $request)
     {
+        $user = Auth::user();
+
+        // ==================================================================================
+        // 🟢 ส่วนที่ 1: เช็คว่าเป็นลูกค้า (Member) หรือไม่?
+        // ==================================================================================
+        // ตรวจสอบว่า User ที่ Login เข้ามา มี Role เป็น member หรือเป็น Model MemberAccount
+        // (ปรับเงื่อนไขตรง if ให้ตรงกับระบบ Auth ของคุณที่สุด)
+        if ($user && ($user->role === 'member' || $user instanceof \App\Models\MemberAccount)) {
+
+            // ดึงข้อมูลการเช่า "เฉพาะของลูกค้าคนนี้" (member_id ตรงกับ user->id)
+            $rentals = Rental::with(['items.item', 'accessories']) // Eager Load เพื่อลด Query หน้า View
+                ->where('member_id', $user->member_id ?? $user->id) // เช็ค ID ให้ตรงกับ PK ของตาราง Members
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // ส่งไปหน้า View สำหรับลูกค้าโดยเฉพาะ (แยกไฟล์ View ให้สวยงามแบบ Mobile)
+            return view('member.history', compact('rentals'));
+        }
+
+        // ==================================================================================
+        // 🔴 ส่วนที่ 2: ถ้าเป็น Admin / Reception (ทำงานตาม Code เดิม)
+        // ==================================================================================
+
         // 1. ส่วนรอกดยืนยันชำระเงิน (Pending Payment)
         $pending = Rental::with(['member', 'items.item', 'accessories'])
             ->where('status', Rental::STATUS_PENDING_PAYMENT)
@@ -96,7 +119,7 @@ class ReceptionController extends Controller
 
         $history = $historyQuery->orderBy('updated_at', 'desc')->paginate(10);
 
-        // ✅ ข้อมูล Master Data สำหรับ Dropdown ในหน้าแก้ไข
+        // ✅ ข้อมูล Master Data สำหรับ Dropdown ในหน้าแก้ไข (ของ Admin/Reception)
         $promotions = Promotion::where('status', 'active')->where(function ($q) {
             $q->whereNull('end_date')->orWhere('end_date', '>=', now());
         })->get();
@@ -105,6 +128,7 @@ class ReceptionController extends Controller
         $photo_packages = PhotographerPackage::all();
         $accessories = Accessory::where('stock', '>', 0)->get();
 
+        // ส่งไปหน้า View ของ Admin/Reception
         return view('reception.history', compact('pending', 'active', 'history', 'promotions', 'makeup_artists', 'photographers', 'photo_packages', 'accessories'));
     }
 
