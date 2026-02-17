@@ -24,6 +24,63 @@ Route::get('/check-richmenu', function () {
     return $response->json();
 });
 
+Route::get('/create-member-menu', function () {
+    $token = env('LINE_CHANNEL_ACCESS_TOKEN');
+
+    // 1. สร้างกรอบเมนู 3 ช่อง
+    $menuData = [
+        "size" => ["width" => 1200, "height" => 405],
+        "selected" => true,
+        "name" => "Member Menu API",
+        "chatBarText" => "เมนูสมาชิก",
+        "areas" => [
+            [
+                "bounds" => ["x" => 0, "y" => 0, "width" => 400, "height" => 405],
+                "action" => ["type" => "message", "text" => "เช็คแต้ม"]
+            ],
+            [
+                "bounds" => ["x" => 400, "y" => 0, "width" => 400, "height" => 405],
+                "action" => ["type" => "message", "text" => "เช็คสถานะการเช่า"]
+            ],
+            [
+                "bounds" => ["x" => 800, "y" => 0, "width" => 400, "height" => 405],
+                "action" => ["type" => "uri", "uri" => "https://watakacha-supabase.onrender.com/liff/logout"]
+            ]
+        ]
+    ];
+
+    // ส่งคำสั่งสร้างเมนูไปที่ LINE
+    $createResponse = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $token,
+    ])->post('https://api.line.me/v2/bot/richmenu', $menuData);
+
+    $richMenuId = $createResponse->json('richMenuId');
+
+    if (!$richMenuId) {
+        return "❌ พังที่ขั้นตอนสร้าง: " . $createResponse->body();
+    }
+
+    // 2. อัปโหลดรูปภาพใส่เมนู
+    $imagePath = public_path('member_menu.jpg');
+
+    if (!file_exists($imagePath)) {
+        return "⚠️ สร้างเมนูได้รหัส: {$richMenuId} <br>แต่หารูปไม่เจอ! เอารูปไปใส่ที่ public/member_menu.jpg ก่อนครับ";
+    }
+
+    $image = file_get_contents($imagePath);
+    $uploadResponse = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $token,
+        'Content-Type' => 'image/jpeg'
+    ])->withBody($image, 'image/jpeg')
+        ->post("https://api-data.line.me/v2/bot/richmenu/{$richMenuId}/content");
+
+    if ($uploadResponse->successful()) {
+        return "<h1>🎉 สำเร็จ! ได้รหัส ID แล้ว:</h1> <br><br> <h2 style='color:green;'>{$richMenuId}</h2> <br><br> เอารหัสสีเขียวนี้ไปใส่ใน LiffController ได้เลยครับ!";
+    }
+
+    return "❌ พังที่ขั้นตอนอัปโหลดรูป: " . $uploadResponse->body();
+});
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
