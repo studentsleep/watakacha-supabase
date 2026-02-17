@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\MemberAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http; // ✅ เพิ่มเพื่อยิง API เปลี่ยน Rich Menu
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class LiffController extends Controller
@@ -47,16 +47,14 @@ class LiffController extends Controller
                 }
             }
 
-            // --- 🔑 Login เข้าสู่ระบบ ---
-            Auth::guard('web')->login($member);
+            // --- 🔑 Login เข้าสู่ระบบ ด้วย Guard 'member' ---
+            // ใส่ true เพื่อ "Remember Me"
+            Auth::guard('member')->login($member, true);
 
             // --- 🎨 เปลี่ยน Rich Menu เป็นแบบ Member ---
-            // (เอาฟังก์ชันนี้ออกก่อนถ้ายังไม่ได้สร้าง Rich Menu B)
             $this->linkRichMenuToUser($request->line_user_id);
 
             // --- 🚀 Redirect ไปหน้าลูกค้า (Member Zone) ---
-            // ❌ เดิม: reception.history (ติดสิทธิ์ Admin)
-            // ✅ ใหม่: member.history (เข้าได้ปกติ)
             return redirect()->route('member.history');
         }
 
@@ -77,15 +75,15 @@ class LiffController extends Controller
         $member = MemberAccount::where('line_user_id', $lineId)->first();
 
         if ($member) {
-            // เจอว่าผูกไว้แล้ว -> Login เลย
-            Auth::guard('web')->login($member);
+            // เจอว่าผูกไว้แล้ว -> Login ด้วย Guard 'member' เลย
+            Auth::guard('member')->login($member, true);
 
             // เปลี่ยน Rich Menu เผื่อไว้ (กันเหนียว)
             $this->linkRichMenuToUser($lineId);
 
             return response()->json([
                 'status' => 'found',
-                'redirect' => route('member.history') // ✅ ไปหน้า Member
+                'redirect' => route('member.history')
             ]);
         }
 
@@ -97,14 +95,16 @@ class LiffController extends Controller
     // =========================================================================
     public function logout()
     {
-        $user = Auth::guard('web')->user();
+        // เช็ค User จาก Guard 'member'
+        $user = Auth::guard('member')->user();
 
         if ($user && $user->line_user_id) {
             // ปลด Rich Menu Member ออก (กลับไปใช้ Default Menu A)
             $this->unlinkRichMenu($user->line_user_id);
         }
 
-        Auth::guard('web')->logout();
+        // Logout ออกจาก Guard 'member'
+        Auth::guard('member')->logout();
 
         // สร้าง View ง่ายๆ บอกว่าออกแล้ว หรือให้ปิดหน้าต่าง
         return '<script>
