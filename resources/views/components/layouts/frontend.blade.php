@@ -333,85 +333,127 @@
 
         // 2. ฟังก์ชันส่งข้อความ
         async function contactLine(itemName) {
-            const bodyEl = document.querySelector('body');
-            const alpineData = Alpine.$data(bodyEl);
-            const item = alpineData.selectedItem;
+            try {
+                const bodyEl = document.querySelector('body');
+                const alpineData = Alpine.$data(bodyEl);
+                const item = alpineData.selectedItem;
 
-            if (!item) {
-                window.location.href = "https://line.me/R/ti/p/@699mhyzz";
-                return;
-            }
+                if (!item) {
+                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                    return;
+                }
 
-            if (liff.isInClient()) {
-                // 🟢 ตรวจสอบว่า User เคยอนุญาตสิทธิ์ส่งข้อความหรือยัง
-                const permission = await liff.permission.query("chat_message.write");
+                // --- เริ่มต้นดักทางที่ 1: ตรวจสอบการใช้งานในแอป LINE ---
+                if (liff.isInClient() && liff.isLoggedIn()) {
 
-                if (permission.state === "granted") {
-                    liff.sendMessages([{
-                        "type": "flex",
-                        "altText": "สนใจเช่าชุด: " + item.item_name,
-                        "contents": {
-                            /* ... โค้ด Flex Message เดิมของคุณ ... */
-                            "type": "bubble",
-                            "hero": {
-                                "type": "image",
-                                "url": alpineData.imageUrl(item.images && item.images[0] ? item.images[0].path : ''),
-                                "size": "full",
-                                "aspectRatio": "20:26",
-                                "aspectMode": "cover"
-                            },
-                            "body": {
-                                "type": "box",
-                                "layout": "vertical",
-                                "contents": [{
-                                        "type": "text",
-                                        "text": "สนใจเช่าชุดนี้ค่ะ ✨",
-                                        "weight": "bold",
-                                        "color": "#db2777",
-                                        "size": "sm"
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": item.item_name,
-                                        "weight": "bold",
-                                        "size": "xl",
-                                        "margin": "md"
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price),
-                                        "size": "lg",
-                                        "color": "#111111",
-                                        "weight": "bold"
-                                    }
-                                ]
-                            },
-                            "footer": {
-                                "type": "box",
-                                "layout": "vertical",
-                                "contents": [{
-                                    "type": "button",
-                                    "action": {
-                                        "type": "uri",
-                                        "label": "ดูรายละเอียด",
-                                        "uri": window.location.href
-                                    },
-                                    "style": "secondary"
-                                }]
+                    let finalImageUrl = null;
+
+                    // --- ดักทางที่ 2: เช็ค Path และบังคับ HTTPS ---
+                    if (item.images && item.images.length > 0 && item.images[0].path) {
+                        let rawUrl = alpineData.imageUrl(item.images[0].path);
+                        if (rawUrl && rawUrl.startsWith('http')) {
+                            finalImageUrl = rawUrl.replace('http:', 'https:');
+
+                            // --- ดักทางที่ 3: เช็คว่ารูปภาพโหลดได้จริงหรือไม่ (Image Preload) ---
+                            // ถ้าภายใน 2 วินาทีรูปไม่โหลด หรือโหลด Error จะถือว่ารูปใช้ไม่ได้
+                            const checkImage = (url) => {
+                                return new Promise((resolve) => {
+                                    const img = new Image();
+                                    img.src = url;
+                                    img.onload = () => resolve(true);
+                                    img.onerror = () => resolve(false);
+                                    setTimeout(() => resolve(false), 2000); // Timeout 2 วินาที
+                                });
+                            };
+
+                            const isImageValid = await checkImage(finalImageUrl);
+                            if (!isImageValid) {
+                                finalImageUrl = null; // ถ้ารูปพัง ให้เซ็ตเป็น null เพื่อไม่ส่งรูป
+                                console.warn("รูปภาพโหลดไม่ได้ หรือช้าเกินไป: ตัดส่วนรูปทิ้ง");
                             }
                         }
-                    }]).then(() => {
-                        liff.closeWindow();
-                    }).catch((err) => {
-                        console.error("Send error:", err);
-                        window.location.href = "https://line.me/R/ti/p/@699mhyzz";
-                    });
+                    }
+
+                    // --- ดักทางที่ 4: สร้างโครงสร้าง Flex (Body & Footer เสมอ) ---
+                    let flexContents = {
+                        "type": "bubble",
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [{
+                                    "type": "text",
+                                    "text": "สนใจเช่าชุดนี้ค่ะ ✨",
+                                    "weight": "bold",
+                                    "color": "#db2777",
+                                    "size": "sm"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": item.item_name || "Wedding Dress",
+                                    "weight": "bold",
+                                    "size": "xl",
+                                    "margin": "md",
+                                    "wrap": true
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "รหัสสินค้า: #" + (item.id || item.item_id || "-"),
+                                    "size": "xs",
+                                    "color": "#aaaaaa",
+                                    "margin": "xs"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price || 0),
+                                    "size": "lg",
+                                    "color": "#111111",
+                                    "weight": "bold",
+                                    "margin": "md"
+                                }
+                            ]
+                        },
+                        "footer": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [{
+                                "type": "button",
+                                "action": {
+                                    "type": "uri",
+                                    "label": "ดูรายละเอียดในเว็บ",
+                                    "uri": window.location.href
+                                },
+                                "style": "secondary"
+                            }]
+                        }
+                    };
+
+                    // ดักทางที่ 5: ถ้าผ่านทุกการตรวจสอบรูปภาพ ค่อยใส่ส่วน Hero (รูปภาพ)
+                    if (finalImageUrl) {
+                        flexContents.hero = {
+                            "type": "image",
+                            "url": finalImageUrl,
+                            "size": "full",
+                            "aspectRatio": "20:26",
+                            "aspectMode": "cover"
+                        };
+                    }
+
+                    // --- ส่งข้อความ ---
+                    await liff.sendMessages([{
+                        "type": "flex",
+                        "altText": "สนใจเช่าชุด: " + (item.item_name || "ชุดที่สนใจ"),
+                        "contents": flexContents
+                    }]);
+
+                    liff.closeWindow();
+
                 } else {
-                    // 🔴 ถ้ายังไม่ได้อนุญาต ให้เด้งหน้าขอสิทธิ์ใหม่
-                    alert("กรุณาอนุญาตสิทธิ์การส่งข้อความ เพื่อทำรายการต่อค่ะ");
-                    liff.permission.request(["chat_message.write"]);
+                    // ถ้านอกแอป LINE หรือยังไม่ Login ให้ไปหน้าแชทปกติ
+                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                 }
-            } else {
+            } catch (error) {
+                console.error("Error ดักจับได้:", error);
+                // ดักทางสุดท้าย: ถ้าเกิด Error ใดๆ ในขั้นตอนข้างบน ให้พาไปหน้าแชทเพื่อให้ลูกค้าไม่เสียอารมณ์
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
             }
         }
