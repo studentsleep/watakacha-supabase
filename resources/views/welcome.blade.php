@@ -139,7 +139,7 @@
                     <i data-lucide="shopping-bag" class="w-5 h-5"></i>
                     เลือกชมชุด
                 </a>
-                <a href="https://line.me/ti/p/@yourlineid" target="_blank"
+                <a href="https://line.me/ti/p/@699mhyzz" target="_blank"
                     class="px-10 py-4 bg-white text-gray-900 border-2 border-gray-100 font-bold rounded-full shadow-md hover:border-gray-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 text-lg">
                     <i data-lucide="message-circle" class="w-5 h-5 text-green-600"></i>
                     สอบถามผ่าน LINE

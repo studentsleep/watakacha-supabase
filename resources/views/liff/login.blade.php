@@ -168,7 +168,7 @@
                 .then(data => {
                     document.getElementById('loading').classList.add('hidden');
                     if (data.status === 'found') {
-                        window.location.href = data.redirect;
+                        liff.closeWindow();
                     } else {
                         showConsentModal();
                     }
