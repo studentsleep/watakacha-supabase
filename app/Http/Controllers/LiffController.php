@@ -160,7 +160,7 @@ class LiffController extends Controller
     private function linkRichMenuToUser($lineUserId)
     {
         // 🔴 ใส่ Rich Menu ID ของเมนูสมาชิก (Menu B) ที่นี่
-        $richMenuIdMember = 'richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+        $richMenuIdMember = 'richmenu-969c757d6fc56beb4e02480c040279c8';
         $token = env('LINE_CHANNEL_ACCESS_TOKEN');
 
         if ($richMenuIdMember && $token) {
