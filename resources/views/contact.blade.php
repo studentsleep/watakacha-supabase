@@ -58,8 +58,8 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xl font-bold text-gray-900 mb-2">เวลาทำการ</h3>
-                                    <p class="text-gray-600 font-medium">เปิดทุกวัน</p>
-                                    <p class="text-brand-600 font-bold text-lg">09:00 - 20:00 น.</p>
+                                    <p class="text-gray-600 font-medium">หยุดทุกวันจันทร์</p>
+                                    <p class="text-brand-600 font-bold text-lg">11:00-19:00 น.</p>
                                 </div>
                             </div>
                         </div>

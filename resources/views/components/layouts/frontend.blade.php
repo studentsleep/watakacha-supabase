@@ -233,7 +233,7 @@
                     <ul class="space-y-3 text-gray-400 text-sm">
                         <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> 499/130 หมู่บ้านรุ่งเรือง ซ. 8 <br>อำเภอสันทราย เชียงใหม่ 50210</li>
                         <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> 082 280 6989</li>
-                        <li class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> เปิดทุกวัน 09:00 - 20:00 น.</li>
+                        <li class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 11:00-19:00 น. หยุดทุกวันจันทร์</li>
                     </ul>
                 </div>
                 <div>
@@ -302,8 +302,11 @@
                             </div>
                         </div>
                         <div class="mt-8 pt-6 border-t border-gray-100">
-                            <button class="w-full py-4 bg-brand-600 hover:bg-brand-700 text-black-500 font-bold rounded-xl shadow-lg shadow-brand-500/30 transition flex justify-center items-center gap-2">
-                                <i data-lucide="message-circle" class="w-5 h-5"></i> สนใจเช่าชุดนี้ (ทัก LINE)
+                            <button type="button"
+                                @click="contactLine(selectedItem?.item_name)"
+                                class="w-full py-4 bg-brand-600 hover:bg-brand-700 text-black-500 font-bold rounded-xl shadow-lg shadow-brand-500/30 transition flex justify-center items-center gap-2">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                สนใจเช่าชุดนี้ (ทัก LINE)
                             </button>
                         </div>
                     </div>
@@ -312,14 +315,52 @@
         </div>
     </div>
 
-    {{-- Script Load Icons --}}
+    {{-- เพิ่ม SDK ของ LINE LIFF --}}
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
     <script>
+        // 1. Initial LIFF
+        async function initLiff() {
+            try {
+                await liff.init({
+                    liffId: "2009077441-uCh3VnXy"
+                });
+            } catch (error) {
+                console.error('LIFF Init Error', error);
+            }
+        }
+        initLiff();
+
+        // 2. ฟังก์ชันส่งข้อความ
+        function contactLine(itemName) {
+            // ถ้า itemName ว่าง ให้ลองดึงจาก Alpine metadata (สำหรับกรณีเปิดใน Modal)
+            if (!itemName || itemName === '') {
+                const alpineData = document.querySelector('[x-data]').__x.$data;
+                itemName = alpineData.selectedItem ? alpineData.selectedItem.item_name : 'ชุดที่สนใจ';
+            }
+
+            const messageText = 'สวัสดีค่ะ สนใจเช่าชุด: ' + itemName + ' ค่ะ ✨\nรบกวนขอทราบรายละเอียดเพิ่มเติมหน่อยค่ะ';
+
+            if (liff.isInClient()) {
+                liff.sendMessages([{
+                    'type': 'text',
+                    'text': messageText
+                }]).then(function() {
+                    liff.closeWindow(); // ส่งเสร็จปิดหน้าเว็บทันที
+                }).catch(function(error) {
+                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                });
+            } else {
+                // ถ้าเปิดบน Browser ปกติ ให้เด้งไปหน้าแชท
+                window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+            }
+        }
+
+        // ส่วนของ Lucide Icons เดิม
         lucide.createIcons();
         document.addEventListener('alpine:init', () => {
             Alpine.effect(() => {
-                if (Alpine.store('itemModalOpen') || true) {
-                    setTimeout(() => lucide.createIcons(), 50);
-                }
+                setTimeout(() => lucide.createIcons(), 50);
             });
         });
     </script>
