@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // 🟢 เพิ่มบรรทัดนี้เข้าไป เพื่อให้ Render ส่ง Cookie ได้สำเร็จ
         $middleware->trustProxies(at: '*');
+
+        $middleware->validateCsrfTokens(except: [
+            'liff/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
