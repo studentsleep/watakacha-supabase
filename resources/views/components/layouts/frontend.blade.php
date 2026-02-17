@@ -333,25 +333,86 @@
 
         // 2. ฟังก์ชันส่งข้อความ
         function contactLine(itemName) {
-            // ถ้า itemName ว่าง ให้ลองดึงจาก Alpine metadata (สำหรับกรณีเปิดใน Modal)
-            if (!itemName || itemName === '') {
-                const alpineData = document.querySelector('[x-data]').__x.$data;
-                itemName = alpineData.selectedItem ? alpineData.selectedItem.item_name : 'ชุดที่สนใจ';
+            const alpineData = document.querySelector('[x-data]').__x.$data;
+            const item = alpineData.selectedItem;
+
+            if (!item) {
+                // ถ้าไม่มีข้อมูล item (เผื่อกดจากปุ่มอื่นที่ไม่ได้อยู่ใน Modal) ให้ส่งเป็น Text ธรรมดา
+                sendDefaultText(itemName);
+                return;
             }
 
-            const messageText = 'สวัสดีค่ะ สนใจเช่าชุด: ' + itemName + ' ค่ะ ✨\nรบกวนขอทราบรายละเอียดเพิ่มเติมหน่อยค่ะ';
-
-            if (liff.isInClient()) {
+            if (liff.isInClient() && liff.isLoggedIn()) {
                 liff.sendMessages([{
-                    'type': 'text',
-                    'text': messageText
-                }]).then(function() {
-                    liff.closeWindow(); // ส่งเสร็จปิดหน้าเว็บทันที
-                }).catch(function(error) {
+                    "type": "flex",
+                    "altText": "สนใจเช่าชุด: " + item.item_name,
+                    "contents": {
+                        "type": "bubble",
+                        "hero": {
+                            "type": "image",
+                            "url": alpineData.imageUrl(item.images[0]?.path),
+                            "size": "full",
+                            "aspectRatio": "20:26",
+                            "aspectMode": "cover"
+                        },
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [{
+                                    "type": "text",
+                                    "text": "สนใจเช่าชุดนี้ค่ะ ✨",
+                                    "weight": "bold",
+                                    "color": "#db2777",
+                                    "size": "sm"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": item.item_name,
+                                    "weight": "bold",
+                                    "size": "xl",
+                                    "margin": "md"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price),
+                                    "size": "lg",
+                                    "color": "#111111",
+                                    "weight": "bold"
+                                }
+                            ]
+                        },
+                        "footer": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [{
+                                "type": "button",
+                                "action": {
+                                    "type": "uri",
+                                    "label": "ดูรายละเอียดในเว็บ",
+                                    "uri": window.location.href
+                                },
+                                "style": "secondary"
+                            }]
+                        }
+                    }
+                }]).then(() => {
+                    liff.closeWindow();
+                }).catch((err) => {
                     window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                 });
             } else {
-                // ถ้าเปิดบน Browser ปกติ ให้เด้งไปหน้าแชท
+                window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+            }
+        }
+
+        function sendDefaultText(name) {
+            const txt = name ? 'สวัสดีค่ะ สนใจชุด: ' + name : 'สวัสดีค่ะ สนใจเช่าชุดค่ะ';
+            if (liff.isInClient()) {
+                liff.sendMessages([{
+                    'type': 'text',
+                    'text': txt
+                }]).then(() => liff.closeWindow());
+            } else {
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
             }
         }

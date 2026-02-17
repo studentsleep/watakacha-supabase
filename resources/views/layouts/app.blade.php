@@ -66,6 +66,7 @@
 
     {{-- 1. SweetAlert2 CDN (สำหรับ Alert สวยๆ) --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
