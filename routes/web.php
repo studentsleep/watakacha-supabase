@@ -12,6 +12,17 @@ use App\Http\Middleware\CheckUserRole;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\MemberAuthController;
 use App\Http\Controllers\ServiceCostController;
+use Illuminate\Support\Facades\Http;
+
+Route::get('/check-richmenu', function () {
+    $token = env('LINE_CHANNEL_ACCESS_TOKEN');
+
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $token,
+    ])->get('https://api.line.me/v2/bot/richmenu/list');
+
+    return $response->json();
+});
 
 /*
 |--------------------------------------------------------------------------
