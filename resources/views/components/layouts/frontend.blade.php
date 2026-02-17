@@ -333,24 +333,32 @@
 
         // 2. ฟังก์ชันส่งข้อความ
         function contactLine(itemName) {
-            const alpineData = document.querySelector('[x-data]').__x.$data;
+            // 1. ดึงข้อมูลจาก AlpineJS 3 แบบที่ถูกต้อง
+            // ค้นหา Element ที่ถือ x-data หลัก (ในที่นี้คือแท็ก <body>)
+            const bodyEl = document.querySelector('body');
+            const alpineData = Alpine.$data(bodyEl);
+
+            // 2. ดึง selectedItem มาใช้งาน
             const item = alpineData.selectedItem;
 
+            // 3. ตรวจสอบข้อมูลเบื้องต้น
             if (!item) {
-                // ถ้าไม่มีข้อมูล item (เผื่อกดจากปุ่มอื่นที่ไม่ได้อยู่ใน Modal) ให้ส่งเป็น Text ธรรมดา
-                sendDefaultText(itemName);
+                console.warn("ไม่พบข้อมูลชุดใน selectedItem, กำลังไปหน้าแชทปกติ...");
+                window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                 return;
             }
 
-            if (liff.isInClient() && liff.isLoggedIn()) {
+            // 4. ถ้าเปิดใน LINE (LIFF)
+            if (typeof liff !== 'undefined' && liff.isInClient()) {
                 liff.sendMessages([{
                     "type": "flex",
-                    "altText": "สนใจเช่าชุด: " + item.item_name,
+                    "altText": "สนใจเช่าชุด: " + (item.item_name || "ชุดแต่งงาน"),
                     "contents": {
                         "type": "bubble",
                         "hero": {
                             "type": "image",
-                            "url": alpineData.imageUrl(item.images[0]?.path),
+                            // ใช้ฟังก์ชัน imageUrl ที่อยู่ใน Alpine data
+                            "url": alpineData.imageUrl(item.images && item.images[0] ? item.images[0].path : ''),
                             "size": "full",
                             "aspectRatio": "20:26",
                             "aspectMode": "cover"
@@ -367,14 +375,14 @@
                                 },
                                 {
                                     "type": "text",
-                                    "text": item.item_name,
+                                    "text": item.item_name || "ชุดแต่งงาน",
                                     "weight": "bold",
                                     "size": "xl",
                                     "margin": "md"
                                 },
                                 {
                                     "type": "text",
-                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price),
+                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price || 0),
                                     "size": "lg",
                                     "color": "#111111",
                                     "weight": "bold"
@@ -396,11 +404,14 @@
                         }
                     }
                 }]).then(() => {
+                    console.log("ส่งข้อความสำเร็จ");
                     liff.closeWindow();
                 }).catch((err) => {
+                    console.error('LIFF Send Error:', err);
                     window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                 });
             } else {
+                // กรณีเปิดผ่านเบราว์เซอร์ปกติ
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
             }
         }
