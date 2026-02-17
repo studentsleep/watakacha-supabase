@@ -62,6 +62,44 @@ class LiffController extends Controller
     }
 
     // =========================================================================
+    // 2.5 ฟังก์ชัน สมัครสมาชิกใหม่ผ่าน LIFF (Register + Auto Binding)
+    // =========================================================================
+    public function register(Request $request)
+    {
+        // 1. Validate ข้อมูล
+        $request->validate([
+            'username'     => 'required|string|unique:member_accounts,username',
+            'first_name'   => 'required|string',
+            'last_name'    => 'required|string',
+            'tel'          => 'required|string',
+            'password'     => 'required|string|min:6', // ตั้งรหัสผ่านขั้นต่ำ 6 ตัว
+            'line_user_id' => 'required',
+        ], [
+            'username.unique' => 'ชื่อผู้ใช้นี้มีคนใช้แล้ว กรุณาเปลี่ยนใหม่',
+            'password.min'    => 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'
+        ]);
+
+        // 2. สร้างสมาชิกใหม่
+        $member = MemberAccount::create([
+            'username'     => $request->username,
+            'first_name'   => $request->first_name,
+            'last_name'    => $request->last_name,
+            'tel'          => $request->tel,
+            'password'     => Hash::make($request->password),
+            'line_user_id' => $request->line_user_id, // ผูก LINE ทันที
+        ]);
+
+        // 3. Login เข้าสู่ระบบอัตโนมัติ
+        Auth::guard('member')->login($member, true);
+
+        // 4. เปลี่ยน Rich Menu เป็นแบบ Member
+        $this->linkRichMenuToUser($request->line_user_id);
+
+        // 5. เด้งไปหน้าประวัติ
+        return redirect()->route('member.history')->with('success', 'สมัครสมาชิกสำเร็จ!');
+    }
+
+    // =========================================================================
     // 3. ฟังก์ชันเช็ค Auto Login (ใช้ตอนเปิด LIFF ครั้งแรก)
     // =========================================================================
     public function checkAutoLogin(Request $request)

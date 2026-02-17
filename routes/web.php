@@ -123,6 +123,7 @@ Route::prefix('liff')->name('liff.')->group(function () {
     Route::post('/login', [LiffController::class, 'login'])->name('submit');
     Route::post('/check-auto', [LiffController::class, 'checkAutoLogin'])->name('check');
     Route::get('/logout', [LiffController::class, 'logout'])->name('logout');
+    Route::post('/register', [LiffController::class, 'register'])->name('register.submit');
 });
 
 // ==================================================================================

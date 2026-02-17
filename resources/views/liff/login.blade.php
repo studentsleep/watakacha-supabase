@@ -42,18 +42,23 @@
         </div>
     </div>
 
-    {{-- Login Form --}}
+    {{-- Main Box (มีทั้ง Login และ Register) --}}
     <div id="loginForm" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100">
-            <div class="text-center mb-8">
+
+            <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 mb-3">
-                    {{-- Icon User --}}
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h2>
-                <p class="text-gray-500 text-sm mt-1">กรอกชื่อผู้ใช้และรหัสผ่านมาตรฐานของคุณ</p>
+                <h2 class="text-2xl font-bold text-gray-800" id="formTitle">เข้าสู่ระบบ</h2>
+            </div>
+
+            {{-- Tabs สลับ Login / Register --}}
+            <div class="flex border-b border-gray-200 mb-6">
+                <button type="button" onclick="switchTab('login')" id="tabLogin" class="w-1/2 py-2 text-center font-bold text-indigo-600 border-b-2 border-indigo-600 transition">มีบัญชีแล้ว</button>
+                <button type="button" onclick="switchTab('register')" id="tabRegister" class="w-1/2 py-2 text-center font-bold text-gray-400 border-b-2 border-transparent transition hover:text-indigo-500">สมัครสมาชิก</button>
             </div>
 
             @if($errors->any())
@@ -62,46 +67,66 @@
             </div>
             @endif
 
-            <form action="{{ route('liff.submit') }}" method="POST">
+            {{-- 🟢 ฟอร์มที่ 1: เข้าสู่ระบบ (เหมือนเดิม) --}}
+            <form id="formSectionLogin" action="{{ route('liff.submit') }}" method="POST">
                 @csrf
-                <input type="hidden" name="line_user_id" id="line_user_id">
+                <input type="hidden" name="line_user_id" class="line_user_id_field">
 
-                {{-- 1. ช่อง Username --}}
                 <div class="mb-5">
                     <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">ชื่อผู้ใช้ (Username)</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        {{-- เปลี่ยน type="tel" เป็น text และ name="username" --}}
-                        <input type="text" name="username" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" placeholder="Username" required>
-                    </div>
+                    <input type="text" name="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="Username" required>
                 </div>
 
-                {{-- 2. ช่อง Password --}}
                 <div class="mb-8">
                     <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">รหัสผ่าน (Password)</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" name="password" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" placeholder="Password" required>
+                    <input type="password" name="password" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition">
+                    ผูกบัญชีและเข้าสู่ระบบ
+                </button>
+            </form>
+
+            {{-- 🟢 ฟอร์มที่ 2: สมัครสมาชิก (ซ่อนไว้ก่อน) --}}
+            <form id="formSectionRegister" action="{{ route('liff.register.submit') }}" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="line_user_id" class="line_user_id_field">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">ชื่อผู้ใช้ (สำหรับเข้าสู่ระบบครั้งหน้า)</label>
+                    <input type="text" name="username" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="Username (Eng)" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">ชื่อจริง</label>
+                        <input type="text" name="first_name" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">นามสกุล</label>
+                        <input type="text" name="last_name" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition transform active:scale-95">
-                    ผูกบัญชีและเข้าสู่ระบบ
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">เบอร์โทรศัพท์</label>
+                    <input type="tel" name="tel" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2 ml-1">รหัสผ่าน</label>
+                    <input type="password" name="password" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="อย่างน้อย 6 ตัวอักษร" required>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl hover:bg-green-700 transition">
+                    สมัครสมาชิกและผูกบัญชี
                 </button>
             </form>
         </div>
     </div>
 
     <script>
-        // ✅ แก้ LIFF ID ให้ถูกต้อง (ลบ https://... ออก)
+        // ✅ แก้ LIFF ID ให้ถูกต้อง
         const LIFF_ID = "2009077441-uCh3VnXy";
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -114,7 +139,12 @@
                     return;
                 }
                 const profile = await liff.getProfile();
-                document.getElementById('line_user_id').value = profile.userId;
+
+                // 🟢 [ส่วนที่แก้] ค้นหา input ที่มี class .line_user_id_field ทั้งหมดและใส่ค่า
+                document.querySelectorAll('.line_user_id_field').forEach(input => {
+                    input.value = profile.userId;
+                });
+
                 checkAutoLogin(profile.userId);
             } catch (err) {
                 console.error('LIFF Error', err);
@@ -165,6 +195,29 @@
                 liff.closeWindow();
             } else {
                 window.close();
+            }
+        }
+
+        // 🟢 [ส่วนที่เพิ่ม] ฟังก์ชันสลับหน้าจอ Login / Register
+        function switchTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('formSectionLogin').classList.remove('hidden');
+                document.getElementById('formSectionRegister').classList.add('hidden');
+
+                document.getElementById('tabLogin').classList.add('text-indigo-600', 'border-indigo-600');
+                document.getElementById('tabLogin').classList.remove('text-gray-400', 'border-transparent');
+                document.getElementById('tabRegister').classList.add('text-gray-400', 'border-transparent');
+                document.getElementById('tabRegister').classList.remove('text-indigo-600', 'border-indigo-600');
+                document.getElementById('formTitle').innerText = 'เข้าสู่ระบบ';
+            } else {
+                document.getElementById('formSectionRegister').classList.remove('hidden');
+                document.getElementById('formSectionLogin').classList.add('hidden');
+
+                document.getElementById('tabRegister').classList.add('text-indigo-600', 'border-indigo-600');
+                document.getElementById('tabRegister').classList.remove('text-gray-400', 'border-transparent');
+                document.getElementById('tabLogin').classList.add('text-gray-400', 'border-transparent');
+                document.getElementById('tabLogin').classList.remove('text-indigo-600', 'border-indigo-600');
+                document.getElementById('formTitle').innerText = 'สมัครสมาชิกใหม่';
             }
         }
     </script>
