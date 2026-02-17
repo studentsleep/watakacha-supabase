@@ -332,86 +332,86 @@
         initLiff();
 
         // 2. ฟังก์ชันส่งข้อความ
-        function contactLine(itemName) {
-            // 1. ดึงข้อมูลจาก AlpineJS 3 แบบที่ถูกต้อง
-            // ค้นหา Element ที่ถือ x-data หลัก (ในที่นี้คือแท็ก <body>)
+        async function contactLine(itemName) {
             const bodyEl = document.querySelector('body');
             const alpineData = Alpine.$data(bodyEl);
-
-            // 2. ดึง selectedItem มาใช้งาน
             const item = alpineData.selectedItem;
 
-            // 3. ตรวจสอบข้อมูลเบื้องต้น
             if (!item) {
-                console.warn("ไม่พบข้อมูลชุดใน selectedItem, กำลังไปหน้าแชทปกติ...");
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                 return;
             }
 
-            // 4. ถ้าเปิดใน LINE (LIFF)
-            if (typeof liff !== 'undefined' && liff.isInClient()) {
-                liff.sendMessages([{
-                    "type": "flex",
-                    "altText": "สนใจเช่าชุด: " + (item.item_name || "ชุดแต่งงาน"),
-                    "contents": {
-                        "type": "bubble",
-                        "hero": {
-                            "type": "image",
-                            // ใช้ฟังก์ชัน imageUrl ที่อยู่ใน Alpine data
-                            "url": alpineData.imageUrl(item.images && item.images[0] ? item.images[0].path : ''),
-                            "size": "full",
-                            "aspectRatio": "20:26",
-                            "aspectMode": "cover"
-                        },
-                        "body": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [{
-                                    "type": "text",
-                                    "text": "สนใจเช่าชุดนี้ค่ะ ✨",
-                                    "weight": "bold",
-                                    "color": "#db2777",
-                                    "size": "sm"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": item.item_name || "ชุดแต่งงาน",
-                                    "weight": "bold",
-                                    "size": "xl",
-                                    "margin": "md"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price || 0),
-                                    "size": "lg",
-                                    "color": "#111111",
-                                    "weight": "bold"
-                                }
-                            ]
-                        },
-                        "footer": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [{
-                                "type": "button",
-                                "action": {
-                                    "type": "uri",
-                                    "label": "ดูรายละเอียดในเว็บ",
-                                    "uri": window.location.href
-                                },
-                                "style": "secondary"
-                            }]
+            if (liff.isInClient()) {
+                // 🟢 ตรวจสอบว่า User เคยอนุญาตสิทธิ์ส่งข้อความหรือยัง
+                const permission = await liff.permission.query("chat_message.write");
+
+                if (permission.state === "granted") {
+                    liff.sendMessages([{
+                        "type": "flex",
+                        "altText": "สนใจเช่าชุด: " + item.item_name,
+                        "contents": {
+                            /* ... โค้ด Flex Message เดิมของคุณ ... */
+                            "type": "bubble",
+                            "hero": {
+                                "type": "image",
+                                "url": alpineData.imageUrl(item.images && item.images[0] ? item.images[0].path : ''),
+                                "size": "full",
+                                "aspectRatio": "20:26",
+                                "aspectMode": "cover"
+                            },
+                            "body": {
+                                "type": "box",
+                                "layout": "vertical",
+                                "contents": [{
+                                        "type": "text",
+                                        "text": "สนใจเช่าชุดนี้ค่ะ ✨",
+                                        "weight": "bold",
+                                        "color": "#db2777",
+                                        "size": "sm"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": item.item_name,
+                                        "weight": "bold",
+                                        "size": "xl",
+                                        "margin": "md"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price),
+                                        "size": "lg",
+                                        "color": "#111111",
+                                        "weight": "bold"
+                                    }
+                                ]
+                            },
+                            "footer": {
+                                "type": "box",
+                                "layout": "vertical",
+                                "contents": [{
+                                    "type": "button",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "ดูรายละเอียด",
+                                        "uri": window.location.href
+                                    },
+                                    "style": "secondary"
+                                }]
+                            }
                         }
-                    }
-                }]).then(() => {
-                    console.log("ส่งข้อความสำเร็จ");
-                    liff.closeWindow();
-                }).catch((err) => {
-                    console.error('LIFF Send Error:', err);
-                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
-                });
+                    }]).then(() => {
+                        liff.closeWindow();
+                    }).catch((err) => {
+                        console.error("Send error:", err);
+                        window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                    });
+                } else {
+                    // 🔴 ถ้ายังไม่ได้อนุญาต ให้เด้งหน้าขอสิทธิ์ใหม่
+                    alert("กรุณาอนุญาตสิทธิ์การส่งข้อความ เพื่อทำรายการต่อค่ะ");
+                    liff.permission.request(["chat_message.write"]);
+                }
             } else {
-                // กรณีเปิดผ่านเบราว์เซอร์ปกติ
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
             }
         }
