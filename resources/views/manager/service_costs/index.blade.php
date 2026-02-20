@@ -228,7 +228,7 @@
                                     <td class="px-6 py-4 text-right">
                                         @if($item->makeup_cost > 0)
                                         <div class="inline-flex flex-col items-end">
-                                            <span class="text-pink-600 font-bold">฿{{ number_format($item->makeup_cost, 0) }}</span>
+                                            <span class="text-pink-600 font-bold">{{ number_format($item->makeup_cost, 0) }}</span>
                                             <span class="text-[10px] text-pink-600 bg-pink-100 px-1.5 py-0.5 rounded flex items-center gap-1 mt-0.5">
                                                 💄 {{ $item->makeupArtist->first_name ?? 'ช่าง' }}
                                             </span>
@@ -240,7 +240,7 @@
                                     <td class="px-6 py-4 text-right">
                                         @if($item->photographer_cost > 0)
                                         <div class="inline-flex flex-col items-end">
-                                            <span class="text-blue-600 font-bold">฿{{ number_format($item->photographer_cost, 0) }}</span>
+                                            <span class="text-blue-600 font-bold">{{ number_format($item->photographer_cost, 0) }}</span>
                                             <span class="text-[10px] text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded flex items-center gap-1 mt-0.5">
                                                 📷 {{ $item->photographer->first_name ?? 'ช่าง' }}
                                             </span>
@@ -252,7 +252,7 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <span class="font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
-                                            ฿{{ number_format($item->makeup_cost + $item->photographer_cost, 2) }}
+                                            {{ number_format($item->makeup_cost + $item->photographer_cost, 2) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center">
@@ -320,7 +320,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number" x-model="form.makeup_cost" class="w-full rounded-xl border-gray-300 pr-10 text-right font-bold text-gray-900 h-11 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <span class="absolute right-4 top-2.5 text-gray-400 font-bold">฿</span>
+                                    <span class="absolute right-4 top-2.5 text-gray-400 font-bold"></span>
                                 </div>
                             </div>
                         </template>
@@ -336,7 +336,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number" x-model="form.photographer_cost" class="w-full rounded-xl border-gray-300 pr-10 text-right font-bold text-gray-900 h-11 focus:ring-indigo-500 focus:border-indigo-500" placeholder="0">
-                                    <span class="absolute right-4 top-2.5 text-gray-400 font-bold">฿</span>
+                                    <span class="absolute right-4 top-2.5 text-gray-400 font-bold"></span>
                                 </div>
                             </div>
                         </template>

@@ -292,7 +292,7 @@
                         <div class="flex-grow">
                             <span class="bg-brand-100 text-brand-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">New Arrival</span>
                             <h2 class="text-2xl font-bold text-gray-900 mt-2" x-text="selectedItem?.item_name"></h2>
-                            <p class="text-3xl font-bold text-brand-600 mt-4">฿<span x-text="new Intl.NumberFormat().format(selectedItem?.price)"></span></p>
+                            <p class="text-3xl font-bold text-brand-600 mt-4"><span x-text="new Intl.NumberFormat().format(selectedItem?.price)"></span></p>
                             <hr class="my-6 border-gray-100">
                             <h4 class="font-bold text-gray-900 mb-2">รายละเอียดชุด</h4>
                             <p class="text-gray-600 leading-relaxed text-sm" x-text="selectedItem?.description || 'ไม่มีรายละเอียดเพิ่มเติม'"></p>
@@ -404,7 +404,7 @@
                                 },
                                 {
                                     "type": "text",
-                                    "text": "ราคาเช่า: ฿" + new Intl.NumberFormat().format(item.price || 0),
+                                    "text": "ราคาเช่า: " + new Intl.NumberFormat().format(item.price || 0),
                                     "size": "lg",
                                     "color": "#111111",
                                     "weight": "bold",

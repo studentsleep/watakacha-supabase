@@ -35,7 +35,7 @@
                             <td class="px-6 py-4 text-sm text-gray-400 font-mono">#{{ $package->package_id }}</td>
                             <td class="px-6 py-4 font-bold text-indigo-300 text-base" title="{{ $package->description }}">{{ $package->package_name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-400 max-w-sm truncate">{{ $package->description ?? '-' }}</td>
-                            <td class="px-6 py-4 text-right text-white font-mono">฿{{ number_format($package->price, 2) }}</td>
+                            <td class="px-6 py-4 text-right text-white font-mono">{{ number_format($package->price, 2) }}</td>
                             <td class="px-6 py-4 text-right font-medium">
                                 <button onclick="toggleModal('updatePhotographerPackageModal-{{ $package->package_id }}', true)" class="text-blue-400 hover:text-blue-300 mr-2"><i data-lucide="file-pen-line" class="w-5 h-5"></i></button>
                                 <form id="delete-form-{{ $package->package_id }}"

@@ -34,19 +34,19 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
                     <p class="text-xs font-bold text-gray-400 uppercase">รายรับ (ช่วงที่เลือก)</p>
-                    <h3 class="text-2xl font-bold text-green-500 mt-1">฿{{ number_format($totalRevenuePeriod) }}</h3>
+                    <h3 class="text-2xl font-bold text-green-500 mt-1">{{ number_format($totalRevenuePeriod) }}</h3>
                     <p class="text-[10px] text-gray-400 mt-1">สินค้า + อุปกรณ์ + บริการ</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
                     <p class="text-xs font-bold text-gray-400 uppercase">รายจ่าย (ช่วงที่เลือก)</p>
-                    <h3 class="text-2xl font-bold text-red-500 mt-1">฿{{ number_format($totalExpensePeriod) }}</h3>
+                    <h3 class="text-2xl font-bold text-red-500 mt-1">{{ number_format($totalExpensePeriod) }}</h3>
                     <p class="text-[10px] text-gray-400 mt-1">ต้นทุนช่าง + ค่าซ่อมบำรุง</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border-l-4 border-indigo-500">
                     <p class="text-xs font-bold text-gray-400 uppercase">กำไรขั้นต้น (ช่วงที่เลือก)</p>
-                    <h3 class="text-2xl font-bold text-indigo-500 mt-1">฿{{ number_format($totalProfitPeriod) }}</h3>
+                    <h3 class="text-2xl font-bold text-indigo-500 mt-1">{{ number_format($totalProfitPeriod) }}</h3>
                     <p class="text-[10px] text-gray-400 mt-1">รายรับ - รายจ่าย</p>
                 </div>
 
@@ -131,18 +131,18 @@
                                     <span class="w-3 h-3 rounded-full bg-red-500"></span>
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300">ค่าซ่อมบำรุง (Maintenance)</span>
                                 </div>
-                                <span class="font-mono font-bold text-red-600 dark:text-red-400">฿{{ number_format($costMaintenance) }}</span>
+                                <span class="font-mono font-bold text-red-600 dark:text-red-400">{{ number_format($costMaintenance) }}</span>
                             </div>
                             <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                                 <div class="flex items-center gap-3">
                                     <span class="w-3 h-3 rounded-full bg-orange-500"></span>
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300">ค่าจ้างช่าง (Services Cost)</span>
                                 </div>
-                                <span class="font-mono font-bold text-orange-600 dark:text-orange-400">฿{{ number_format($costServices) }}</span>
+                                <span class="font-mono font-bold text-orange-600 dark:text-orange-400">{{ number_format($costServices) }}</span>
                             </div>
                             <div class="border-t border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between">
                                 <span class="text-sm font-bold text-gray-500">รวมรายจ่ายทั้งหมด</span>
-                                <span class="text-lg font-bold text-gray-800 dark:text-white">฿{{ number_format($costMaintenance + $costServices) }}</span>
+                                <span class="text-lg font-bold text-gray-800 dark:text-white">{{ number_format($costMaintenance + $costServices) }}</span>
                             </div>
                         </div>
                     </div>

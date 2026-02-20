@@ -37,7 +37,7 @@
                             <td class="px-6 py-4 text-sm text-gray-400 font-mono">#{{ $promo->promotion_id }}</td>
                             <td class="px-6 py-4 font-bold text-indigo-300 text-base" title="{{ $promo->description }}">{{ $promo->promotion_name }}</td>
                             <td class="px-6 py-4 text-right text-red-400 font-bold">
-                                {{ number_format($promo->discount_value) }} {{ $promo->discount_type == 'percentage' ? '%' : '฿' }}
+                                {{ number_format($promo->discount_value) }} {{ $promo->discount_type == 'percentage' ? '%' : '' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-400">
                                 {{ $promo->start_date ? \Carbon\Carbon::parse($promo->start_date)->format('d/m/y') : '-' }} -

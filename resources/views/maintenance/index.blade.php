@@ -347,7 +347,7 @@
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">ค่าจ้างร้าน (ต้นทุน)</label>
                             <div class="relative">
                                 <input type="number" x-model="receiveForm.shop_cost" class="w-full rounded-xl border-gray-300 pr-10 text-right font-bold text-gray-900 h-11 text-lg" placeholder="0.00">
-                                <span class="absolute right-4 top-2.5 text-gray-400 font-bold">฿</span>
+                                <span class="absolute right-4 top-2.5 text-gray-400 font-bold"></span>
                             </div>
                             <p class="text-xs text-gray-400 mt-2">* ระบุจำนวนเงินที่จ่ายให้ร้านซัก/ซ่อม</p>
                         </div>

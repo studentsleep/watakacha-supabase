@@ -58,7 +58,7 @@
                                 @endif
                             </td>
 
-                            <td class="px-6 py-4 text-right text-white font-mono">฿{{ number_format($artist->price) }}</td>
+                            <td class="px-6 py-4 text-right text-white font-mono">{{ number_format($artist->price) }}</td>
 
                             {{-- ✅ แก้ไขสถานะเป็นภาษาไทย --}}
                             <td class="px-6 py-4 text-center">

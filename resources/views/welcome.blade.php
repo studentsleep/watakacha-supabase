@@ -204,7 +204,7 @@
                 <div class="p-4">
                     <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition truncate">{{ $item->item_name }}</h3>
                     <div class="flex justify-between items-center mt-2">
-                        <p class="text-brand-600 font-bold">฿{{ number_format($item->price) }}</p>
+                        <p class="text-brand-600 font-bold">{{ number_format($item->price) }}</p>
                     </div>
                 </div>
             </div>

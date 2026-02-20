@@ -11,7 +11,7 @@
                 <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group">
                     <div class="bg-gradient-to-r from-brand-500 to-purple-600 p-8 text-red-500 text-center">
                         <p class="font-medium opacity-90 tracking-widest mt-1 text-black p-2">ส่วนลด</p>
-                        <h2 class="text-4xl font-extrabold">{{ number_format($promo->discount_value) }} <span class="text-2xl">{{ $promo->discount_type == 'percentage' ? '%' : '฿' }}</span></h2>
+                        <h2 class="text-4xl font-extrabold">{{ number_format($promo->discount_value) }} <span class="text-2xl">{{ $promo->discount_type == 'percentage' ? '%' : '' }}</span></h2>
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $promo->promotion_name }}</h3>

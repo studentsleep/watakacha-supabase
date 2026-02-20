@@ -393,17 +393,29 @@
             {{-- ======================================================= --}}
             <div x-show="activeTab === 'history'" style="display: none;" x-transition:enter="transition ease-out duration-300">
 
-                {{-- Search (เหลือแค่ Search อย่างเดียว) --}}
-                <div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-3 items-center no-print">
-                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <form action="{{ route('reception.rental') }}" method="GET" class="flex-grow flex gap-2">
-                        <input type="hidden" name="tab" value="history">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="ค้นหาประวัติ (ID, ชื่อ)..." class="w-full border-gray-200 rounded-xl text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <button type="submit" class="bg-gray-900 text-white px-5 rounded-xl text-sm font-bold hover:bg-black transition">ค้นหา</button>
+                {{-- 🔍 Search Box --}}
+                <div class="mb-8 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <form action="{{ route('reception.return') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="w-full md:flex-grow">
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">ค้นหารายการที่รอคืน</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="พิมพ์ ID, ชื่อลูกค้า หรือเบอร์โทร..."
+                                    class="w-full pl-10 rounded-xl border-gray-300 dark:bg-gray-700 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 h-11 transition-all">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full md:w-auto px-6 h-11 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            ค้นหา
+                        </button>
                     </form>
                 </div>
 

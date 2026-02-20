@@ -129,7 +129,7 @@
                             <div class="p-4">
                                 <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition truncate">{{ $item->item_name }}</h3>
                                 <div class="flex justify-between items-center mt-2">
-                                    <p class="text-brand-600 font-bold text-lg">฿{{ number_format($item->price) }}</p>
+                                    <p class="text-brand-600 font-bold text-lg">{{ number_format($item->price) }}</p>
                                     <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
                                         {{ $item->unit->name ?? 'ชิ้น' }}
                                     </span>
