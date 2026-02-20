@@ -360,6 +360,14 @@ class ReceptionController extends Controller
             $rental->save();
 
             DB::commit();
+
+            // แจ้งเตือน LINE: รอรับชุด
+            $rentalToNotify = Rental::with('member')->find($rentalId);
+            if ($rentalToNotify && $rentalToNotify->member && $rentalToNotify->member->line_user_id) {
+                $msg = "✨ ชำระเงิน/มัดจำ สำเร็จ!\nบิล: #{$rentalToNotify->rental_id}\nสถานะ: รอรับชุด 📦\nคุณลูกค้าสามารถเข้ามารับชุดได้ตามวันที่นัดหมายนะคะ";
+                $this->sendPushMessage($rentalToNotify->member->line_user_id, $msg);
+            }
+
             return response()->json(['success' => true, 'message' => 'บันทึกการชำระเงินเรียบร้อย']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -388,6 +396,13 @@ class ReceptionController extends Controller
 
         $rental->status = Rental::STATUS_RENTED;
         $rental->save();
+
+        // แจ้งเตือน LINE: กำลังเช่า
+        $rental->load('member'); // โหลดข้อมูล member
+        if ($rental->member && $rental->member->line_user_id) {
+            $msg = "👗 รับชุดเรียบร้อย!\nบิล: #{$rental->rental_id}\nสถานะ: กำลังเช่า\nขอให้มีความสุขในวันสำคัญนะคะ และอย่าลืมคืนชุดตามกำหนดน้า ✨";
+            $this->sendPushMessage($rental->member->line_user_id, $msg);
+        }
 
         return back()->with('success', 'ยืนยันการรับชุดเรียบร้อย สถานะ: กำลังเช่า');
     }
@@ -597,6 +612,16 @@ class ReceptionController extends Controller
             }
 
             DB::commit();
+
+            // แจ้งเตือน LINE: คืนชุดสำเร็จ
+            if ($rental->member_id) {
+                $member = MemberAccount::find($rental->member_id);
+                if ($member && $member->line_user_id) {
+                    $msg = "✅ คืนชุดเรียบร้อย!\nบิล: #{$rental->rental_id}\nสถานะ: เช่าสำเร็จ\nขอบคุณที่ใช้บริการ Watakacha ค่ะ โอกาสหน้าเชิญใหม่นะคะ ✨";
+                    $this->sendPushMessage($member->line_user_id, $msg);
+                }
+            }
+
             return response()->json(['success' => true, 'message' => 'บันทึกการคืนสำเร็จ (ส่งซัก/ซ่อมเรียบร้อย)']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -836,5 +861,22 @@ class ReceptionController extends Controller
 
         return redirect()->route('reception.member.create')
             ->with('status', 'สมัครสมาชิกสำเร็จ! เบอร์: ' . $request->tel);
+    }
+
+    // =========================================================================
+    // 📢 ฟังก์ชันส่งแจ้งเตือน LINE หาลูกค้า
+    // =========================================================================
+    private function sendPushMessage($lineUserId, $message)
+    {
+        $token = env('LINE_CHANNEL_ACCESS_TOKEN');
+        if ($token && $lineUserId) {
+            \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type' => 'application/json',
+            ])->post('https://api.line.me/v2/bot/message/push', [
+                'to' => $lineUserId,
+                'messages' => [['type' => 'text', 'text' => $message]]
+            ]);
+        }
     }
 }

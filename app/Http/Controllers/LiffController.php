@@ -176,4 +176,22 @@ class LiffController extends Controller
                 ->delete("https://api.line.me/v2/bot/user/{$lineUserId}/richmenu");
         }
     }
+
+    public function sendLineNotification($lineUserId, $message)
+    {
+        $channelAccessToken = env('LINE_CHANNEL_ACCESS_TOKEN'); // ใส่ Token ในไฟล์ .env
+
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $channelAccessToken,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.line.me/v2/bot/message/push', [
+            'to' => $lineUserId,
+            'messages' => [
+                [
+                    'type' => 'text',
+                    'text' => $message
+                ]
+            ]
+        ]);
+    }
 }
