@@ -332,128 +332,44 @@
         initLiff();
 
         // 2. ฟังก์ชันส่งข้อความ
-        async function contactLine(itemName) {
+        function contactLine(itemName) {
             try {
                 const bodyEl = document.querySelector('body');
                 const alpineData = Alpine.$data(bodyEl);
                 const item = alpineData.selectedItem;
 
+                // ถ้าไม่มีข้อมูลชุด ให้เด้งไปหน้าแชทเฉยๆ
                 if (!item) {
                     window.location.href = "https://line.me/R/ti/p/@699mhyzz";
                     return;
                 }
 
-                // --- เริ่มต้นดักทางที่ 1: ตรวจสอบการใช้งานในแอป LINE ---
-                if (liff.isInClient() && liff.isLoggedIn()) {
+                // --- เตรียมข้อความที่จะให้พิมพ์รอไว้ในช่องแชท ---
+                let textMsg = `สวัสดีค่ะ สนใจเช่าชุดนี้ค่ะ ✨\n`;
+                textMsg += `👗 ชื่อชุด: ${item.item_name || itemName}\n`;
+                textMsg += `🏷️ รหัสสินค้า: #${item.id || item.item_id || "-"}\n`;
+                textMsg += `💰 ราคาเช่า: ฿${new Intl.NumberFormat().format(item.price || 0)}`;
 
-                    let finalImageUrl = null;
+                // แปลงข้อความให้รองรับการส่งผ่าน URL
+                let encodedMsg = encodeURIComponent(textMsg);
 
-                    // --- ดักทางที่ 2: เช็ค Path และบังคับ HTTPS ---
-                    if (item.images && item.images.length > 0 && item.images[0].path) {
-                        let rawUrl = alpineData.imageUrl(item.images[0].path);
-                        if (rawUrl && rawUrl.startsWith('http')) {
-                            finalImageUrl = rawUrl.replace('http:', 'https:');
+                // --- ใช้ LINE OA Scheme ส่งไปเปิดหน้าแชทและพิมพ์รอ ---
+                // ข้อดี: ไม่ต้องง้อ Permission, ไม่สนว่ารูปจะพังไหม ทำงานได้ 100%
+                let lineUrl = `https://line.me/R/oaMessage/@699mhyzz/?${encodedMsg}`;
 
-                            // --- ดักทางที่ 3: เช็คว่ารูปภาพโหลดได้จริงหรือไม่ (Image Preload) ---
-                            // ถ้าภายใน 2 วินาทีรูปไม่โหลด หรือโหลด Error จะถือว่ารูปใช้ไม่ได้
-                            const checkImage = (url) => {
-                                return new Promise((resolve) => {
-                                    const img = new Image();
-                                    img.src = url;
-                                    img.onload = () => resolve(true);
-                                    img.onerror = () => resolve(false);
-                                    setTimeout(() => resolve(false), 2000); // Timeout 2 วินาที
-                                });
-                            };
-
-                            const isImageValid = await checkImage(finalImageUrl);
-                            if (!isImageValid) {
-                                finalImageUrl = null; // ถ้ารูปพัง ให้เซ็ตเป็น null เพื่อไม่ส่งรูป
-                                console.warn("รูปภาพโหลดไม่ได้ หรือช้าเกินไป: ตัดส่วนรูปทิ้ง");
-                            }
-                        }
-                    }
-
-                    // --- ดักทางที่ 4: สร้างโครงสร้าง Flex (Body & Footer เสมอ) ---
-                    let flexContents = {
-                        "type": "bubble",
-                        "body": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [{
-                                    "type": "text",
-                                    "text": "สนใจเช่าชุดนี้ค่ะ ✨",
-                                    "weight": "bold",
-                                    "color": "#db2777",
-                                    "size": "sm"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": item.item_name || "Wedding Dress",
-                                    "weight": "bold",
-                                    "size": "xl",
-                                    "margin": "md",
-                                    "wrap": true
-                                },
-                                {
-                                    "type": "text",
-                                    "text": "รหัสสินค้า: #" + (item.id || item.item_id || "-"),
-                                    "size": "xs",
-                                    "color": "#aaaaaa",
-                                    "margin": "xs"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": "ราคาเช่า: " + new Intl.NumberFormat().format(item.price || 0),
-                                    "size": "lg",
-                                    "color": "#111111",
-                                    "weight": "bold",
-                                    "margin": "md"
-                                }
-                            ]
-                        },
-                        "footer": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [{
-                                "type": "button",
-                                "action": {
-                                    "type": "uri",
-                                    "label": "ดูรายละเอียดในเว็บ",
-                                    "uri": window.location.href
-                                },
-                                "style": "secondary"
-                            }]
-                        }
-                    };
-
-                    // ดักทางที่ 5: ถ้าผ่านทุกการตรวจสอบรูปภาพ ค่อยใส่ส่วน Hero (รูปภาพ)
-                    if (finalImageUrl) {
-                        flexContents.hero = {
-                            "type": "image",
-                            "url": finalImageUrl,
-                            "size": "full",
-                            "aspectRatio": "20:26",
-                            "aspectMode": "cover"
-                        };
-                    }
-
-                    // --- ส่งข้อความ ---
-                    await liff.sendMessages([{
-                        "type": "flex",
-                        "altText": "สนใจเช่าชุด: " + (item.item_name || "ชุดที่สนใจ"),
-                        "contents": flexContents
-                    }]);
-
-                    liff.closeWindow();
-
+                // ถ้าอยู่ในแอป LINE ให้สั่งปิดหน้าเว็บแล้วเปิดแชท
+                if (liff.isInClient()) {
+                    window.location.href = lineUrl;
+                    setTimeout(() => {
+                        liff.closeWindow();
+                    }, 500);
                 } else {
-                    // ถ้านอกแอป LINE หรือยังไม่ Login ให้ไปหน้าแชทปกติ
-                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                    // ถ้าเปิดในคอม หรือ Browser ปกติ
+                    window.location.href = lineUrl;
                 }
+
             } catch (error) {
-                console.error("Error ดักจับได้:", error);
-                // ดักทางสุดท้าย: ถ้าเกิด Error ใดๆ ในขั้นตอนข้างบน ให้พาไปหน้าแชทเพื่อให้ลูกค้าไม่เสียอารมณ์
+                console.error("Error:", error);
                 window.location.href = "https://line.me/R/ti/p/@699mhyzz";
             }
         }
