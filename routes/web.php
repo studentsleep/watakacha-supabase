@@ -108,10 +108,14 @@ Route::prefix('member')->name('member.')->group(function () {
     Route::post('/register', [MemberAuthController::class, 'store'])->name('store');
     Route::post('/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
-    // 2. Member Portal (ต้อง Login แต่ไม่ต้องเช็ค Role Admin)
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/history', [ReceptionController::class, 'history'])->name('history');
-        Route::get('/points', [ReceptionController::class, 'pointHistory'])->name('points');
+    // 2. Member Portal (ต้อง Login ผ่าน Guard member)
+    Route::middleware(['auth:member'])->group(function () {
+        // ข้อมูลส่วนตัว
+        Route::get('/profile', [\App\Http\Controllers\MemberProfileController::class, 'edit'])->name('profile');
+        Route::put('/profile', [\App\Http\Controllers\MemberProfileController::class, 'update'])->name('profile.update');
+
+        // ประวัติการเช่าชุด
+        Route::get('/history', [\App\Http\Controllers\MemberProfileController::class, 'history'])->name('history');
     });
 });
 

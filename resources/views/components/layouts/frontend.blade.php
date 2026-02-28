@@ -147,8 +147,12 @@
                                 <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::guard('member')->user()->username }}</p>
                             </div>
                             <div class="py-1">
-                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700"><i data-lucide="user" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i> ข้อมูลส่วนตัว</a>
-                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700"><i data-lucide="history" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i> ประวัติการเช่า</a>
+                                <a href="{{ route('member.profile') }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">
+                                    <i data-lucide="user" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i> ข้อมูลส่วนตัว
+                                </a>
+                                <a href="{{ route('member.history') }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">
+                                    <i data-lucide="history" class="mr-3 h-4 w-4 text-gray-400 group-hover:text-brand-500"></i> ประวัติการเช่า
+                                </a>
                             </div>
                             <div class="py-1">
                                 <form method="POST" action="{{ route('member.logout') }}">
@@ -184,7 +188,7 @@
                     <p class="text-xs text-brand-600 font-bold">⭐ {{ number_format(Auth::guard('member')->user()->points ?? 0) }} แต้ม</p>
                 </div>
             </div>
-            <a href="#" class="text-gray-800 font-medium ml-2">ประวัติการเช่า</a>
+            <a href="{{ route('member.history') }}" class="text-gray-800 font-medium ml-2">ประวัติการเช่า</a>
             <form method="POST" action="{{ route('member.logout') }}">@csrf<button class="text-red-600 font-bold ml-2">ออกจากระบบ</button></form>
             <hr class="my-2">
             @endauth
