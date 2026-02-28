@@ -55,21 +55,24 @@
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         @php
-                        // 1. หารูปสินค้า (รูปหลัก หรือ รูปแรก)
-                        $mainImage = $item->images->firstWhere('is_main', true) ?? $item->images->first();
+                        // แก้ไขจาก $item เป็น $detail->item
+                        $mainImage = null;
+                        if (isset($detail->item) && $detail->item->images) {
+                        $mainImage = $detail->item->images->firstWhere('is_main', true) ?? $detail->item->images->first();
+                        }
+
                         if ($mainImage) {
-                        // ✅ มีรูป: เช็คว่าเป็น Cloudinary หรือ Local
+                        // มีรูป: เช็คว่าเป็น Cloudinary หรือ Local
                         $imageUrl = str_starts_with($mainImage->path, 'http')
                         ? $mainImage->path
-                        : asset('storage/' . $mainImage->path);
+                        : asset('storage/' . str_replace('public/', '', $mainImage->path));
                         } else {
-                        // ❌ ไม่มีรูป: ให้ดึง Logo ร้านมาแสดงแทน
+                        // ไม่มีรูป: ให้ดึง Logo ร้านมาแสดงแทน
                         $imageUrl = asset('images/logo.png');
                         }
                         @endphp
 
-                        {{-- ส่วนแสดงผลรูปภาพ --}}
-                        <img src="{{ $imageUrl }}" class="w-12 h-12 rounded-lg object-cover border border-gray-600">
+                        <img src="{{ $imageUrl }}" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <p class="text-sm font-bold text-gray-900">{{ $detail->item->item_name ?? 'อุปกรณ์เสริม' }}</p>
