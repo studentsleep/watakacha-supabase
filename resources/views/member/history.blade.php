@@ -1,5 +1,4 @@
-@extends('layouts.app')
-@section('content')
+@component('layouts.app')
 <div class="pt-24 pb-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="flex items-center gap-3 mb-8">
@@ -70,4 +69,4 @@
     </div>
     @endif
 </div>
-@endsection
+@endcomponent
