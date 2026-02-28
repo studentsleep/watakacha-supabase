@@ -1,4 +1,5 @@
-<x-layouts.app>
+@extends('layouts.app')
+@section('content')
     <div class="pt-24 pb-12 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div class="flex items-center gap-3 mb-8">
@@ -72,4 +73,4 @@
             </div>
         </div>
     </div>
-</x-layouts.app>
+@endsection
