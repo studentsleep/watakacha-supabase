@@ -25,7 +25,6 @@
             margin-right: 0.75rem;
         }
 
-        /* --- เพิ่ม CSS สำหรับ Hover สีต่างๆ (โดยไม่แก้โครงสร้างหลัก) --- */
         .hover-blue:hover {
             color: #60a5fa !important;
         }
@@ -59,6 +58,99 @@
         }
     </style>
 
+    @if(Auth::guard('member')->check())
+    {{-- ========================================== --}}
+    {{-- 👤 เมนูสำหรับ สมาชิก (MEMBER)                  --}}
+    {{-- ========================================== --}}
+    <div>
+        <a href="{{ route('welcome') }}" class="flex items-center justify-center mb-4">
+            <x-application-logo class="block h-9 w-auto fill-current text-brand-500" />
+            <span class="ml-2 text-lg font-bold text-white" x-show="sidebarOpen" x-transition>
+                สมาชิกร้าน
+            </span>
+        </a>
+
+        <div class="mb-4" :class="sidebarOpen ? 'flex justify-end' : 'flex justify-center'">
+            <button @click="sidebarOpen = !sidebarOpen; $nextTick(() => lucide.createIcons())"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md">
+                <i data-lucide="panel-left-close" class="w-5 h-5" x-show="sidebarOpen"></i>
+                <i data-lucide="menu" class="w-5 h-5" x-show="!sidebarOpen"></i>
+            </button>
+        </div>
+
+        <nav>
+            <ul class="space-y-2 text-sm">
+                <li>
+                    <a href="{{ route('welcome') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                        :class="sidebarOpen ? '' : 'justify-center'" title="หน้าแรก">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>หน้าแรกเว็บไซต์</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('member.profile') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-brand-600 hover:text-white rounded-md transition-colors"
+                        :class="sidebarOpen ? '' : 'justify-center'" title="ข้อมูลส่วนตัว">
+                        <i data-lucide="user-cog" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>ข้อมูลส่วนตัว</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('member.history') }}"
+                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-brand-600 hover:text-white rounded-md transition-colors"
+                        :class="sidebarOpen ? '' : 'justify-center'" title="ประวัติการเช่าชุด">
+                        <i data-lucide="history" class="w-5 h-5"></i>
+                        <span class="ml-3" x-show="sidebarOpen" x-transition>ประวัติการเช่าชุด</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="mt-auto border-t border-gray-700 pt-4" x-data="{ profileOpen: false }">
+        <div class="relative">
+            <div x-show="profileOpen" @click.away="profileOpen = false"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="transform opacity-0 scale-95"
+                x-transition:enter-end="transform opacity-100 scale-100"
+                class="absolute bottom-full left-0 right-0 mb-2 w-full bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
+                style="display: none;">
+
+                <form method="POST" action="{{ route('member.logout') }}">
+                    @csrf
+                    <a href="{{ route('member.logout') }}"
+                        class="block w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-gray-700 hover:text-red-300"
+                        onclick="event.preventDefault(); this.closest('form').submit();">
+                        <i data-lucide="log-out" class="inline w-4 h-4 mr-1"></i> ออกจากระบบ
+                    </a>
+                </form>
+            </div>
+
+            <button @click="profileOpen = !profileOpen"
+                class="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+                :class="sidebarOpen ? '' : 'justify-center'">
+
+                <div class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-transparent group-hover:ring-brand-400 transition-all">
+                    {{ mb_strtoupper(mb_substr(Auth::guard('member')->user()->first_name ?? 'M', 0, 1)) }}
+                </div>
+
+                <div class="ml-3 text-left overflow-hidden" x-show="sidebarOpen" x-transition>
+                    <span class="block text-xs font-medium text-white truncate w-32">{{ Auth::guard('member')->user()->first_name }}</span>
+                    <span class="block text-[10px] text-yellow-400 truncate w-32">
+                        ⭐ {{ number_format(Auth::guard('member')->user()->points ?? 0) }} แต้ม
+                    </span>
+                </div>
+
+                <i data-lucide="chevron-up" class="w-4 h-4 ml-auto" x-show="sidebarOpen"></i>
+            </button>
+        </div>
+    </div>
+
+    @else
+    {{-- ========================================== --}}
+    {{-- 👔 เมนูสำหรับ พนักงานและผู้จัดการ (ADMIN/RECEPTION) --}}
+    {{-- ========================================== --}}
     <div>
         <a href="{{ route('dashboard') }}" class="flex items-center justify-center mb-4">
             <x-application-logo class="block h-9 w-auto fill-current text-gray-200" />
@@ -114,7 +206,6 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ระบบสมาชิก</span></li>
-                                {{-- ✅ แก้ Link --}}
                                 <li><a href="{{ route('manager.members.index') }}" class="flyout-link"><i data-lucide="users" class="icon-size"></i> บัญชีสมาชิก</a></li>
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">ระบบพนักงาน</span></li>
                                 <li><a href="{{ route('manager.users.index') }}" class="flyout-link"><i data-lucide="shield" class="icon-size"></i> บัญชีผู้ใช้</a></li>
@@ -142,13 +233,10 @@
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">คลังสินค้า</span></li>
-                                {{-- ✅ แก้ Link --}}
                                 <li><a href="{{ route('manager.items.index') }}" class="flyout-link"><i data-lucide="shopping-bag" class="icon-size"></i> รายการสินค้า</a></li>
                                 <li><a href="{{ route('manager.accessories.index') }}" class="flyout-link"><i data-lucide="headphones" class="icon-size"></i> อุปกรณ์เสริม</a></li>
                                 <li><a href="{{ route('manager.item_types.index') }}" class="flyout-link"><i data-lucide="list-tree" class="icon-size"></i> ประเภทสินค้า</a></li>
                                 <li><a href="{{ route('manager.units.index') }}" class="flyout-link"><i data-lucide="box-select" class="icon-size"></i> หน่วยนับ</a></li>
-
-                                {{-- 🟡 การตลาด (ย้ายมาไว้ตรงนี้ หรือแยกปุ่มก็ได้ แต่นี่ใส่ตามกลุ่มเดิม) --}}
                                 <li><span class="block px-2 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase">การตลาด</span></li>
                                 <li><a href="{{ route('manager.promotions.index') }}" class="flyout-link"><i data-lucide="percent-circle" class="icon-size"></i> โปรโมชั่น</a></li>
                             </ul>
@@ -191,8 +279,7 @@
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ค่าแรงช่าง</span></li>
                                 <li>
                                     <a href="{{ route('service_costs.index') }}" class="flyout-link">
-                                        <i data-lucide="coins" class="icon-size"></i> {{-- เปลี่ยนไอคอนเป็นรูปเงิน หรือใช้ sparkles เหมือนเดิมก็ได้ --}}
-                                        จัดการค่าแรงช่าง
+                                        <i data-lucide="coins" class="icon-size"></i> จัดการค่าแรงช่าง
                                     </a>
                                 </li>
                             </ul>
@@ -270,8 +357,7 @@
                 <li>
                     <a href="{{ route('service_costs.index') }}" class="flex items-center px-4 py-2 text-gray-300 hover:bg-purple-700 hover:text-white rounded-md"
                         :class="sidebarOpen ? '' : 'justify-center'">
-                        <i data-lucide="coins" class="w-5 h-5"></i><span class="ml-3" x-show="sidebarOpen" x-transition>
-                            จัดการค่าแรงช่าง</span>
+                        <i data-lucide="coins" class="w-5 h-5"></i><span class="ml-3" x-show="sidebarOpen" x-transition>จัดการค่าแรงช่าง</span>
                     </a>
                 </li>
 
@@ -286,7 +372,7 @@
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="transform opacity-0 scale-95"
                         x-transition:enter-end="transform opacity-100 scale-100"
-                        class="absolute left-full bottom-0 w-64 pl-2" {{-- 🔴 แก้จุดที่ 2: ใช้ bottom-0 --}}
+                        class="absolute left-full bottom-0 w-64 pl-2"
                         style="display: none;">
                         <div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700">
                             <ul class="space-y-2 text-sm">
@@ -304,7 +390,6 @@
         </nav>
     </div>
 
-    {{-- ✅ Account: ใช้แบบใหม่ตามที่ขอ --}}
     <div class="mt-auto border-t border-gray-700 pt-4" x-data="{ profileOpen: false }">
         <div class="relative">
             <div x-show="profileOpen"
@@ -333,7 +418,6 @@
                 :class="sidebarOpen ? '' : 'justify-center'"
                 :title="sidebarOpen ? '' : '{{ Auth::user()->name }}'">
 
-                {{-- เปลี่ยนเป็น Avatar --}}
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-transparent group-hover:ring-gray-500 transition-all">
                     {{ mb_strtoupper(mb_substr(Auth::user()->first_name ?? 'U', 0, 1)) }}
                 </div>
@@ -349,4 +433,5 @@
             </button>
         </div>
     </div>
+    @endif
 </aside>

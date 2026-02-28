@@ -1,9 +1,16 @@
 @component('layouts.app')
-<div class="pt-24 pb-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="pt-8 md:pt-12 pb-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="flex items-center gap-3 mb-8">
-        <i data-lucide="history" class="w-8 h-8 text-brand-600"></i>
-        <h1 class="text-3xl font-bold text-gray-900">ประวัติการเช่าชุด</h1>
+    {{-- ส่วน Header และปุ่มย้อนกลับ --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-3">
+            <i data-lucide="history" class="w-8 h-8 text-brand-600"></i>
+            <h1 class="text-3xl font-bold text-gray-900">ประวัติการเช่าชุด</h1>
+        </div>
+        <button onclick="window.history.back()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition duration-200">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            ย้อนกลับ
+        </button>
     </div>
 
     @if($rentals->isEmpty())
@@ -47,11 +54,22 @@
                 @foreach($rental->items as $detail)
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                        @if(isset($detail->item->images[0]))
-                        <img src="{{ asset('storage/' . str_replace('public/', '', $detail->item->images[0]->path)) }}" class="w-full h-full object-cover">
-                        @else
-                        <div class="w-full h-full flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-5 h-5"></i></div>
-                        @endif
+                        @php
+                        // 1. หารูปสินค้า (รูปหลัก หรือ รูปแรก)
+                        $mainImage = $item->images->firstWhere('is_main', true) ?? $item->images->first();
+                        if ($mainImage) {
+                        // ✅ มีรูป: เช็คว่าเป็น Cloudinary หรือ Local
+                        $imageUrl = str_starts_with($mainImage->path, 'http')
+                        ? $mainImage->path
+                        : asset('storage/' . $mainImage->path);
+                        } else {
+                        // ❌ ไม่มีรูป: ให้ดึง Logo ร้านมาแสดงแทน
+                        $imageUrl = asset('images/logo.png');
+                        }
+                        @endphp
+
+                        {{-- ส่วนแสดงผลรูปภาพ --}}
+                        <img src="{{ $imageUrl }}" class="w-12 h-12 rounded-lg object-cover border border-gray-600">
                     </div>
                     <div>
                         <p class="text-sm font-bold text-gray-900">{{ $detail->item->item_name ?? 'อุปกรณ์เสริม' }}</p>
