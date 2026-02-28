@@ -4,8 +4,8 @@
     {{-- ส่วน Header และปุ่มย้อนกลับ --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-3">
-            <i data-lucide="history" class="w-8 h-8 text-brand-600"></i>
-            <h1 class="text-3xl font-bold text-gray-900">ประวัติการเช่าชุด</h1>
+            <i data-lucide="history" class="w-8 h-8 text-gray-100"></i>
+            <h1 class="text-3xl font-bold text-gray-100">ประวัติการเช่าชุด</h1>
         </div>
         <button onclick="window.history.back()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition duration-200">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
