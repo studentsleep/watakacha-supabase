@@ -74,9 +74,8 @@ class ManagerController extends Controller
         // ==================================================================================
 
         // ดึงรายการเช่าในช่วงเวลานี้ (ไม่เอายกเลิก)
-        // ใช้ updated_at หรือ payment_date ในการจับยอดเงิน (ที่นี่ใช้ rental_date เพื่อดู Performance ตามรอบจอง)
         $rentals = Rental::with(['items', 'accessories', 'promotion', 'makeupArtist', 'photographerPackage'])
-            ->whereBetween('rental_date', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', '!=', 'cancelled')
             ->get();
 
@@ -128,7 +127,9 @@ class ManagerController extends Controller
         $costMaintenance = ItemMaintenance::whereBetween('received_at', [$startDate, $endDate])->sum('actual_cost');
 
         // รวมยอดเพื่อแสดง Top Cards (แบบสรุปช่วงเวลา)
-        $totalRevenuePeriod = $revItemsNet + $revAccessories + $revServices;
+        $totalRevenuePeriod = Payment::whereBetween('payment_date', [$startDate, $endDate])
+            ->where('status', 'paid')
+            ->sum('amount');
         $totalExpensePeriod = $costServices + $costMaintenance;
         $totalProfitPeriod = $totalRevenuePeriod - $totalExpensePeriod;
 
@@ -139,7 +140,7 @@ class ManagerController extends Controller
         // 1. สินค้ายอดนิยม (Top 5 Items)
         $topItems = RentalItem::select('item_id', DB::raw('SUM(quantity) as total_qty'))
             ->whereHas('rental', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('rental_date', [$startDate, $endDate])->where('status', '!=', 'cancelled');
+                $q->whereBetween('created_at', [$startDate, $endDate])->where('status', '!=', 'cancelled');
             })
             ->groupBy('item_id')
             ->orderByDesc('total_qty')
@@ -150,7 +151,7 @@ class ManagerController extends Controller
         // 2. อุปกรณ์เสริมยอดนิยม (Top 5 Accessories)
         $topAccessories = RentalAccessory::select('accessory_id', DB::raw('SUM(quantity) as total_qty'))
             ->whereHas('rental', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('rental_date', [$startDate, $endDate])->where('status', '!=', 'cancelled');
+                $q->whereBetween('created_at', [$startDate, $endDate])->where('status', '!=', 'cancelled');
             })
             ->groupBy('accessory_id')
             ->orderByDesc('total_qty')
@@ -161,7 +162,7 @@ class ManagerController extends Controller
         // 3. รายงานโปรโมชั่น (Promotion Usage)
         $promotionStats = Rental::select('promotion_id', DB::raw('count(*) as usage_count'))
             ->whereNotNull('promotion_id')
-            ->whereBetween('rental_date', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', '!=', 'cancelled')
             ->groupBy('promotion_id')
             ->with('promotion')
@@ -184,7 +185,10 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereYear('payment_date', $today->year)->whereMonth('payment_date', $i)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereYear('received_at', $today->year)->whereMonth('received_at', $i)->sum('actual_cost');
-                $svCost = Rental::whereYear('updated_at', $today->year)->whereMonth('updated_at', $i)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $svCost = Rental::whereYear('created_at', $today->year)
+                    ->whereMonth('created_at', $i)
+                    ->where('status', '!=', 'cancelled')
+                    ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
             }
         } elseif ($filter == 'month') {
@@ -197,7 +201,9 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopDate)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopDate)->sum('actual_cost');
-                $svCost = Rental::whereDate('updated_at', $loopDate)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $svCost = Rental::whereDate('created_at', $loopDate)
+                    ->where('status', '!=', 'cancelled')
+                    ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
             }
         } else {
@@ -217,7 +223,9 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopStart)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopStart)->sum('actual_cost');
-                $svCost = Rental::whereDate('updated_at', $loopStart)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+                $svCost = Rental::whereDate('created_at', $loopStart)
+                    ->where('status', '!=', 'cancelled')
+                    ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
 
                 $loopStart->addDay();
@@ -230,7 +238,9 @@ class ManagerController extends Controller
         // ยอดวันนี้ (รายวัน) - คงไว้เหมือนเดิมเพื่อให้เห็น Realtime
         $todayRevenue = Payment::whereDate('payment_date', $today)->sum('amount');
         $todayExpense = ItemMaintenance::whereDate('received_at', $today)->sum('actual_cost')
-            + Rental::whereDate('updated_at', $today)->where('status', 'returned')->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+            + Rental::whereDate('created_at', $today) // <-- 1. เปลี่ยนเป็น created_at
+            ->where('status', '!=', 'cancelled') // <-- 2. เปลี่ยนให้แสดงยอดต้นทุนทันทีที่เปิดบิลสำเร็จ
+            ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
         // รายการชำรุดล่าสุด
         $damagedItemsList = ItemMaintenance::with(['item', 'accessory'])

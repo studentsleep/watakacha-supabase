@@ -270,7 +270,7 @@
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">บำรุงรักษา</span></li>
                                 <li>
                                     <a href="{{ route('maintenance.index') }}"class="flyout-link">
-                                        <i data-lucide="wrench" class="w-5 h-5"></i>จัดการการซัก-ซ่อม
+                                        <i data-lucide="wrench" class="w-5 h-5"></i> จัดการการซัก-ซ่อม
                                     </a>
                                 </li>
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ค่าแรงช่าง</span></li>
