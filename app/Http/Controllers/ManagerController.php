@@ -130,13 +130,17 @@ class ManagerController extends Controller
         //     ->where('service_cost_status', 'paid')
         //     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
+        // โค้ดที่ต้องแก้
         $costServicesQuery = Rental::where('service_cost_status', 'paid');
 
         if ($filter == 'today' && !$request->has('start_date')) {
-            // ถ้าเลือกวันนี้ ให้ใช้ whereDate เฉพาะวันนี้เลย (แม่นยำ 100%)
-            $costServicesQuery->whereDate('updated_at', Carbon::today());
+            // ✅ ใช้ whereBetween คลุมตั้งแต่เริ่มวัน ถึง สิ้นวัน
+            $costServicesQuery->whereBetween('updated_at', [
+                Carbon::today()->startOfDay(),
+                Carbon::today()->endOfDay()
+            ]);
         } else {
-            // ถ้าเป็น 7 วัน, เดือน, ปี หรือเลือกวันที่เอง ให้ใช้ whereBetween
+            // ถ้าเป็น 7 วัน, เดือน, ปี หรือเลือกวันที่เอง ให้ใช้ whereBetween เดิม
             $costServicesQuery->whereBetween('updated_at', [$startDate, $endDate]);
         }
 
@@ -216,7 +220,10 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopDate)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopDate)->sum('actual_cost');
-                $svCost = Rental::whereDate('updated_at', $loopDate)
+                $svCost = Rental::whereBetween('updated_at', [
+                    $loopDate->copy()->startOfDay(),
+                    $loopDate->copy()->endOfDay()
+                ])
                     ->where('service_cost_status', 'paid')
                     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
@@ -238,7 +245,10 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopStart)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopStart)->sum('actual_cost');
-                $svCost = Rental::whereDate('updated_at', $loopStart)
+                $svCost = Rental::whereBetween('updated_at', [
+                    $loopStart->copy()->startOfDay(),
+                    $loopStart->copy()->endOfDay()
+                ])
                     ->where('service_cost_status', 'paid')
                     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
@@ -252,8 +262,8 @@ class ManagerController extends Controller
 
         // ยอดวันนี้ (รายวัน) - คงไว้เหมือนเดิมเพื่อให้เห็น Realtime
         $todayRevenue = Payment::whereDate('payment_date', $today)->sum('amount');
-        $todayExpense = ItemMaintenance::whereDate('received_at', $today)->sum('actual_cost')
-            + Rental::whereDate('updated_at', $today)
+        $todayExpense = ItemMaintenance::whereBetween('received_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])->sum('actual_cost')
+            + Rental::whereBetween('updated_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])
             ->where('service_cost_status', 'paid')
             ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
