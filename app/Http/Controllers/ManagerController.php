@@ -126,10 +126,21 @@ class ManagerController extends Controller
         // รายจ่ายค่าซ่อมบำรุง (Maintenance Cost) ในช่วงเวลานี้
         $costMaintenance = ItemMaintenance::whereBetween('received_at', [$startDate, $endDate])->sum('actual_cost');
 
-        $costServices = Rental::whereBetween('updated_at', [$startDate, $endDate])
-            ->where('service_cost_status', 'paid')
-            ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
+        // $costServices = Rental::whereBetween('updated_at', [$startDate, $endDate])
+        //     ->where('service_cost_status', 'paid')
+        //     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
+        $costServicesQuery = Rental::where('service_cost_status', 'paid');
+
+        if ($filter == 'today' && !$request->has('start_date')) {
+            // ถ้าเลือกวันนี้ ให้ใช้ whereDate เฉพาะวันนี้เลย (แม่นยำ 100%)
+            $costServicesQuery->whereDate('updated_at', Carbon::today());
+        } else {
+            // ถ้าเป็น 7 วัน, เดือน, ปี หรือเลือกวันที่เอง ให้ใช้ whereBetween
+            $costServicesQuery->whereBetween('updated_at', [$startDate, $endDate]);
+        }
+
+        $costServices = $costServicesQuery->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
         // รวมยอดเพื่อแสดง Top Cards (แบบสรุปช่วงเวลา)
         $totalRevenuePeriod = Payment::whereBetween('payment_date', [$startDate, $endDate])
             ->where('status', 'paid')
