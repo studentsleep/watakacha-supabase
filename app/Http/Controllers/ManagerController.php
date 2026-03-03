@@ -120,11 +120,15 @@ class ManagerController extends Controller
             $revServices += ($makeupPrice + $photoPrice);
 
             // 5. คำนวณรายจ่ายค่าช่าง (ต้นทุนจริง)
-            $costServices += ($rental->makeup_cost ?? 0) + ($rental->photographer_cost ?? 0);
+            //$costServices += ($rental->makeup_cost ?? 0) + ($rental->photographer_cost ?? 0);
         }
 
         // รายจ่ายค่าซ่อมบำรุง (Maintenance Cost) ในช่วงเวลานี้
         $costMaintenance = ItemMaintenance::whereBetween('received_at', [$startDate, $endDate])->sum('actual_cost');
+
+        $costServices = Rental::whereBetween('updated_at', [$startDate, $endDate])
+            ->where('service_cost_status', 'paid')
+            ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
         // รวมยอดเพื่อแสดง Top Cards (แบบสรุปช่วงเวลา)
         $totalRevenuePeriod = Payment::whereBetween('payment_date', [$startDate, $endDate])
@@ -186,8 +190,8 @@ class ManagerController extends Controller
 
                 $mtCost = ItemMaintenance::whereYear('received_at', $today->year)->whereMonth('received_at', $i)->sum('actual_cost');
                 $svCost = Rental::whereYear('created_at', $today->year)
-                    ->whereMonth('created_at', $i)
-                    ->where('status', '!=', 'cancelled')
+                    ->whereMonth('updated_at', $i)
+                    ->where('service_cost_status', 'paid')
                     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
             }
@@ -201,8 +205,8 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopDate)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopDate)->sum('actual_cost');
-                $svCost = Rental::whereDate('created_at', $loopDate)
-                    ->where('status', '!=', 'cancelled')
+                $svCost = Rental::whereDate('updated_at', $loopDate)
+                    ->where('service_cost_status', 'paid')
                     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
             }
@@ -223,8 +227,8 @@ class ManagerController extends Controller
                 $incomeData[] = Payment::whereDate('payment_date', $loopStart)->sum('amount');
 
                 $mtCost = ItemMaintenance::whereDate('received_at', $loopStart)->sum('actual_cost');
-                $svCost = Rental::whereDate('created_at', $loopStart)
-                    ->where('status', '!=', 'cancelled')
+                $svCost = Rental::whereDate('updated_at', $loopStart)
+                    ->where('service_cost_status', 'paid')
                     ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
                 $expenseData[] = $mtCost + $svCost;
 
@@ -238,8 +242,8 @@ class ManagerController extends Controller
         // ยอดวันนี้ (รายวัน) - คงไว้เหมือนเดิมเพื่อให้เห็น Realtime
         $todayRevenue = Payment::whereDate('payment_date', $today)->sum('amount');
         $todayExpense = ItemMaintenance::whereDate('received_at', $today)->sum('actual_cost')
-            + Rental::whereDate('created_at', $today) // <-- 1. เปลี่ยนเป็น created_at
-            ->where('status', '!=', 'cancelled') // <-- 2. เปลี่ยนให้แสดงยอดต้นทุนทันทีที่เปิดบิลสำเร็จ
+            + Rental::whereDate('updated_at', $today)
+            ->where('service_cost_status', 'paid')
             ->sum(DB::raw('COALESCE(makeup_cost, 0) + COALESCE(photographer_cost, 0)'));
 
         // รายการชำรุดล่าสุด

@@ -463,10 +463,10 @@
                                 <div class="flex justify-between items-center text-white"><span>ค่าชุดหลัก <span class="text-xs bg-gray-100 text-indigo-500 px-2 py-0.5 rounded-full" x-text="cartItemCount"></span></span><span class="font-bold text-indigo-200" x-text="formatPrice(cartTotal)"></span></div>
                                 <div class="flex justify-between items-center text-white" x-show="accessoryCart.length > 0"><span>อุปกรณ์เสริม <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full" x-text="accessoryItemCount"></span></span><span class="font-bold text-orange-600" x-text="formatPrice(accessoryTotal)"></span></div>
                                 <template x-if="makeupPrice > 0">
-                                    <div class="flex justify-between items-center text-gray-600"><span>ค่าแต่งหน้า</span><span class="font-bold text-gray-900" x-text="formatPrice(makeupPrice)"></span></div>
+                                    <div class="flex justify-between items-center text-gray-100"><span>ค่าแต่งหน้า</span><span class="font-bold text-pink-100" x-text="formatPrice(makeupPrice)"></span></div>
                                 </template>
                                 <template x-if="packagePrice > 0">
-                                    <div class="flex justify-between items-center text-gray-600"><span>ค่าถ่ายภาพ</span><span class="font-bold text-gray-900" x-text="formatPrice(packagePrice)"></span></div>
+                                    <div class="flex justify-between items-center text-gray-100"><span>ค่าถ่ายภาพ</span><span class="font-bold text-indigo-100" x-text="formatPrice(packagePrice)"></span></div>
                                 </template>
                                 <template x-if="discountAmount > 0">
                                     <div class="flex justify-between items-center text-green-600 bg-green-50 p-2 rounded-lg"><span>ส่วนลดโปรโมชั่น</span><span class="font-bold" x-text="'-' + formatPrice(discountAmount)"></span></div>

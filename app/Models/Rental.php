@@ -81,6 +81,11 @@ class Rental extends Model
         return $this->hasMany(Payment::class, 'rental_id', 'rental_id');
     }
 
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'rental_id', 'rental_id');
+    }
+
     // --- Helpers ---
 
     // ยอดจ่ายแล้วทั้งหมด
