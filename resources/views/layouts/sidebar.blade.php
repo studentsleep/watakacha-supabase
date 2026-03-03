@@ -269,11 +269,8 @@
                                 <li><a href="{{ route('manager.photographer_packages.index') }}" class="flyout-link"><i data-lucide="layers" class="icon-size"></i> แพ็คเกจถ่ายภาพ</a></li>
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">บำรุงรักษา</span></li>
                                 <li>
-                                    <a href="{{ route('maintenance.index') }}"
-                                        class="flex items-center px-4 py-2 text-gray-300 hover:bg-orange-700 hover:text-white rounded-md"
-                                        :class="sidebarOpen ? '' : 'justify-center'">
-                                        <i data-lucide="wrench" class="w-5 h-5"></i>
-                                        <span class="ml-3" x-show="sidebarOpen" x-transition>จัดการการซัก-ซ่อม</span>
+                                    <a href="{{ route('maintenance.index') }}"class="flyout-link">
+                                        <i data-lucide="wrench" class="w-5 h-5"></i>จัดการการซัก-ซ่อม
                                     </a>
                                 </li>
                                 <li><span class="block px-2 py-1 text-xs font-semibold text-gray-500 uppercase">ค่าแรงช่าง</span></li>
