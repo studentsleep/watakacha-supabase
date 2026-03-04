@@ -342,39 +342,46 @@
                 const alpineData = Alpine.$data(bodyEl);
                 const item = alpineData.selectedItem;
 
-                // ถ้าไม่มีข้อมูลชุด ให้เด้งไปหน้าแชทเฉยๆ
                 if (!item) {
-                    window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                    window.location.href = "https://line.me/ti/p/@699mhyzz";
                     return;
                 }
 
-                // --- เตรียมข้อความที่จะให้พิมพ์รอไว้ในช่องแชท ---
-                let textMsg = `สวัสดีค่ะ สนใจเช่าชุดนี้ค่ะ ✨\n`;
-                textMsg += `👗 ชื่อชุด: ${item.item_name || itemName}\n`;
+                // 1. เตรียมข้อความ
+                let textMsg = `สวัสดีครับ/ค่ะ สนใจเช่าชุดนี้ ✨\n`;
+                textMsg += `👗 ชื่อชุด: ${item.item_name}\n`;
                 textMsg += `🏷️ รหัสสินค้า: #${item.id || item.item_id || "-"}\n`;
                 textMsg += `💰 ราคาเช่า: ฿${new Intl.NumberFormat().format(item.price || 0)}`;
 
-                // แปลงข้อความให้รองรับการส่งผ่าน URL
                 let encodedMsg = encodeURIComponent(textMsg);
 
-                // --- ใช้ LINE OA Scheme ส่งไปเปิดหน้าแชทและพิมพ์รอ ---
-                // ข้อดี: ไม่ต้องง้อ Permission, ไม่สนว่ารูปจะพังไหม ทำงานได้ 100%
-                let lineUrl = `https://line.me/R/oaMessage/@699mhyzz/?${encodedMsg}`;
-
-                // ถ้าอยู่ในแอป LINE ให้สั่งปิดหน้าเว็บแล้วเปิดแชท
+                // 2. เช็คอุปกรณ์ที่ใช้งาน
+                // ถ้าเปิดในแอป LINE (LIFF)
                 if (liff.isInClient()) {
-                    window.location.href = lineUrl;
+                    // ใช้ oaMessage เพื่อให้ข้อความไปค้างในช่องแชททันที
+                    window.location.href = `https://line.me/R/oaMessage/@699mhyzz/?${encodedMsg}`;
                     setTimeout(() => {
                         liff.closeWindow();
                     }, 500);
-                } else {
-                    // ถ้าเปิดในคอม หรือ Browser ปกติ
-                    window.location.href = lineUrl;
+                }
+                // ถ้าเปิดในมือถือ (Browser ข้างนอก เช่น Safari, Chrome)
+                else if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                    // ส่งไปเปิดแอป LINE และพิมพ์ข้อความค้างไว้
+                    window.location.href = `https://line.me/R/oaMessage/@699mhyzz/?${encodedMsg}`;
+                }
+                // ถ้าเปิดในคอมพิวเตอร์ (PC / Mac)
+                else {
+                    // ส่งไปหน้า Profile เพื่อให้คนสแกน QR Code (กันเด้งไป line.me หน้าแรก)
+                    // หมายเหตุ: หน้า ti/p/ จะแสดงปุ่มแชทหรือ QR Code ให้โดยอัตโนมัติ
+                    window.open(`https://line.me/ti/p/@699mhyzz`, '_blank');
+
+                    // หรือถ้าอยากให้ Copy ข้อความให้เขาด้วย (Optional)
+                    alert("ระบบกำลังพาคุณไปที่ LINE ของร้าน\nคุณสามารถวางข้อความรายละเอียดชุดในช่องแชทได้ทันที");
                 }
 
             } catch (error) {
                 console.error("Error:", error);
-                window.location.href = "https://line.me/R/ti/p/@699mhyzz";
+                window.location.href = "https://line.me/ti/p/@699mhyzz";
             }
         }
 
